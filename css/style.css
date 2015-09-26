@@ -1,0 +1,129 @@
+/* Set the size and font of the tab widget */
+.tabBox {
+	border-radius: 4px;
+	margin: 10px 0 40px 0;
+    width: 550px;
+    height: auto;
+    float: left;
+}
+  
+/* Configure the radio buttons to hide off screen */
+.tabBox > input[type="radio"] {
+    position: absolute;
+    left:-100px;
+    top:-100px;
+}
+  
+/* Configure labels to look like tabs */
+.tabBox > input[type="radio"] + label {
+    /* inline-block such that the label can be given dimensions */
+    display: inline-block;
+  
+    /* A nice curved border around the tab */
+    border: 1px solid #DEDBD1;
+    border-radius: 5px 5px 0 0;
+    -moz-border-radius: 5px 5px 0 0;
+    -webkit-border-radius: 5px 5px 0 0;
+      
+    /* the bottom border is handled by the tab content div */
+    border-bottom: 0;
+  
+    /* Padding around tab text */
+    padding: 5px 10px;
+  
+    /* Set the background color to default gray (non-selected tab) */
+    background-color:#ddd;
+    color: black;
+}
+  
+/* Checked tabs must be white with the bottom border removed */
+.tabBox > input[type="radio"]:checked + label {
+    background-color:white;
+    font-weight: bold;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+}
+
+/* The tab content must fill the widgets size and have a nice border */
+.tabBox > div {
+    display: none;
+    border: 1px solid #DEDBD1;
+    background-color: white;
+    padding: 10px 20px 10px 20px;
+    height: auto;
+    overflow: auto;
+    margin-top: -1px;
+      
+    border-radius: 0 5px 5px 5px;
+    -moz-border-radius: 0 5px 5px 5px;
+    -webkit-border-radius: 0 5px 5px 5px;
+}
+
+/* This matchs tabs displaying to thier associated radio inputs */
+#aDBc-clean:checked ~ .tab1, #aDBc-optimize:checked ~ .tab2, #aDBc-stats:checked ~ .tab3{
+    display: block;
+}
+
+
+/* style for count numbers */
+.aDBcCount {
+	text-align:center;
+	color: #666 !important;
+}
+
+
+/* Style for check box */
+
+input[type=checkbox] {
+	visibility: hidden;
+}
+
+/* SQUARED FOUR */
+.squaredFour {
+	position: relative;
+}
+
+.squaredFour label {
+	cursor: pointer;
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	top: 0;
+	border-radius: 4px;
+	border: 1px solid #999;
+	background: #fcfff4;
+}
+
+.squaredFour label:after {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: alpha(opacity=0);
+	opacity: 0;
+	content: '';
+	position: absolute;
+	width: 7px;
+	height: 4px;
+	background: transparent;
+	top: 4px;
+	left: 4px;
+	border: 2px solid #71ADE1;
+	border-top: none;
+	border-right: none;
+	-webkit-transform: rotate(-45deg);
+	-moz-transform: rotate(-45deg);
+	-o-transform: rotate(-45deg);
+	-ms-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+}
+
+.squaredFour label:hover::after {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+	filter: alpha(opacity=30);
+	opacity: 0.3;
+}
+
+.squaredFour input[type=checkbox]:checked + label:after {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: alpha(opacity=100);
+	opacity: 1;
+}
+
