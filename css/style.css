@@ -1,50 +1,37 @@
-/* Set the size and font of the tab widget */
 .tabBox {
 	border-radius: 4px;
 	margin: 10px 0 40px 0;
-    width: 550px;
     height: auto;
     float: left;
 }
-  
-/* Configure the radio buttons to hide off screen */
+
 .tabBox > input[type="radio"] {
     position: absolute;
     left:-100px;
     top:-100px;
 }
-  
-/* Configure labels to look like tabs */
+
 .tabBox > input[type="radio"] + label {
-    /* inline-block such that the label can be given dimensions */
     display: inline-block;
-  
-    /* A nice curved border around the tab */
     border: 1px solid #DEDBD1;
     border-radius: 5px 5px 0 0;
     -moz-border-radius: 5px 5px 0 0;
     -webkit-border-radius: 5px 5px 0 0;
-      
-    /* the bottom border is handled by the tab content div */
     border-bottom: 0;
-  
-    /* Padding around tab text */
-    padding: 5px 10px;
-  
-    /* Set the background color to default gray (non-selected tab) */
+    padding: 10px 10px;
     background-color:#ddd;
-    color: black;
+    color: #555;
+	font-size: 14px;
 }
-  
-/* Checked tabs must be white with the bottom border removed */
+
 .tabBox > input[type="radio"]:checked + label {
     background-color:white;
     font-weight: bold;
-    border-bottom: 1px solid white;
     margin-bottom: -1px;
+	color: #0073aa;
+	border-top: 1px solid #1A9AC9;
 }
 
-/* The tab content must fill the widgets size and have a nice border */
 .tabBox > div {
     display: none;
     border: 1px solid #DEDBD1;
@@ -59,11 +46,9 @@
     -webkit-border-radius: 0 5px 5px 5px;
 }
 
-/* This matchs tabs displaying to thier associated radio inputs */
 #aDBc-clean:checked ~ .tab1, #aDBc-optimize:checked ~ .tab2, #aDBc-stats:checked ~ .tab3{
     display: block;
 }
-
 
 /* style for count numbers */
 .aDBcCount {
@@ -73,7 +58,6 @@
 
 
 /* Style for check box */
-
 input[type=checkbox] {
 	visibility: hidden;
 }
@@ -127,3 +111,22 @@ input[type=checkbox] {
 	opacity: 1;
 }
 
+/* Style for sidebar */
+.aDBcSidebar {
+	float:right;
+	border: 1px solid #ccc;
+	background: #fff;
+	margin: 10px 0 0 0;
+	width: 280px;
+    border-radius: 5px 5px 0 0;
+    -moz-border-radius: 5px 5px 0 0;
+    -webkit-border-radius: 5px 5px 0 0;
+}
+
+.aDBcSidebar  > div{
+	padding: 15px;
+}
+
+.aDBcSidebar  h2{
+	font-size:20px;
+}

@@ -1,9 +1,10 @@
 === Advanced Database Cleaner ===
 Contributors: symptote
+Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-Dy9AZSB3bmJFsrGWImHWiCoHtSE8KuC2SNdGQpreQxG8dl2tVZK&dispatch=5885d80a13c0db1f8e263663d3faee8d0b9dcb01a9b6dc564e45f62871326a5e
 Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, cleaner, delete orphan data, delete revisions, delete draft, delete trash, delete spam, delete auto drfat, delete postmeta, delete commentmeta, delete relationships, delete transient feed, optimize database, database optimize, optimize, admin
 Requires at least: 2.7
 Tested up to: 4.3
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,7 +35,11 @@ This section describes how to install the plugin and get it working.
 
 == Changelog ==
 
-= 1.5.0 =
+= 1.1.1 =
+* Some optimizations and style modifications
+* Adding "Donate link"
+
+= 1.1.0 =
 * Some optimizations and style modifications
 * Adding "Optimize Database"
 
