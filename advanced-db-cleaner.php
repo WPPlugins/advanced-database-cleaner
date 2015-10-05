@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Advanced Database Cleaner
-Description: Clean your database and save space by removing unused data such as "draft", "Spam Comments", "Orphan Postmeta", etc.
-Version: 1.1.1
+Description: Clean up your database by deleting unused data such as 'draft', Optimize your database or reset it to its initial state.
+Version: 1.2.0
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
