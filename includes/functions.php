@@ -47,52 +47,53 @@ function adv_db_cleaner($type){
 	}
 }
 
-function adv_db_cleaner_count($type){
+function adv_db_cleaner_count(){
 	global $wpdb;
-	switch($type){
-		case "revision":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'revision'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "draft":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'draft'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "autodraft":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'auto-draft'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "moderated":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '0'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "spam":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "trash":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'trash'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "postmeta":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->postmeta pm LEFT JOIN $wpdb->posts wp ON wp.ID = pm.post_id WHERE wp.ID IS NULL";
-			//$adbc_sql = "SELECT COUNT(*) FROM $wpdb->postmeta WHERE NOT EXISTS ( SELECT * FROM $wpdb->posts WHERE $wpdb->postmeta.post_id = $wpdb->posts.ID )";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "commentmeta":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE comment_id NOT IN (SELECT comment_id FROM $wpdb->comments)";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "relationships":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM $wpdb->posts)";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-		case "feed":
-			$adbc_sql = "SELECT COUNT(*) FROM $wpdb->options WHERE option_name LIKE '_site_transient_browser_%' OR option_name LIKE '_site_transient_timeout_browser_%' OR option_name LIKE '_transient_feed_%' OR option_name LIKE '_transient_timeout_feed_%'";
-			$count = $wpdb->get_var($adbc_sql);
-			break;
-	}
-	return $count;
+	$aDBc_count_total_unused = 0;
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'revision'";
+	$aDBc_count_unused["revision"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["revision"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'draft'";
+	$aDBc_count_unused["draft"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["draft"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->posts WHERE post_status = 'auto-draft'";
+	$aDBc_count_unused["autodraft"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["autodraft"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '0'";
+	$aDBc_count_unused["moderated"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["moderated"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'spam'";
+	$aDBc_count_unused["spam"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["spam"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = 'trash'";
+	$aDBc_count_unused["trash"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["trash"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->postmeta pm LEFT JOIN $wpdb->posts wp ON wp.ID = pm.post_id WHERE wp.ID IS NULL";
+	//$adbc_sql = "SELECT COUNT(*) FROM $wpdb->postmeta WHERE NOT EXISTS ( SELECT * FROM $wpdb->posts WHERE $wpdb->postmeta.post_id = $wpdb->posts.ID )";
+	$aDBc_count_unused["postmeta"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["postmeta"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->commentmeta WHERE comment_id NOT IN (SELECT comment_id FROM $wpdb->comments)";
+	$aDBc_count_unused["commentmeta"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["commentmeta"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM $wpdb->posts)";
+	$aDBc_count_unused["relationships"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["relationships"];
+
+	$adbc_sql = "SELECT COUNT(*) FROM $wpdb->options WHERE option_name LIKE '_site_transient_browser_%' OR option_name LIKE '_site_transient_timeout_browser_%' OR option_name LIKE '_transient_feed_%' OR option_name LIKE '_transient_timeout_feed_%'";
+	$aDBc_count_unused["feed"] = $wpdb->get_var($adbc_sql);
+	$aDBc_count_total_unused += $aDBc_count_unused["feed"];
+
+	$aDBc_count_unused["total"] = $aDBc_count_total_unused;
+	return $aDBc_count_unused;
 }
 
 function adv_db_cleaner_optimize(){

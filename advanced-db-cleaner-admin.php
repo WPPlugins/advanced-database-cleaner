@@ -1,23 +1,19 @@
 <?php
 add_action('admin_init', 'adv_db_cleaner_register_styles' );
 add_action('admin_menu', 'adv_db_cleaner_add_admin_menu');
-
 /* --- Add 'DB Cleaner' to Wordpress settings menu ---------- */
 function adv_db_cleaner_add_admin_menu() {
 	$hook_adv_db_cleaner = add_options_page('Advanced DB Cleaner Options', 'Database Cleaner','manage_options', __FILE__, 'adv_db_cleaner_page');
 	add_action('admin_print_styles-' . $hook_adv_db_cleaner, 'adv_db_cleaner_enqueue_styles');
 }
-
 /* --- Register stylesheet ---------------------------------- */
 function adv_db_cleaner_register_styles() {
 	wp_register_style('adv_db_cleaner_css', plugins_url() .'/'. dirname(plugin_basename(__FILE__)) . '/css/style.css');
 }
-
 /* --- Enqueue stylesheet ----------------------------------- */
 function adv_db_cleaner_enqueue_styles() {
    wp_enqueue_style( 'adv_db_cleaner_css' );
 }
-
 /* --- The admin page content ------------------------------- */
 function adv_db_cleaner_page(){
 ?>
@@ -48,7 +44,6 @@ function adv_db_cleaner_page(){
 			echo '<div id="adbc_message" class="'. $adv_db_cleaner_message_class .'"><p><strong>' . $adv_db_cleaner_message . '</strong></p></div>';
 		}
 		?>
-		
 		<div style="margin-right:300px">
 			<div class="tabBox">
 				<?php
@@ -57,7 +52,6 @@ function adv_db_cleaner_page(){
 								array("id"=>"aDBc-optimize","title"=>"Optimize Database"),
 								array("id"=>"aDBc-reset","title"=>"Reset Database")
 							);
-
 					foreach ($aDBc_tab_list as $key => $value){
 						$checked = "";
 						if((!isset($_POST["aDBc_clean_form"]) && !isset($_POST["aDBc_optimize_form"]) && !isset($_POST["aDBc_reset_form"]) && $value["id"] == "aDBc-clean") 
@@ -70,31 +64,22 @@ function adv_db_cleaner_page(){
 						echo '<label for="'.$value["id"].'">'.$value["title"].'</label>'."\n";
 					}
 				?>
-			
 				<div class="tab1">
 					<?php include_once 'includes/clean-db.php'; ?>
 				</div>
-				
 				<div class="tab2">
 					<?php include_once 'includes/optimize-db.php'; ?>
 				</div>
-				
 				<div class="tab3">
 					<?php include_once 'includes/reset-db.php'; ?>
 				</div>
-
 			</div>
-		
 			<div class="aDBcSidebar">
 				<?php include_once 'includes/sidebar.php'; ?>
 			</div>
-		
 		</div>
-
 	</div>
 <?php 
 }
-
 include_once 'includes/functions.php';
-
 ?>

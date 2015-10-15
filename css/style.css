@@ -48,25 +48,24 @@
 
 #aDBc-clean:checked ~ .tab1, #aDBc-optimize:checked ~ .tab2, #aDBc-reset:checked ~ .tab3{
     display: block;
+	min-height: 400px;
 }
 
 /* style for count numbers */
 .aDBcCount {
-	text-align:center;
+	text-align: right !important;
 	color: #666 !important;
 }
-
 
 /* Style for check box */
 input[type=checkbox] {
 	visibility: hidden;
 }
-
 /* SQUARED FOUR */
 .squaredFour {
 	position: relative;
+	text-align: center;	
 }
-
 .squaredFour label {
 	cursor: pointer;
 	position: absolute;
@@ -77,7 +76,6 @@ input[type=checkbox] {
 	border: 1px solid #999;
 	background: #fcfff4;
 }
-
 .squaredFour label:after {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
 	filter: alpha(opacity=0);
@@ -98,13 +96,11 @@ input[type=checkbox] {
 	-ms-transform: rotate(-45deg);
 	transform: rotate(-45deg);
 }
-
 .squaredFour label:hover::after {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
 	filter: alpha(opacity=30);
 	opacity: 0.3;
 }
-
 .squaredFour input[type=checkbox]:checked + label:after {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	filter: alpha(opacity=100);
@@ -123,11 +119,57 @@ input[type=checkbox] {
     -moz-border-radius: 5px 5px 0 0;
     -webkit-border-radius: 5px 5px 0 0;
 }
-
 .aDBcSidebar  > div{
 	padding: 15px;
 }
-
 .aDBcSidebar  h2{
 	font-size:20px;
+}
+
+/* Box warning */
+.box-warning {
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background: #fff5cc url("../images/warning.png") no-repeat scroll 8px 50%;
+    border-color: #f2dd8c;
+    color: #404040;
+    padding: 10px 10px 10px 50px;
+	margin-top: 20px;
+}
+/* Info box */
+.box-info {
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background: #e1f1ff url("../images/info.png") no-repeat scroll 8px 50%;
+    border-color: #a3d4ff;
+    color: #404040;
+    padding: 10px 10px 10px 60px;
+	margin-top: 20px;
+}
+
+/* boxes in tab to inform users about the current option */
+.box-notice{
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+	border: 1px solid #eee;
+	margin-top:40px;
+	padding:10px;
+	background:#F4F4F4;
+	width:300px;
+	font-size: 12px;
+	text-align:justify;
+}
+
+/* For Data already cleaned */
+.already-cleaned{
+	float: left;
+	background:#c4c4c4;
+	padding:2px 6px 2px 6px;
+	border-radius: 8px;
+	color: #fff;
+	margin: 2px;
+	font-size: 11px;
 }

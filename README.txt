@@ -4,7 +4,7 @@ Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-
 Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, cleaner, delete orphan data, orphan data, delete revisions, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto drfat, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin
 Requires at least: 2.7
 Tested up to: 4.3
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,11 +33,21 @@ This section describes how to install the plugin and get it working.
 3. Go to "Dashboard" -> "Settings" -> "Database Cleaner"
 
 == Screenshots ==
-1. "Clean database" admin page screenshot
-2. "Optimize database" admin page screenshot
-3. "Reset database" admin page screenshot
+1. Example of dirty database
+2. Example of cleaned database
+3. Example of dirty tables
+4. Example of optimized tables
+5. Reset database" admin page screenshot
 
 == Changelog ==
+
+= 1.2.1 =
+* Some optimizations and style modifications
+* "Clean database" tab shows now only elements that should be cleaned instead of listing all elements.
+* "Clean database" tab shows now an icon that indicates the state of your database.
+* "Optimize database" tab shows now only tables that should be optimized instead of listing all tables.
+* "Optimize database" tab shows now an icon that indicates the state of your tables.
+* "Reset database" shows now a warning before resetting the database.
 
 = 1.2.0 =
 * Some optimizations and style modifications
