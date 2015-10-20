@@ -4,7 +4,7 @@ Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-
 Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, cleaner, delete orphan data, orphan data, delete revisions, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto drfat, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin
 Requires at least: 2.7
 Tested up to: 4.3
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ This section describes how to install the plugin and get it working.
 5. Reset database" admin page screenshot
 
 == Changelog ==
+
+= 1.2.2 =
+* Some optimizations and style modifications
 
 = 1.2.1 =
 * Some optimizations and style modifications

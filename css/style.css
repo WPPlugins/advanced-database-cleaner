@@ -1,16 +1,28 @@
+/* ---------------------*/
+/* --- Global styles ---*/
+/* ---------------------*/
+.marginRight300 {
+	margin-right: 300px;
+}
+
+.marginTop20 {
+	margin-top: 20px;
+}
+
+/* ---------------------*/
+/* ----- Tabs style ----*/
+/* ---------------------*/
 .tabBox {
 	border-radius: 4px;
 	margin: 10px 0 40px 0;
     float: left;
 	width: 100%;
 }
-
 .tabBox > input[type="radio"] {
     position: absolute;
     left:-100px;
     top:-100px;
 }
-
 .tabBox > input[type="radio"] + label {
     display: inline-block;
     border: 1px solid #DEDBD1;
@@ -23,7 +35,6 @@
     color: #111;
 	font-size: 13px;
 }
-
 .tabBox > input[type="radio"]:checked + label {
     background-color:white;
     font-weight: bold;
@@ -31,7 +42,6 @@
 	color: #0073aa;
 	border-top: 1px solid #1A9AC9;
 }
-
 .tabBox > div {
     display: none;
     border: 1px solid #DEDBD1;
@@ -40,22 +50,28 @@
     height: auto;
     overflow: auto;
     margin-top: -1px;
-      
     border-radius: 0 5px 5px 5px;
     -moz-border-radius: 0 5px 5px 5px;
     -webkit-border-radius: 0 5px 5px 5px;
 }
-
 #aDBc-clean:checked ~ .tab1, #aDBc-optimize:checked ~ .tab2, #aDBc-reset:checked ~ .tab3{
     display: block;
 	min-height: 400px;
 }
 
-/* style for count numbers */
+/* ---------------------------------*/
+/* ----- "Clean DB" tabs styles ----*/
+/* ---------------------------------*/
+
+
+/* Style for count numbers */
 .aDBcCount {
 	text-align: right !important;
 	color: #666 !important;
 }
+
+
+
 
 /* Style for check box */
 input[type=checkbox] {
@@ -161,6 +177,7 @@ input[type=checkbox] {
 	width:300px;
 	font-size: 12px;
 	text-align:justify;
+	color: #888;
 }
 
 /* For Data already cleaned */

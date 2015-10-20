@@ -1,4 +1,4 @@
-<div style="color:#888; margin-top:20px;">
+<div class="marginTop20">
 	<div style="float: left;  margin-right:30px; margin-bottom:40px">
 		<form action="" method="post">
 			<table class="widefat" style="width: 400px; border: 0px; box-shadow: 0 1px 0px #ccc;">

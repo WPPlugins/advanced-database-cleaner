@@ -44,13 +44,13 @@ function adv_db_cleaner_page(){
 			echo '<div id="adbc_message" class="'. $adv_db_cleaner_message_class .'"><p><strong>' . $adv_db_cleaner_message . '</strong></p></div>';
 		}
 		?>
-		<div style="margin-right:300px">
+		<div class="marginRight300">
 			<div class="tabBox">
 				<?php
 					$aDBc_tab_list = array(
-								array("id"=>"aDBc-clean","title"=>"Clean Database"),
-								array("id"=>"aDBc-optimize","title"=>"Optimize Database"),
-								array("id"=>"aDBc-reset","title"=>"Reset Database")
+								array("id"=>"aDBc-clean", 		"title"=>__('Clean Database', 'advanced-db-cleaner')),
+								array("id"=>"aDBc-optimize",	"title"=>__('Optimize Database', 'advanced-db-cleaner')),
+								array("id"=>"aDBc-reset", 		"title"=>__('Reset Database', 'advanced-db-cleaner'))
 							);
 					foreach ($aDBc_tab_list as $key => $value){
 						$checked = "";

@@ -2,8 +2,8 @@
 	<center><h2>Advanced Database Cleaner</h2></center>
 	<!--<p>See what is new in <a href="#">version 4.3.9</a></p>-->
 	
-	<p style="text-align: justify">If you love this plugin and would like to make a donation, then you're awesome.</p>
-	<p style="text-align:right">Thank you!</p>
+	<p style="text-align: justify"><?php _e('If you love this plugin and would like to make a donation, then you\'re awesome.', 'advanced-db-cleaner'); ?></p>
+	<p style="text-align:right"><?php _e('Thank you!', 'advanced-db-cleaner'); ?></p>
 	<center>
 		<!-- Donate -->
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -21,5 +21,5 @@
 
 </div>
 <div style="background: #1A9AC9; border-top: 1px solid #ccc; text-align: center; color: #fff">
-	&copy; <?php echo date("Y"); ?> Created by <b>Younes JFR</b>
+	&copy; <?php echo date("Y") . " " . __('Created by', 'advanced-db-cleaner') . " <b>Younes JFR</b>"; ?>
 </div>
