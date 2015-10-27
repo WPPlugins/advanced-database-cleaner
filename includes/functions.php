@@ -47,6 +47,21 @@ function adv_db_cleaner($type){
 	}
 }
 
+function aDBc_cleanAll(){
+	global $wpdb;
+	$wpdb->query("DELETE FROM $wpdb->posts WHERE post_type = 'revision'");
+	$wpdb->query("DELETE FROM $wpdb->posts WHERE post_status = 'draft'");
+	$wpdb->query("DELETE FROM $wpdb->posts WHERE post_status = 'auto-draft'");
+	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = '0'");
+	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = 'spam'");
+	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = 'trash'");
+	//$adbc_sql = "DELETE FROM $wpdb->postmeta WHERE NOT EXISTS ( SELECT * FROM $wpdb->posts WHERE $wpdb->postmeta.post_id = $wpdb->posts.ID )";
+	$wpdb->query("DELETE pm FROM $wpdb->postmeta pm LEFT JOIN $wpdb->posts wp ON wp.ID = pm.post_id WHERE wp.ID IS NULL");
+	$wpdb->query("DELETE FROM $wpdb->commentmeta WHERE comment_id NOT IN (SELECT comment_id FROM $wpdb->comments)");
+	$wpdb->query("DELETE FROM $wpdb->term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM $wpdb->posts)");
+	$wpdb->query("DELETE FROM $wpdb->options WHERE option_name LIKE '_site_transient_browser_%' OR option_name LIKE '_site_transient_timeout_browser_%' OR option_name LIKE '_transient_feed_%' OR option_name LIKE '_transient_timeout_feed_%'");
+}
+
 function adv_db_cleaner_count(){
 	global $wpdb;
 	$aDBc_count_total_unused = 0;

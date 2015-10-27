@@ -1,10 +1,10 @@
 === Advanced Database Cleaner ===
 Contributors: symptote
 Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-Dy9AZSB3bmJFsrGWImHWiCoHtSE8KuC2SNdGQpreQxG8dl2tVZK&dispatch=5885d80a13c0db1f8e263663d3faee8d0b9dcb01a9b6dc564e45f62871326a5e
-Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, cleaner, delete orphan data, orphan data, delete revisions, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto drfat, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin
+Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, cleaner, delete orphan data, orphan data, delete revisions, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto drfat, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin, schedule, scheduler, schedule clean-up, schedule optimize
 Requires at least: 2.7
 Tested up to: 4.3
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +23,7 @@ Advanced Database Cleaner is a must-have plugin that cleans your WP database by:
 <br><br>
 * It cleans your database by one click.<br>
 * The settings page allows you choose what data should be cleaned.<br>
+* You can schedule the clean-up and optimization of your database.<br>
 * It is a must-have plugin to keep your database clean.<br>
 
 == Installation ==
@@ -40,6 +41,10 @@ This section describes how to install the plugin and get it working.
 5. Reset database" admin page screenshot
 
 == Changelog ==
+
+= 1.2.3 =
+* Some optimizations and style modifications
+* New feature: Adding the scheduler. You can now schedule the clean-up and optimization of your database.
 
 = 1.2.2 =
 * Some optimizations and style modifications

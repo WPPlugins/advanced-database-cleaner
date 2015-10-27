@@ -165,15 +165,24 @@ input[type=checkbox] {
 	margin-top: 20px;
 }
 
-/* boxes in tab to inform users about the current option */
-.box-notice{
+/* Top info box */
+.aDBC-topBoxInfo {
+	clear:both;
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-	border: 1px solid #eee;
-	margin-top:40px;
-	padding:10px;
-	background:#F4F4F4;
+    background: #F0F5FA url("../images/info.png") no-repeat scroll 8px 50%;
+    color: #888;
+	margin-bottom: 25px;
+    padding: 10px 10px 10px 40px;
+	max-width: 730px;
+}
+
+/* boxes in tab to inform users about the current option */
+.aDBCRightBox{
+	padding:20px 0px 20px 0px;
+	margin-bottom:5px;
+	background:#fff;
 	width:300px;
 	font-size: 12px;
 	text-align:justify;
@@ -183,10 +192,15 @@ input[type=checkbox] {
 /* For Data already cleaned */
 .already-cleaned{
 	float: left;
-	background:#c4c4c4;
+	background:#f4f4f4;
 	padding:2px 6px 2px 6px;
 	border-radius: 8px;
-	color: #fff;
+	color: #999;
 	margin: 2px;
 	font-size: 11px;
+}
+
+/* Support us like image */
+.aDBC-supportUs{
+	background: url("../images/support.png") no-repeat top right;
 }

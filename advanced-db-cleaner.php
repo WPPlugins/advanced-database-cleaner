@@ -2,7 +2,7 @@
 /*
 Plugin Name: Advanced Database Cleaner
 Description: Clean up your database by deleting unused data such as 'draft', Optimize your database or reset it to its initial state.
-Version: 1.2.2
+Version: 1.2.3
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
@@ -11,17 +11,188 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+/*******************************************************************/
+
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+/********************************************************************
+* Add 'settings' link under the plugin name in plugins page
+********************************************************************/
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'db_cleaner_add_action_links');
-
-// Add 'settings' link under the plugin name in plugins page
 function db_cleaner_add_action_links($links){
-	$adc_settings_link = '<a href = "options-general.php?page=' . dirname(plugin_basename(__FILE__)) . '/advanced-db-cleaner-admin.php">' . __('Settings', 'advanced-db-cleaner') . '</a>';
+	$adc_settings_link = '<a href = "options-general.php?page=' . dirname(plugin_basename(__FILE__)) . '/advanced-db-cleaner.php">' . __('Settings', 'advanced-db-cleaner') . '</a>';
 	array_unshift($links, $adc_settings_link);
 	return $links;
 }
 
-if(is_admin()){require_once('advanced-db-cleaner-admin.php');}
+/********************************************************************
+* Add 'Database Cleaner' to Wordpress settings menu
+********************************************************************/
+add_action('admin_menu', 'adv_db_cleaner_add_admin_menu');
+function adv_db_cleaner_add_admin_menu() {
+	$hook_adv_db_cleaner = add_options_page('Advanced DB Cleaner Options', 'Database Cleaner','manage_options', __FILE__, 'adv_db_cleaner_page');
+	add_action('admin_print_styles-' . $hook_adv_db_cleaner, 'adv_db_cleaner_enqueue_styles');
+}
 
+/********************************************************************
+* Register stylesheet
+********************************************************************/
+add_action('admin_init', 'adv_db_cleaner_register_styles' );
+function adv_db_cleaner_register_styles() {
+	wp_register_style('adv_db_cleaner_css', plugins_url() .'/'. dirname(plugin_basename(__FILE__)) . '/css/style.css');
+}
+
+/********************************************************************
+* nqueue stylesheet
+********************************************************************/
+function adv_db_cleaner_enqueue_styles() {
+   wp_enqueue_style( 'adv_db_cleaner_css' );
+}
+
+/******************************************************************************************
+* The scheduler
+* Get more info here: http://codex.wordpress.org/Plugin_API/Filter_Reference/cron_schedules
+******************************************************************************************/
+add_filter('cron_schedules', 'aDBc_additional_schedules');
+function aDBc_additional_schedules($schedules){
+	// Add weekly schedule
+	$schedules['weekly'] = array(
+		'interval' => 604800,
+		'display'  => __('Once Weekly')
+	);
+	// Add monthly schedule
+	$schedules['monthly'] = array(
+		'interval' => 2635200,
+		'display'  => __('Once a month')
+	);
+	return $schedules;
+}
+
+// (RE)-schedule tasks after (RE)-activation or update of the plugin
+register_activation_hook(__FILE__, 'aDBc_activate_plugin');
+add_action('aDBc_optimize_scheduler', 'adv_db_cleaner_optimize');
+add_action('aDBc_clean_scheduler', 'aDBc_cleanAll');
+function aDBc_activate_plugin(){
+	$aDBc_optimize_schedule = get_option('aDBc_optimize_schedule');
+	if($aDBc_optimize_schedule && $aDBc_optimize_schedule != 'no_schedule'){
+		if(!wp_next_scheduled('aDBc_optimize_scheduler'))
+			wp_schedule_event(time()+60, $aDBc_optimize_schedule, 'aDBc_optimize_scheduler');
+	}
+	$aDBc_clean_schedule = get_option('aDBc_clean_schedule');
+	if($aDBc_clean_schedule && $aDBc_clean_schedule != 'no_schedule'){
+		if(!wp_next_scheduled('aDBc_clean_scheduler'))
+			wp_schedule_event(time()+60, $aDBc_clean_schedule, 'aDBc_clean_scheduler');
+	}	
+}
+
+// Clear current scheduled tasks (if any) when deactivated
+register_deactivation_hook(__FILE__, 'aDBc_deactivate_plugin' );
+function aDBc_deactivate_plugin(){
+	wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+	wp_clear_scheduled_hook('aDBc_clean_scheduler');
+}
+
+register_uninstall_hook(__FILE__, 'aDBc_uninstall');
+function aDBc_uninstall(){
+	delete_option('aDBc_optimize_schedule');
+	delete_option('aDBc_clean_schedule');
+	wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+	wp_clear_scheduled_hook('aDBc_clean_scheduler');	
+}
+
+/***************************************************************
+*
+* The admin page content
+*
+***************************************************************/
+function adv_db_cleaner_page(){
+?>
+	<div class="wrap">
+		<h2>Advanced DB Cleaner</h2>
+		<?php
+		// If one of the forms is sent, then process data and print results
+		$adv_db_cleaner_message = '';
+		$adv_db_cleaner_message_class = 'updated settings-error notice is-dismissible';
+		if(isset($_POST['adbc_post_type'])){
+			foreach($_POST['adbc_post_type'] as $adbc_type) {
+				adv_db_cleaner($adbc_type);
+			}
+			$adv_db_cleaner_message = __('Database cleaned successfully!', 'advanced-db-cleaner');
+		}elseif(isset($_POST['aDBc_optimize_form'])){
+			adv_db_cleaner_optimize();
+			$adv_db_cleaner_message = __('Database optimized successfully!', 'advanced-db-cleaner');
+		}elseif(isset($_POST['aDBc_reset_form'])){
+			if($_POST['aDBc_reset_comfirmation'] == 'reset'){
+				adv_db_cleaner_reset();
+			}else{
+				$adv_db_cleaner_message = __('Please type the word "reset" correctly in the text box below.', 'advanced-db-cleaner');
+				$adv_db_cleaner_message_class = 'error';
+			}
+		}elseif(isset($_POST['aDBc_optimize_schedule_form'])){
+			wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+			if($_POST['aDBc_optimize_schedule'] == 'no_schedule'){
+				delete_option('aDBc_optimize_schedule');
+			}else{
+				update_option('aDBc_optimize_schedule', $_POST['aDBc_optimize_schedule']);
+				wp_schedule_event(time()+60, $_POST['aDBc_optimize_schedule'], 'aDBc_optimize_scheduler');
+			}
+			$adv_db_cleaner_message = __('The optimization schedule is saved successfully!', 'advanced-db-cleaner');
+		}elseif(isset($_POST['aDBc_clean_schedule_form'])){
+			wp_clear_scheduled_hook('aDBc_clean_scheduler');
+			if($_POST['aDBc_clean_schedule'] == 'no_schedule'){
+				delete_option('aDBc_clean_schedule');
+			}else{
+				update_option('aDBc_clean_schedule', $_POST['aDBc_clean_schedule']);
+				wp_schedule_event(time()+60, $_POST['aDBc_clean_schedule'], 'aDBc_clean_scheduler');
+			}
+			$adv_db_cleaner_message = __('The clean-up schedule is saved successfully!', 'advanced-db-cleaner');
+		}
+		// Print message
+		if($adv_db_cleaner_message != ''){
+			echo '<div id="adbc_message" class="'. $adv_db_cleaner_message_class .'"><p><strong>' . $adv_db_cleaner_message . '</strong></p></div>';
+		}
+		?>
+		<div class="marginRight300">
+			<div class="tabBox">
+				<?php
+					$aDBc_tab_list = array(
+								array("id"=>"aDBc-clean", 		"title"=>__('Clean Database', 'advanced-db-cleaner')),
+								array("id"=>"aDBc-optimize",	"title"=>__('Optimize Database', 'advanced-db-cleaner')),
+								array("id"=>"aDBc-reset", 		"title"=>__('Reset Database', 'advanced-db-cleaner'))
+							);
+					foreach ($aDBc_tab_list as $key => $value){
+						$checked = "";
+						if($value["id"] == "aDBc-clean"
+							|| (isset($_POST["aDBc_optimize_form"]) && $value["id"] == "aDBc-optimize")
+							|| (isset($_POST["aDBc_optimize_schedule_form"]) && $value["id"] == "aDBc-optimize")							
+							|| (isset($_POST["aDBc_reset_form"]) && $value["id"] == "aDBc-reset")){
+							$checked = 'checked = "checked"';
+						}
+						echo '<input '.$checked.' type="radio" id="'.$value["id"].'" name="tabGroup1">'."\n";
+						echo '<label for="'.$value["id"].'">'.$value["title"].'</label>'."\n";
+					}
+				?>
+				<div class="tab1">
+					<?php include_once 'includes/clean-db.php'; ?>
+				</div>
+				<div class="tab2">
+					<?php include_once 'includes/optimize-db.php'; ?>
+				</div>
+				<div class="tab3">
+					<?php include_once 'includes/reset-db.php'; ?>
+				</div>
+			</div>
+			<div class="aDBcSidebar">
+				<?php include_once 'includes/sidebar.php'; ?>
+			</div>
+		</div>
+	</div>
+<?php 
+}
+/***************************************************************
+*
+* Get functions
+*
+***************************************************************/
+include_once 'includes/functions.php';
 ?>

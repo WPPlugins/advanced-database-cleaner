@@ -3,20 +3,20 @@
 $aDBc_count_unused = adv_db_cleaner_count();
 ?>
 <div class="marginTop20">
-	<div style="float: left;  margin-right:30px; margin-bottom:40px">
+	<div style="float: left;  margin-right:25px; margin-bottom:40px">
 		<form action="" method="post">
-			<table class="widefat" style="width: 400px; border: 0px; box-shadow: 0 1px 0px #ccc;">
+			<table class="widefat" style="width: 400px; border: 1px solid #eee; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; box-shadow: 0 0px 0px #ccc;">
 				<thead style="background:#f0f5fa; border-bottom:1px solid dashed">
 					<tr>
-						<th scope="col" style="font-size:13px; border-bottom: 1px dashed #ccc; border-top: 1px solid #eee"><?php _e('Elements to clean','advanced-db-cleaner'); ?></th>
-						<th scope="col" style="text-align: right; width: 80px; font-size:13px; border-bottom: 1px dashed #ccc; border-top: 1px solid #eee"><?php _e('Count','advanced-db-cleaner'); ?></th>
-						<th scope="col" style="text-align: right; width: 80px; font-size:13px; border-bottom: 1px dashed #ccc; border-top: 1px solid #eee"><?php _e('Select','advanced-db-cleaner'); ?></th>
+						<th scope="col" style="font-size:13px; color:#222; border-bottom: 0px;"><?php _e('Elements to clean','advanced-db-cleaner'); ?></th>
+						<th scope="col" style="text-align: right; color:#222; width: 80px; font-size:13px; border-bottom: 0px"><?php _e('Count','advanced-db-cleaner'); ?></th>
+						<th scope="col" style="text-align: right; color:#222; width: 80px; font-size:13px; border-bottom: 0px"><?php _e('Select','advanced-db-cleaner'); ?></th>
 					</tr>
 				</thead>
 				<tbody id="the-list">
 					<?php 
 					if($aDBc_count_unused["total"] == 0){ ?>
-						<tr class="alternate">
+						<tr class="">
 							<td class="column-name" style="color: #999"><?php _e('Nothing to do!','advanced-db-cleaner'); ?></td>
 							<td class="column-name"></td>
 							<td class="column-name"></td>
@@ -24,7 +24,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 					<?php 
 					} else {
 						if($aDBc_count_unused["revision"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Revision','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["revision"]; ?></td>
 								<td class="column-name">
@@ -37,7 +37,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["draft"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Draft','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["draft"]; ?></td>
 								<td class="column-name">
@@ -50,7 +50,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["autodraft"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Auto Draft','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["autodraft"]; ?></td>
 								<td class="column-name">
@@ -63,7 +63,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}						
 						if($aDBc_count_unused["moderated"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Moderated Comments','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["moderated"]; ?></td>
 								<td class="column-name">
@@ -76,7 +76,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["spam"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Spam Comments','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["spam"]; ?></td>
 								<td class="column-name">
@@ -89,7 +89,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["trash"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Trash Comments','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["trash"]; ?></td>
 								<td class="column-name">
@@ -103,7 +103,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						}
 
 						if($aDBc_count_unused["postmeta"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Orphan Postmeta','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["postmeta"]; ?></td>
 								<td class="column-name">
@@ -116,7 +116,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["commentmeta"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Orphan Commentmeta','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["commentmeta"]; ?></td>
 								<td class="column-name">
@@ -129,7 +129,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["relationships"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Orphan Relationships','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["relationships"]; ?></td>
 								<td class="column-name">
@@ -142,7 +142,7 @@ $aDBc_count_unused = adv_db_cleaner_count();
 						<?php 
 						}
 						if($aDBc_count_unused["feed"] > 0){ ?>
-							<tr class="alternate">
+							<tr class="">
 								<td class="column-name"><?php _e('Dashboard Transient Feed','advanced-db-cleaner'); ?></td>
 								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["feed"]; ?></td>
 								<td class="column-name">
@@ -158,9 +158,9 @@ $aDBc_count_unused = adv_db_cleaner_count();
 				</tbody>
 				<tfoot style="background:#f0f5fa">
 					<tr>
-						<th scope="col" style="font-size:13px; border-top: 1px dashed #ccc"><?php _e('Total','advanced-db-cleaner'); ?></th>
-						<th scope="col" class="aDBcCount" style="border-top: 1px dashed #ccc"><b><?php echo $aDBc_count_unused["total"]; ?></b></th>
-						<th scope="col" style="border-top: 1px dashed #ccc"></th>
+						<th scope="col" style="font-size:13px; font-weight:bold; color:#444; border-top: 0px"><?php _e('Total','advanced-db-cleaner'); ?></th>
+						<th scope="col" class="aDBcCount" style="border-top: 0px; font-weight:bold; color:#444;"><b><?php echo $aDBc_count_unused["total"]; ?></b></th>
+						<th scope="col" style="border-top: 0px"></th>
 					</tr>
 				</tfoot>			
 			</table>
@@ -170,19 +170,52 @@ $aDBc_count_unused = adv_db_cleaner_count();
 			</p>
 		</form>
 	</div>
-	<div style="float:left; padding-left:20px; border-left: 1px dashed #ccc; ">
-		<div style="text-align:center;">
+	<div style="float:left; padding-left:25px; border-left: 1px dashed #ccc; ">
+		<div style="text-align:center; margin-bottom: 30px">
 			<?php if($aDBc_count_unused["total"] == 0){ ?>
 				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_clean.png'?>"/>
 				<div style="font-color:#ccc; color: #999; font-family: tahoma">Your database is clean!</div>
 			<?php } else { ?>
 				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_not_clean.png'?>"/>
-				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $aDBc_count_unused["total"]; ?></b> element(s) <br/>should be cleaned!</div>		
+				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $aDBc_count_unused["total"]; ?></b> element(s) should be cleaned!</div>		
 			<?php }  ?>
 		</div>
-		<div class="box-notice">
-			Cleaning your database helps you saving space by removing unused data. The plugin has detected that the following items are already cleaned:
-			<div style="margin-top:15px">
+
+		<div class="aDBCRightBox" style="border-bottom: 1px solid #eee">
+			<div style="font-weight: bold; padding-bottom:12px; color:#111; font-size:13px">&nbsp;Schedule</div>
+			<form action="" method="post">
+				<select style="height:30px; font-size:13px; width: 240px" name="aDBc_clean_schedule" id="aDBc_clean_schedule">
+					<option value="no_schedule" <?php echo get_option('aDBc_clean_schedule') == 'no_schedule' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Not scheduled','advanced-db-cleaner');?>
+					</option>
+					<option value="hourly" <?php echo get_option('aDBc_clean_schedule') == 'hourly' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Run clean-up hourly','advanced-db-cleaner');?>
+					</option>
+					<option value="twicedaily" <?php echo get_option('aDBc_clean_schedule') == 'twicedaily' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Run clean-up twice a day','advanced-db-cleaner');?>
+					</option>
+					<option value="daily" <?php echo get_option('aDBc_clean_schedule') == 'daily' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Run clean-up daily','advanced-db-cleaner');?>
+					</option>
+					<option value="weekly" <?php echo get_option('aDBc_clean_schedule') == 'weekly' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Run clean-up weekly','advanced-db-cleaner');?>
+					</option>
+					<option value="monthly" <?php echo get_option('aDBc_clean_schedule') == 'monthly' ? 'selected="selected"' : ''; ?>>
+					<?php _e('Run clean-up monthly','advanced-db-cleaner');?>
+					</option>
+				</select>	
+				<input type="hidden" name="aDBc_clean_schedule_form" value="" />
+				<input style="height:30px" type="submit" class="button-primary" value="<?php _e('Save','advanced-db-cleaner'); ?>" />
+			</form>
+			<div style="padding-top:15px; color:#111;">&nbsp;Next run: <span style="color: green"><?php echo wp_next_scheduled('aDBc_clean_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_clean_scheduler')) : 'Not set'; ?></span></div>
+		</div>		
+
+		<div class="aDBCRightBox">
+			<div style="font-weight: bold; padding-bottom:5px; color:#111; font-size:13px">&nbsp;Please note that</div>
+			<ul style="list-style: disc outside none; padding:0px 10px 0px 10px">
+				<li>Cleaning your database helps you saving space by removing unused data.</li>
+				<li>The following items are already cleaned:</li>
+			</ul>
 				<?php 
 				if($aDBc_count_unused["revision"] == 0)
 					echo "<div class='already-cleaned'>". __('Revision','advanced-db-cleaner') ."</div>";
@@ -206,11 +239,6 @@ $aDBc_count_unused = adv_db_cleaner_count();
 					echo "<div class='already-cleaned'>". __('Dashboard Transient Feed','advanced-db-cleaner') ."</div>"; 
 				?>
 				<div style="clear:both"></div>
-			</div>
 		</div>
 	</div>
 </div>
-<?php
-//Once we have displayed counts, delete the array to optimize usage of memory.
-unset($aDBc_count_unused);
-?>
