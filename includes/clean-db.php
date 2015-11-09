@@ -4,8 +4,16 @@ $aDBc_count_unused = adv_db_cleaner_count();
 ?>
 <div class="marginTop20">
 	<div style="float: left;  margin-right:25px; margin-bottom:40px">
+		<?php if(function_exists('is_multisite') && is_multisite() && is_main_site()){ ?>
+			<div style="margin-bottom:15px;">
+				<a class="tooltips" href="#">
+					<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/about.png'?>"/>
+					<span>The plugin has detected that you use a multisite installation. This is your main site from which you can clean all tables of all sites in your network. Other sites can clean their own tables only.</span>
+				</a>
+			</div>
+		<?php } ?>
 		<form action="" method="post">
-			<table class="widefat" style="width: 400px; border: 1px solid #eee; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; box-shadow: 0 0px 0px #ccc;">
+			<table class="widefat" style="width: 400px; border: 1px solid #eee; box-shadow: 0 0px 0px #ccc;">
 				<thead style="background:#f0f5fa; border-bottom:1px solid dashed">
 					<tr>
 						<th scope="col" style="font-size:13px; color:#222; border-bottom: 0px;"><?php _e('Elements to clean','advanced-db-cleaner'); ?></th>
@@ -173,10 +181,10 @@ $aDBc_count_unused = adv_db_cleaner_count();
 	<div style="float:left; padding-left:25px; border-left: 1px dashed #ccc; ">
 		<div style="text-align:center; margin-bottom: 30px">
 			<?php if($aDBc_count_unused["total"] == 0){ ?>
-				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_clean.png'?>"/>
+				<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/db_clean.png'?>"/>
 				<div style="font-color:#ccc; color: #999; font-family: tahoma">Your database is clean!</div>
 			<?php } else { ?>
-				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_not_clean.png'?>"/>
+				<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/db_not_clean.png'?>"/>
 				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $aDBc_count_unused["total"]; ?></b> element(s) should be cleaned!</div>		
 			<?php }  ?>
 		</div>

@@ -1,8 +1,10 @@
 <?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
 /*
 Plugin Name: Advanced Database Cleaner
 Description: Clean up your database by deleting unused data such as 'draft', Optimize your database or reset it to its initial state.
-Version: 1.2.3
+Version: 1.3.0
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
@@ -11,16 +13,19 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
-/*******************************************************************/
-
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+/********************************************************************
+* Define common variables
+********************************************************************/
+if (!defined("ADB_CLEANER_PLUGIN_VERSION")) 	define("ADB_CLEANER_PLUGIN_VERSION",  "1.3.0");
+if (!defined("ADB_CLEANER_PLUGIN_BASENAME")) 	define("ADB_CLEANER_PLUGIN_BASENAME",  plugin_basename(__FILE__));
+if (!defined("ADB_CLEANER_PLUGIN_DIR")) 		define("ADB_CLEANER_PLUGIN_DIR",  plugins_url() .'/'. dirname(plugin_basename(__FILE__)));
 
 /********************************************************************
 * Add 'settings' link under the plugin name in plugins page
 ********************************************************************/
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'db_cleaner_add_action_links');
+add_filter('plugin_action_links_' . ADB_CLEANER_PLUGIN_BASENAME, 'db_cleaner_add_action_links');
 function db_cleaner_add_action_links($links){
-	$adc_settings_link = '<a href = "options-general.php?page=' . dirname(plugin_basename(__FILE__)) . '/advanced-db-cleaner.php">' . __('Settings', 'advanced-db-cleaner') . '</a>';
+	$adc_settings_link = '<a href = "options-general.php?page=' . ADB_CLEANER_PLUGIN_BASENAME . '">' . __('Settings', 'advanced-db-cleaner') . '</a>';
 	array_unshift($links, $adc_settings_link);
 	return $links;
 }
@@ -39,11 +44,11 @@ function adv_db_cleaner_add_admin_menu() {
 ********************************************************************/
 add_action('admin_init', 'adv_db_cleaner_register_styles' );
 function adv_db_cleaner_register_styles() {
-	wp_register_style('adv_db_cleaner_css', plugins_url() .'/'. dirname(plugin_basename(__FILE__)) . '/css/style.css');
+	wp_register_style('adv_db_cleaner_css', ADB_CLEANER_PLUGIN_DIR . '/css/style.css');
 }
 
 /********************************************************************
-* nqueue stylesheet
+* Enqueue stylesheet
 ********************************************************************/
 function adv_db_cleaner_enqueue_styles() {
    wp_enqueue_style( 'adv_db_cleaner_css' );
@@ -68,43 +73,91 @@ function aDBc_additional_schedules($schedules){
 	return $schedules;
 }
 
-// (RE)-schedule tasks after (RE)-activation or update of the plugin
+/********************************************************************
+* (RE)-schedule tasks after (RE)-activation or update of the plugin
+********************************************************************/
 register_activation_hook(__FILE__, 'aDBc_activate_plugin');
 add_action('aDBc_optimize_scheduler', 'adv_db_cleaner_optimize');
 add_action('aDBc_clean_scheduler', 'aDBc_cleanAll');
-function aDBc_activate_plugin(){
-	$aDBc_optimize_schedule = get_option('aDBc_optimize_schedule');
-	if($aDBc_optimize_schedule && $aDBc_optimize_schedule != 'no_schedule'){
-		if(!wp_next_scheduled('aDBc_optimize_scheduler'))
-			wp_schedule_event(time()+60, $aDBc_optimize_schedule, 'aDBc_optimize_scheduler');
+function aDBc_activate_plugin($network_wide){
+	global $wpdb;
+	if(function_exists('is_multisite') && is_multisite() && $network_wide){
+		$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+		foreach($blogs_ids as $blog_id){
+			switch_to_blog($blog_id);
+			$aDBc_optimize_schedule = get_option('aDBc_optimize_schedule');
+			if($aDBc_optimize_schedule && $aDBc_optimize_schedule != 'no_schedule'){
+				if(!wp_next_scheduled('aDBc_optimize_scheduler'))
+					wp_schedule_event(time()+60, $aDBc_optimize_schedule, 'aDBc_optimize_scheduler');
+			}
+			$aDBc_clean_schedule = get_option('aDBc_clean_schedule');
+			if($aDBc_clean_schedule && $aDBc_clean_schedule != 'no_schedule'){
+				if(!wp_next_scheduled('aDBc_clean_scheduler'))
+					wp_schedule_event(time()+60, $aDBc_clean_schedule, 'aDBc_clean_scheduler');
+			}
+			restore_current_blog();
+		}
+	}else{
+		$aDBc_optimize_schedule = get_option('aDBc_optimize_schedule');
+		if($aDBc_optimize_schedule && $aDBc_optimize_schedule != 'no_schedule'){
+			if(!wp_next_scheduled('aDBc_optimize_scheduler'))
+				wp_schedule_event(time()+60, $aDBc_optimize_schedule, 'aDBc_optimize_scheduler');
+		}
+		$aDBc_clean_schedule = get_option('aDBc_clean_schedule');
+		if($aDBc_clean_schedule && $aDBc_clean_schedule != 'no_schedule'){
+			if(!wp_next_scheduled('aDBc_clean_scheduler'))
+				wp_schedule_event(time()+60, $aDBc_clean_schedule, 'aDBc_clean_scheduler');
+		}	
 	}
-	$aDBc_clean_schedule = get_option('aDBc_clean_schedule');
-	if($aDBc_clean_schedule && $aDBc_clean_schedule != 'no_schedule'){
-		if(!wp_next_scheduled('aDBc_clean_scheduler'))
-			wp_schedule_event(time()+60, $aDBc_clean_schedule, 'aDBc_clean_scheduler');
-	}	
 }
 
-// Clear current scheduled tasks (if any) when deactivated
+/********************************************************************
+* Clear current scheduled tasks (if any) when deactivated
+********************************************************************/
 register_deactivation_hook(__FILE__, 'aDBc_deactivate_plugin' );
-function aDBc_deactivate_plugin(){
-	wp_clear_scheduled_hook('aDBc_optimize_scheduler');
-	wp_clear_scheduled_hook('aDBc_clean_scheduler');
+function aDBc_deactivate_plugin($network_wide){
+	global $wpdb;
+	if(function_exists('is_multisite') && is_multisite() && $network_wide){
+		$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+		foreach($blogs_ids as $blog_id){
+			switch_to_blog($blog_id);
+			wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+			wp_clear_scheduled_hook('aDBc_clean_scheduler');
+			restore_current_blog();
+		}
+	}else{
+		wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+		wp_clear_scheduled_hook('aDBc_clean_scheduler');
+	}
 }
 
+/********************************************************************
+* Clear scheduled tasks + options if UNINSTALL
+********************************************************************/
 register_uninstall_hook(__FILE__, 'aDBc_uninstall');
 function aDBc_uninstall(){
-	delete_option('aDBc_optimize_schedule');
-	delete_option('aDBc_clean_schedule');
-	wp_clear_scheduled_hook('aDBc_optimize_scheduler');
-	wp_clear_scheduled_hook('aDBc_clean_scheduler');	
+	global $wpdb;
+	if(function_exists('is_multisite') && is_multisite()){
+		$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+		foreach($blogs_ids as $blog_id){
+			switch_to_blog($blog_id);
+			delete_option('aDBc_optimize_schedule');
+			delete_option('aDBc_clean_schedule');
+			wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+			wp_clear_scheduled_hook('aDBc_clean_scheduler');
+			restore_current_blog();
+		}
+	}else{
+		delete_option('aDBc_optimize_schedule');
+		delete_option('aDBc_clean_schedule');
+		wp_clear_scheduled_hook('aDBc_optimize_scheduler');
+		wp_clear_scheduled_hook('aDBc_clean_scheduler');
+	}
 }
 
-/***************************************************************
-*
+/********************************************************************
 * The admin page content
-*
-***************************************************************/
+********************************************************************/
 function adv_db_cleaner_page(){
 ?>
 	<div class="wrap">
@@ -179,7 +232,15 @@ function adv_db_cleaner_page(){
 					<?php include_once 'includes/optimize-db.php'; ?>
 				</div>
 				<div class="tab3">
-					<?php include_once 'includes/reset-db.php'; ?>
+					<?php 
+					if(is_main_site()){
+						include_once 'includes/reset-db.php';
+					}else{
+						echo "<div style='text-align:center; padding-top:100px; color:#777'>";
+						_e('Sorry! The reset can be executed from the main site in your Network only!', 'advanced-db-cleaner');
+						echo "</div>";
+					}
+					?>
 				</div>
 			</div>
 			<div class="aDBcSidebar">

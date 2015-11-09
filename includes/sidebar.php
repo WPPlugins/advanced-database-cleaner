@@ -1,7 +1,5 @@
 <div>
-	<center><h2>Advanced Database Cleaner</h2></center>
-	<!--<p>See what is new in <a href="#">version 1.2.2</a></p>-->
-	
+	<center><h2 style="color:#c0c0c0; font-size:18px; font-weight: bold">Advanced Database<br/> Cleaner <?php echo ADB_CLEANER_PLUGIN_VERSION; ?></h2></center>
 	<p style="text-align: justify"><?php _e('If you love this plugin and would like to make a donation, then you\'re awesome.', 'advanced-db-cleaner'); ?></p>
 	<p style="text-align:right"><?php _e('Thank you!', 'advanced-db-cleaner'); ?></p>
 	<center>
@@ -20,17 +18,17 @@
 	</center>
 </div>
 
-<div style="height: 35px; background-color:#f9f9f9;">
+<div style="height: 20px; background-color:#f9f9f9;">
 	<a style="text-decoration: none" href="https://wordpress.org/support/view/plugin-reviews/advanced-database-cleaner#postform">
-		<div class="aDBC-supportUs" style="width:250px; height:35px; padding-top:10px">
-			<span style="font-size: 13px; color:#777"><?php echo __('Please support us', 'advanced-db-cleaner'); ?></span>
+		<div class="aDBC-supportUs" style="width:250px; height:20px">
+			<span style="font-size: 13px; color:#777"><?php echo __('Please rate us', 'advanced-db-cleaner'); ?></span>
 		</div>
 	</a>
 </div>
 
-<div style="text-align:center; height: 20px; clear:both;">
+<div style="height: 20px; clear:both;">
 	<div style="float:left">
-		<span style="font-size: 13px; color:#777"><?php echo __('Having any issues?', 'advanced-db-cleaner'); ?></span>
+		<span style="font-size: 13px; color:#777"><?php echo __('Having issues?', 'advanced-db-cleaner'); ?></span>
 		
 	</div>
 	<div style="float:right">
@@ -38,6 +36,11 @@
 	</div>
 </div>
 
-<div style="text-align: center; color: #000; font-size:12px; border-top:1px dashed #ccc">
-	&copy; <?php echo date("Y") . " " . __('Created by', 'advanced-db-cleaner') . " <b>Younes JFR</b>"; ?>
+<div style=" background-color:#f9f9f9; height: 20px; clear:both;">
+	<div style="float:left">
+		<span style="font-size: 13px; color:#777"><?php echo __('Developed by:', 'advanced-db-cleaner'); ?></span>
+	</div>
+	<div style="float:right">
+		{ <?php _e('Younes JFR', 'advanced-db-cleaner'); ?> }
+	</div>
 </div>

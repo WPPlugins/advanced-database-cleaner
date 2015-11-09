@@ -1,7 +1,15 @@
 <div class="marginTop20">
 	<div style="float: left;  margin-right:25px; margin-bottom:40px">
 		<form action="" method="post">
-			<table class="widefat" style="width: 400px; border: 1px solid #eee; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; box-shadow: 0 0px 0px #ccc;">
+			<?php if(function_exists('is_multisite') && is_multisite() && is_main_site()){ ?>
+				<div style="margin-bottom:15px;">
+					<a class="tooltips" href="#">
+						<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/about.png'?>"/>
+						<span>The plugin has detected that you use a multisite installation. This is your main site from which you can optimize all tables of all sites in your network. Other sites can optimize their own tables only.</span>
+					</a>
+				</div>
+			<?php } ?>
+			<table class="widefat" style="width: 400px; border: 1px solid #eee; box-shadow: 0 0px 0px #ccc;">
 				<thead style="background:#f0f5fa; border-bottom:1px solid dashed">
 					<tr>
 						<th scope="col" style="font-size:13px; color:#222; border-bottom: 0px;"><?php _e('Tables to optimize','advanced-db-cleaner'); ?></th>
@@ -13,23 +21,23 @@
 					global $wpdb;
 					$total_tables_to_optimize = 0;
 					$total_lost = 0;
-					$adbc_sql = 'SHOW TABLE STATUS FROM `'.DB_NAME.'`';
+					$prefix = str_replace( '_', '\_', $wpdb->prefix );
+					$adbc_sql = "SELECT table_name, data_free FROM information_schema.tables WHERE table_schema = '".DB_NAME."' and data_free > 0";
+					if(!is_main_site()){
+						$adbc_sql = $adbc_sql . " and table_name LIKE '{$prefix}%'";
+					}					
 					$result = $wpdb->get_results($adbc_sql);
 					foreach($result as $row){
-						$table_size = ($row->Data_length + $row->Index_length) / 1024;
-						if($row->Data_free > 0){
-							$total_tables_to_optimize += 1;
-							$total_lost += $row->Data_free;
-							echo "<tr class=''>
-								 <td class='column-name'>". $row->Name ."</td>
-								 <td class='column-name' style='text-align:right'>". $row->Data_free . ' o' ."</td>
-								 </tr>\n";
-						}
+						$total_tables_to_optimize += 1;
+						$total_lost += $row->data_free;
+						echo "<tr class=''>
+							 <td class='column-name'>". $row->table_name ."</td>
+							 <td class='column-name' style='text-align:right'>". $row->data_free . ' o' ."</td>
+							 </tr>\n";
 					}
-
 					if($total_lost == 0){
 						echo "<tr class=''>
-							 <td class='column-name' style='color: #999'>". __('Nothing to do!','advanced-db-cleaner') ."</td>
+							 <td class='column-name' style='color: #999'>". __('All tables are optimized!','advanced-db-cleaner') ."</td>
 							 <td class='column-name'></td></tr>";
 					}
 				?>
@@ -43,17 +51,17 @@
 			</table>
 			<p>
 				<input type="hidden" name="aDBc_optimize_form" value="" />
-				<input type="submit" class="button-primary" value="<?php _e('Optimize database','advanced-db-cleaner'); ?>"  <?php echo $total_lost == 0 ? 'disabled' : ''; ?> />
+				<input type="submit" class="button-primary" value="<?php _e('Optimize tables','advanced-db-cleaner'); ?>"  <?php echo $total_lost == 0 ? 'disabled' : ''; ?> />
 			</p>
 		</form>
 	</div>
 	<div style="float:left; padding-left:25px; border-left: 1px dashed #ccc; ">	
 		<div style="text-align:center; margin-bottom: 30px">
 			<?php if($total_lost == 0){ ?>
-				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_clean.png'?>"/>
+				<img src="<?php echo ADB_CLEANER_PLUGIN_DIR . '/images/db_clean.png'?>"/>
 				<div style="font-color:#ccc; color: #999; font-family: tahoma">Your database is optimized!</div>
 			<?php } else { ?>
-				<img src="<?php echo plugins_url() .'/'. dirname(dirname(plugin_basename(__FILE__))) . '/images/db_not_clean.png'?>"/>
+				<img src="<?php echo ADB_CLEANER_PLUGIN_DIR . '/images/db_not_clean.png'?>"/>
 				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $total_tables_to_optimize; ?></b> table(s) should be optimized!</div>		
 			<?php }  ?>
 		</div>
