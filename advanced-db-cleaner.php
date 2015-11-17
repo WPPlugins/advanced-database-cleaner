@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 /*
 Plugin Name: Advanced Database Cleaner
 Description: Clean up your database by deleting unused data such as 'draft', Optimize your database or reset it to its initial state.
-Version: 1.3.0
+Version: 1.3.1
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
