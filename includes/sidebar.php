@@ -1,5 +1,5 @@
 <div>
-	<center><h2 style="color:#c0c0c0; font-size:18px; font-weight: bold">Advanced Database<br/> Cleaner <?php echo ADB_CLEANER_PLUGIN_VERSION; ?></h2></center>
+	<center><h2 style="color:#999; font-size:18px;">Advanced Database<br/> Cleaner <?php echo ADB_CLEANER_PLUGIN_VERSION; ?></h2></center>
 	<p style="text-align: justify"><?php _e('If you love this plugin and would like to make a donation, then you\'re awesome.', 'advanced-db-cleaner'); ?></p>
 	<p style="text-align:right"><?php _e('Thank you!', 'advanced-db-cleaner'); ?></p>
 	<center>

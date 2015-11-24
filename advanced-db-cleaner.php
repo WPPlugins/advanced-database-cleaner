@@ -1,10 +1,10 @@
 <?php
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined( 'ABSPATH' ) or die( 'No direct access allowed' );
 
 /*
 Plugin Name: Advanced Database Cleaner
-Description: Clean up your database by deleting unused data such as 'draft', Optimize your database or reset it to its initial state.
-Version: 1.3.1
+Description: Clean up your database by deleting unused data such as 'revision', optimize your database, or reset it to its initial state, etc.
+Version: 1.3.5
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
@@ -16,7 +16,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 /********************************************************************
 * Define common variables
 ********************************************************************/
-if (!defined("ADB_CLEANER_PLUGIN_VERSION")) 	define("ADB_CLEANER_PLUGIN_VERSION",  "1.3.0");
+if (!defined("ADB_CLEANER_PLUGIN_VERSION")) 	define("ADB_CLEANER_PLUGIN_VERSION",  "1.3.5");
 if (!defined("ADB_CLEANER_PLUGIN_BASENAME")) 	define("ADB_CLEANER_PLUGIN_BASENAME",  plugin_basename(__FILE__));
 if (!defined("ADB_CLEANER_PLUGIN_DIR")) 		define("ADB_CLEANER_PLUGIN_DIR",  plugins_url() .'/'. dirname(plugin_basename(__FILE__)));
 
@@ -199,6 +199,22 @@ function adv_db_cleaner_page(){
 				wp_schedule_event(time()+60, $_POST['aDBc_clean_schedule'], 'aDBc_clean_scheduler');
 			}
 			$adv_db_cleaner_message = __('The clean-up schedule is saved successfully!', 'advanced-db-cleaner');
+		}elseif(isset($_POST['adbc_cron_hooks'])){
+			//Clean cron (scheduled tasks)
+			if(function_exists('is_multisite') && is_multisite() && is_main_site()){
+				foreach($_POST['adbc_cron_hooks'] as $adbc_cron_hook) {
+					// Get the id of the blog and the hook name
+					$adbc_blog_id_and_hook = explode("|", $adbc_cron_hook);
+					switch_to_blog($adbc_blog_id_and_hook[0]);
+					wp_clear_scheduled_hook($adbc_blog_id_and_hook[1]);
+					restore_current_blog();
+				}			
+			}else{
+				foreach($_POST['adbc_cron_hooks'] as $adbc_cron_hook) {
+					wp_clear_scheduled_hook($adbc_cron_hook);
+				}
+			}
+			$adv_db_cleaner_message = __('Cron(s) cleaned successfully!', 'advanced-db-cleaner');
 		}
 		// Print message
 		if($adv_db_cleaner_message != ''){
@@ -211,13 +227,15 @@ function adv_db_cleaner_page(){
 					$aDBc_tab_list = array(
 								array("id"=>"aDBc-clean", 		"title"=>__('Clean Database', 'advanced-db-cleaner')),
 								array("id"=>"aDBc-optimize",	"title"=>__('Optimize Database', 'advanced-db-cleaner')),
+								array("id"=>"aDBc-cron",		"title"=>__('Clean Cron', 'advanced-db-cleaner')),
 								array("id"=>"aDBc-reset", 		"title"=>__('Reset Database', 'advanced-db-cleaner'))
 							);
 					foreach ($aDBc_tab_list as $key => $value){
 						$checked = "";
 						if($value["id"] == "aDBc-clean"
 							|| (isset($_POST["aDBc_optimize_form"]) && $value["id"] == "aDBc-optimize")
-							|| (isset($_POST["aDBc_optimize_schedule_form"]) && $value["id"] == "aDBc-optimize")							
+							|| (isset($_POST["aDBc_optimize_schedule_form"]) && $value["id"] == "aDBc-optimize")
+							|| (isset($_POST["aDBc_clean_cron_form"]) && $value["id"] == "aDBc-cron")							
 							|| (isset($_POST["aDBc_reset_form"]) && $value["id"] == "aDBc-reset")){
 							$checked = 'checked = "checked"';
 						}
@@ -232,6 +250,9 @@ function adv_db_cleaner_page(){
 					<?php include_once 'includes/optimize-db.php'; ?>
 				</div>
 				<div class="tab3">
+					<?php include_once 'includes/clean-cron.php'; ?>
+				</div>				
+				<div class="tab4">
 					<?php 
 					if(is_main_site()){
 						include_once 'includes/reset-db.php';

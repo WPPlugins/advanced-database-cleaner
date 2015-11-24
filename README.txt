@@ -1,10 +1,10 @@
 === Advanced Database Cleaner ===
 Contributors: symptote
 Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-Dy9AZSB3bmJFsrGWImHWiCoHtSE8KuC2SNdGQpreQxG8dl2tVZK&dispatch=5885d80a13c0db1f8e263663d3faee8d0b9dcb01a9b6dc564e45f62871326a5e
-Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, clean-up, clean up, cleanup, cleaner, delete orphan data, orphan data, delete revisions, delete revision, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto draft, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin, widget, schedule, scheduler, schedule clean-up, schedule optimize, multisite, multi-site, network, cron, cron job
+Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, clean-up, clean up, cleanup, cleaner, delete orphan data, orphan data, delete revisions, delete revision, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto draft, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin, widget, schedule, scheduler, schedule clean-up, schedule optimize, multisite, multi-site, network, cron, cron job, clean cron, clean scheduled tasks, view cron, view cron job, view scheduled tasks
 Requires at least: 3.0.0
 Tested up to: 4.3
-Stable tag: 1.3.1
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,7 @@ Advanced Database Cleaner is a must-have plugin that cleans and optimizes your W
 * Allows you choose what data should be cleaned and what data should not [optional]
 * Schedules the clean-up to run automatically hourly, twice a day, daily, weekly or monthly [optional]
 * Schedules the optimization of database to run automatically hourly, twice a day, daily, weekly or monthly [optional]
+* View and clean cron (scheduled tasks) [optional]
 * Supports multisite installation
 
 = Multisite Support =
@@ -46,13 +47,18 @@ This section describes how to install the plugin and get it working.
 
 == Screenshots ==
 
-1. Example of dirty database
+1. Example of database not cleaned
 2. Example of cleaned database
-3. Example of dirty tables
+3. Example of tables not optimized
 4. Example of optimized tables
-5. Reset database" admin page screenshot
+5. "View & clean scheduled tasks" admin page screenshot
+6. "Reset database" admin page screenshot
 
 == Changelog ==
+
+= 1.3.5 =
+* New feature: Adding "Clean Cron". You can now clean unnecessary scheduled tasks.
+* Updating FAQ
 
 = 1.3.1 =
 * Adding FAQ
@@ -97,10 +103,13 @@ This section describes how to install the plugin and get it working.
 As you use WordPress, your database accumulates a lot of extra data such as revisions, spam comments, trashed comments, etc. Removing this unnecessary data will reduce your database size, speeds up your backup process and speeds up your site also.
 
 = Is it safe to clean my database? =
-Yes, it is. We do not run any code that can break down your site or delete your posts, pages, comments, etc. However, we advise you to create a database backup before cleaning. It is always better to be safe than sorry.
+Yes, it is. We do not run any code that can break down your site or delete your posts, pages, comments, etc. However, we advise you to make a database backup before cleaning. It is always better to be safe than sorry.
 
 = What does mean "Optimize my database"? =
 Optimizing your database will reclaim unused space in your tables, which will reduce storage space and improve efficiency when accessing tables. Optimizing the database can sometimes significantly improve performance, particularly on sites that receive a lot of traffic or have a large amount of content. Optimizing your database is absolutely safe.
+
+= Is it safe to clean the cron (scheduled tasks)? =
+A scheduled task enables plugins to execute some actions at specified times, without having to manually execute code at that time. Wordpress itself uses some scheduled tasks to perform some regular actions. However, some scheduled tasks may not be removed even if the responsible plugins are deleted from your wordpress installation. As you know, not all plugins care about the housekeeping of your wordpress. Hence, deleting these unnecessary tasks may help in cleaning your site. It should be noted that cleaning scheduled tasks is safe as long as you know what tasks to clean. If your are not sure, it is better to not clean any task.
 
 = Is this plugin compatible with multisite? =
 Yes, it is compatible with multisite.
@@ -142,7 +151,7 @@ Sometimes the wp_term_relationships table becomes bloated with many orphaned rel
 `DELETE FROM term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT id FROM posts)`
 
 = What does mean "Dashboard transient feed"? What sql code is used to clean it? =
-Transient are a way for storing cached data temporarily in your database by given it a name and a timeframe after which it will expire and be deleted. The sql query used by the plugin to clean all expired dashboard transient feed meta is:
+Transient are a way for storing cached data temporarily in your database by given it a name and a timeframe after which it will expire and be deleted. The sql query used by the plugin to clean dashboard transient feed is:
 `DELETE FROM options WHERE option_name LIKE '_site_transient_browser_%' OR option_name LIKE '_site_transient_timeout_browser_%' OR option_name LIKE '_transient_feed_%' OR option_name LIKE '_transient_timeout_feed_%'`
 
 = Does this plugin cleans itself after the uninstall? =
