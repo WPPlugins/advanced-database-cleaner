@@ -1,10 +1,10 @@
 === Advanced Database Cleaner ===
 Contributors: symptote
-Donate Link: https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&SESSION=Azq_P8u-Dy9AZSB3bmJFsrGWImHWiCoHtSE8KuC2SNdGQpreQxG8dl2tVZK&dispatch=5885d80a13c0db1f8e263663d3faee8d0b9dcb01a9b6dc564e45f62871326a5e
+Donate Link: http://www.sigmaplugin.com/donation
 Tags: plugin, plugins, plugin wordpress, wordpress, database cleaner, clean database, database clean, database, clean, clean-up, clean up, cleanup, cleaner, delete orphan data, orphan data, delete revisions, delete revision, revision, delete draft, draft, delete trash, trash, delete spam, spam, delete auto draft, auto draft, delete postmeta, postmeta, delete commentmeta, commentmeta, delete relationships, relationships, delete transient feed, transient feed, optimize database, database optimize, database optimizer, optimize, optimizer, reset database, database reset, reset, admin, widget, schedule, scheduler, schedule clean-up, schedule optimize, multisite, multi-site, network, cron, cron job, clean cron, clean scheduled tasks, view cron, view cron job, view scheduled tasks
 Requires at least: 3.0.0
 Tested up to: 4.3
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,10 @@ This section describes how to install the plugin and get it working.
 6. "Reset database" admin page screenshot
 
 == Changelog ==
+
+= 1.3.6 =
+* Fixing a problem in donate button
+* Using _e() and __() for all texts in the plugin
 
 = 1.3.5 =
 * New feature: Adding "Clean Cron". You can now clean unnecessary scheduled tasks.

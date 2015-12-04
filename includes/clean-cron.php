@@ -5,7 +5,9 @@
 				<div style="margin-bottom:15px;">
 					<a class="tooltips" href="#">
 						<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/about.png'?>"/>
-						<span>The plugin has detected that you use a multisite installation. This is your main site from which you can manage all scheduled tasks in all sites of your network. Other sites can manage their own scheduled tasks only.</span>
+						<span>
+						<?php _e('The plugin has detected that you use a multisite installation. This is your main site from which you can manage all scheduled tasks in all sites of your network. Other sites can manage their own scheduled tasks only.', 'advanced-db-cleaner'); ?>
+						</span>
 					</a>
 				</div>
 			<?php } ?>

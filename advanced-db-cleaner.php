@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) or die( 'No direct access allowed' );
 /*
 Plugin Name: Advanced Database Cleaner
 Description: Clean up your database by deleting unused data such as 'revision', optimize your database, or reset it to its initial state, etc.
-Version: 1.3.5
+Version: 1.3.6
 Author: Younes JFR.
 Contributors: symptote
 Text Domain: advanced-db-cleaner
@@ -16,7 +16,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 /********************************************************************
 * Define common variables
 ********************************************************************/
-if (!defined("ADB_CLEANER_PLUGIN_VERSION")) 	define("ADB_CLEANER_PLUGIN_VERSION",  "1.3.5");
+if (!defined("ADB_CLEANER_PLUGIN_VERSION")) 	define("ADB_CLEANER_PLUGIN_VERSION",  "1.3.6");
 if (!defined("ADB_CLEANER_PLUGIN_BASENAME")) 	define("ADB_CLEANER_PLUGIN_BASENAME",  plugin_basename(__FILE__));
 if (!defined("ADB_CLEANER_PLUGIN_DIR")) 		define("ADB_CLEANER_PLUGIN_DIR",  plugins_url() .'/'. dirname(plugin_basename(__FILE__)));
 

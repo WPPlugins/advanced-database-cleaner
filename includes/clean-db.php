@@ -8,7 +8,11 @@ $aDBc_count_unused = adv_db_cleaner_count();
 			<div style="margin-bottom:15px;">
 				<a class="tooltips" href="#">
 					<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/about.png'?>"/>
-					<span>The plugin has detected that you use a multisite installation. This is your main site from which you can clean all tables of all sites in your network. Other sites can clean their own tables only.</span>
+					<span>
+					<?php
+					_e('The plugin has detected that you use a multisite installation. This is your main site from which you can clean all tables of all sites in your network. Other sites can clean their own tables only.', 'advanced-db-cleaner');
+					?>
+					</span>
 				</a>
 			</div>
 		<?php } ?>
@@ -182,15 +186,15 @@ $aDBc_count_unused = adv_db_cleaner_count();
 		<div style="text-align:center; margin-bottom: 30px">
 			<?php if($aDBc_count_unused["total"] == 0){ ?>
 				<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/db_clean.png'?>"/>
-				<div style="font-color:#ccc; color: #999; font-family: tahoma">Your database is clean!</div>
+				<div style="font-color:#ccc; color: #999; font-family: tahoma"><?php _e('Your database is clean!','advanced-db-cleaner'); ?></div>
 			<?php } else { ?>
 				<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/db_not_clean.png'?>"/>
-				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $aDBc_count_unused["total"]; ?></b> element(s) should be cleaned!</div>		
+				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $aDBc_count_unused["total"]; ?></b> <?php _e('element(s) should be cleaned!','advanced-db-cleaner'); ?></div>		
 			<?php }  ?>
 		</div>
 
 		<div class="aDBCRightBox" style="border-bottom: 1px solid #eee">
-			<div style="font-weight: bold; padding-bottom:12px; color:#111; font-size:13px">&nbsp;Schedule</div>
+			<div style="font-weight: bold; padding-bottom:12px; color:#111; font-size:13px">&nbsp;<?php _e('Schedule','advanced-db-cleaner'); ?></div>
 			<form action="" method="post">
 				<select style="height:30px; font-size:13px; width: 240px" name="aDBc_clean_schedule" id="aDBc_clean_schedule">
 					<option value="no_schedule" <?php echo get_option('aDBc_clean_schedule') == 'no_schedule' ? 'selected="selected"' : ''; ?>>
@@ -215,14 +219,14 @@ $aDBc_count_unused = adv_db_cleaner_count();
 				<input type="hidden" name="aDBc_clean_schedule_form" value="" />
 				<input style="height:30px" type="submit" class="button-primary" value="<?php _e('Save','advanced-db-cleaner'); ?>" />
 			</form>
-			<div style="padding-top:15px; color:#111;">&nbsp;Next run: <span style="color: green"><?php echo wp_next_scheduled('aDBc_clean_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_clean_scheduler')) : 'Not set'; ?></span></div>
+			<div style="padding-top:15px; color:#111;">&nbsp;<?php _e('Next run:','advanced-db-cleaner'); ?> <span style="color: green"><?php echo wp_next_scheduled('aDBc_clean_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_clean_scheduler')) : 'Not set'; ?></span></div>
 		</div>		
 
 		<div class="aDBCRightBox">
-			<div style="font-weight: bold; padding-bottom:5px; color:#111; font-size:13px">&nbsp;Please note that</div>
+			<div style="font-weight: bold; padding-bottom:5px; color:#111; font-size:13px">&nbsp;<?php _e('Please note that','advanced-db-cleaner'); ?></div>
 			<ul style="list-style: disc outside none; padding:0px 10px 0px 10px">
-				<li>Cleaning your database helps you saving space by removing unused data.</li>
-				<li>The following items are already cleaned:</li>
+				<li><?php _e('Cleaning your database helps you saving space by removing unused data.','advanced-db-cleaner'); ?></li>
+				<li><?php _e('The following items are already cleaned:','advanced-db-cleaner'); ?></li>
 			</ul>
 				<?php 
 				if($aDBc_count_unused["revision"] == 0)

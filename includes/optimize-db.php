@@ -5,7 +5,11 @@
 				<div style="margin-bottom:15px;">
 					<a class="tooltips" href="#">
 						<img src="<?php echo  ADB_CLEANER_PLUGIN_DIR . '/images/about.png'?>"/>
-						<span>The plugin has detected that you use a multisite installation. This is your main site from which you can optimize all tables of all sites in your network. Other sites can optimize their own tables only.</span>
+						<span>
+						<?php
+						_e('The plugin has detected that you use a multisite installation. This is your main site from which you can optimize all tables of all sites in your network. Other sites can optimize their own tables only.','advanced-db-cleaner');
+						?>
+						</span>
 					</a>
 				</div>
 			<?php } ?>
@@ -59,15 +63,15 @@
 		<div style="text-align:center; margin-bottom: 30px">
 			<?php if($total_lost == 0){ ?>
 				<img src="<?php echo ADB_CLEANER_PLUGIN_DIR . '/images/db_clean.png'?>"/>
-				<div style="font-color:#ccc; color: #999; font-family: tahoma">Your database is optimized!</div>
+				<div style="font-color:#ccc; color: #999; font-family: tahoma"><?php _e('Your database is optimized!','advanced-db-cleaner'); ?></div>
 			<?php } else { ?>
 				<img src="<?php echo ADB_CLEANER_PLUGIN_DIR . '/images/db_not_clean.png'?>"/>
-				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $total_tables_to_optimize; ?></b> table(s) should be optimized!</div>		
+				<div style="font-color:#ccc; color: #999; font-family: tahoma"><b><?php echo $total_tables_to_optimize; ?></b> <?php _e('table(s) should be optimized!','advanced-db-cleaner'); ?></div>		
 			<?php }  ?>
 		</div>
 
 		<div class="aDBCRightBox" style="border-bottom: 1px solid #eee">
-			<div style="font-weight: bold; padding-bottom:12px; color:#111; font-size:13px">&nbsp;Schedule</div>
+			<div style="font-weight: bold; padding-bottom:12px; color:#111; font-size:13px">&nbsp;<?php _e('Schedule','advanced-db-cleaner'); ?></div>
 			<form action="" method="post">
 				<select style="height:30px; width: 240px; font-size:13px" name="aDBc_optimize_schedule" id="aDBc_optimize_schedule">
 					<option value="no_schedule" <?php echo get_option('aDBc_optimize_schedule') == 'no_schedule' ? 'selected="selected"' : ''; ?>>
@@ -92,15 +96,15 @@
 				<input type="hidden" name="aDBc_optimize_schedule_form" value="" />
 				<input style="height:30px" type="submit" class="button-primary" value="<?php _e('Save','advanced-db-cleaner'); ?>" />
 			</form>
-			<div style="padding-top:15px; color:#111">&nbsp;Next run: <span style="color: green"><?php echo wp_next_scheduled('aDBc_optimize_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_optimize_scheduler')) : 'Not set'; ?></span></div>
+			<div style="padding-top:15px; color:#111">&nbsp;<?php _e('Next run:','advanced-db-cleaner'); ?> <span style="color: green"><?php echo wp_next_scheduled('aDBc_optimize_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_optimize_scheduler')) : 'Not set'; ?></span></div>
 		</div>		
 
 		<div class="aDBCRightBox">
-			<div style="font-weight: bold; padding-bottom:5px; color:#111; font-size:13px">&nbsp;Please note that</div>
+			<div style="font-weight: bold; padding-bottom:5px; color:#111; font-size:13px">&nbsp;<?php _e('Please note that','advanced-db-cleaner'); ?></div>
 			<ul style="list-style: disc outside none; padding:0px 10px 0px 10px">
-				<li>"Optimizing" reduces storage space and improves efficiency when accessing your tables.</li>
-				<li>Except tables listed in the table above, all your other tables are already optimized.</li>
-				<li>It is not necessary to run the optimization frequently, just do it from time to time.</li>
+				<li><?php _e('"Optimizing" reduces storage space and improves efficiency when accessing your tables.','advanced-db-cleaner'); ?></li>
+				<li><?php _e('Except tables listed in the table above, all your other tables are already optimized.','advanced-db-cleaner'); ?></li>
+				<li><?php _e('It is not necessary to run the optimization frequently, just do it from time to time.','advanced-db-cleaner'); ?></li>
 			</ul>
 		</div>
 	</div>
