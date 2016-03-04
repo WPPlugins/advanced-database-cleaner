@@ -33,11 +33,11 @@
 							// Fetch tasks for all blogs
 							$cron = _get_cron_array();
 							$schedules = wp_get_schedules(); 
-							$date_format = _x( 'M j, Y @ G:i', 'Publish box date format', 'advanced-db-cleaner' );
+							$date_format = 'M j, Y @ H:i:s';
 							foreach ( $cron as $timestamp => $cronhooks ) {
 								foreach ( (array) $cronhooks as $hook => $events ) {
 									foreach ( (array) $events as $key => $event ) {
-										$cron[ $timestamp ][ $hook ][ $key ][ 'date' ] = date_i18n( $date_format, $timestamp );
+										$cron[ $timestamp ][ $hook ][ $key ][ 'date' ] = get_date_from_gmt(date('Y-m-d H:i:s', $timestamp ), $date_format);
 									}
 								}
 							}
@@ -74,22 +74,22 @@
 					}else{
 						// Fetch tasks for single blog
 						$cron = _get_cron_array();
-						$schedules = wp_get_schedules(); 
-						$date_format = _x( 'M j, Y @ G:i', 'Publish box date format', 'advanced-db-cleaner' );
-						foreach ( $cron as $timestamp => $cronhooks ) {
+						$schedules = wp_get_schedules();
+						$date_format = 'M j, Y @ H:i:s';
+						foreach ( (array) $cron as $timestamp => $cronhooks ) {
 							foreach ( (array) $cronhooks as $hook => $events ) {
 								foreach ( (array) $events as $key => $event ) {
-									$cron[ $timestamp ][ $hook ][ $key ][ 'date' ] = date_i18n( $date_format, $timestamp );
+									$cron[ $timestamp ][ $hook ][ $key ][ 'date' ] = get_date_from_gmt(date('Y-m-d H:i:s', $timestamp ), $date_format);
 								}
 							}
 						}
-						foreach ( $cron as $timestamp => $cronhooks ) {
+						foreach ( (array) $cron as $timestamp => $cronhooks ) {
 							foreach ( (array) $cronhooks as $hook => $events ) {
 								foreach ( (array) $events as $event ) { ?>
 									<tr>
 										<td><?php echo $hook; ?></td>
 										<td>
-											<?php 
+											<?php
 												if ( $event[ 'schedule' ] ) {
 													echo $schedules [ $event[ 'schedule' ] ][ 'display' ];
 												} else {

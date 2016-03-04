@@ -73,7 +73,20 @@ $aDBc_count_unused = adv_db_cleaner_count();
 								</td>
 							</tr>
 						<?php 
-						}						
+						}
+						if($aDBc_count_unused["trashposts"] > 0){ ?>
+							<tr class="">
+								<td class="column-name"><?php _e('Trash posts','advanced-db-cleaner'); ?></td>
+								<td class="column-name aDBcCount"><?php echo $aDBc_count_unused["trashposts"]; ?></td>
+								<td class="column-name">
+									<div class="squaredFour">
+										<input id="aDBc_check_trashposts" type="checkbox" name="adbc_post_type[]" value="trash-posts" />
+										<label for="aDBc_check_trashposts"></label>
+									</div>
+								</td>
+							</tr>
+						<?php 
+						}
 						if($aDBc_count_unused["moderated"] > 0){ ?>
 							<tr class="">
 								<td class="column-name"><?php _e('Moderated Comments','advanced-db-cleaner'); ?></td>
@@ -219,7 +232,19 @@ $aDBc_count_unused = adv_db_cleaner_count();
 				<input type="hidden" name="aDBc_clean_schedule_form" value="" />
 				<input style="height:30px" type="submit" class="button-primary" value="<?php _e('Save','advanced-db-cleaner'); ?>" />
 			</form>
-			<div style="padding-top:15px; color:#111;">&nbsp;<?php _e('Next run:','advanced-db-cleaner'); ?> <span style="color: green"><?php echo wp_next_scheduled('aDBc_clean_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_clean_scheduler')) : 'Not set'; ?></span></div>
+			<div style="padding-top:15px; color:#111;">
+				<?php _e('Next run:','advanced-db-cleaner'); ?>
+				<span style="color: green">
+					<?php 
+					if(wp_next_scheduled('aDBc_clean_scheduler')){
+						$date_format = 'M j, Y @ H:i:s';
+						echo get_date_from_gmt(date('Y-m-d H:i:s', wp_next_scheduled('aDBc_clean_scheduler')), $date_format);
+					}else{
+						echo 'Not set';
+					}
+					?>
+				</span>
+			</div>
 		</div>		
 
 		<div class="aDBCRightBox">
@@ -232,23 +257,25 @@ $aDBc_count_unused = adv_db_cleaner_count();
 				if($aDBc_count_unused["revision"] == 0)
 					echo "<div class='already-cleaned'>". __('Revision','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["draft"] == 0)
-					echo "<div class='already-cleaned'>". __('Draft','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Draft','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["autodraft"] == 0)
-					echo "<div class='already-cleaned'>". __('Auto Draft','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Auto Draft','advanced-db-cleaner') ."</div>";
+				if($aDBc_count_unused["trashposts"] == 0)
+					echo "<div class='already-cleaned'>". __('Trash posts','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["postmeta"] == 0)
-					echo "<div class='already-cleaned'>". __('Postmeta','advanced-db-cleaner') ."</div>"; 					
+					echo "<div class='already-cleaned'>". __('Postmeta','advanced-db-cleaner') ."</div>";			
 				if($aDBc_count_unused["moderated"] == 0)
-					echo "<div class='already-cleaned'>". __('Moderated Comments','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Moderated Comments','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["spam"] == 0)
-					echo "<div class='already-cleaned'>". __('Spam Comments','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Spam Comments','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["trash"] == 0)
-					echo "<div class='already-cleaned'>". __('Trash Comments','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Trash Comments','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["commentmeta"] == 0)
-					echo "<div class='already-cleaned'>". __('Commentmeta','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Commentmeta','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["relationships"] == 0)
-					echo "<div class='already-cleaned'>". __('Relationships','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Relationships','advanced-db-cleaner') ."</div>";
 				if($aDBc_count_unused["feed"] == 0)
-					echo "<div class='already-cleaned'>". __('Dashboard Transient Feed','advanced-db-cleaner') ."</div>"; 
+					echo "<div class='already-cleaned'>". __('Dashboard Transient Feed','advanced-db-cleaner') ."</div>";
 				?>
 				<div style="clear:both"></div>
 		</div>

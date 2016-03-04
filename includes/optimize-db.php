@@ -26,7 +26,7 @@
 					$total_tables_to_optimize = 0;
 					$total_lost = 0;
 					$prefix = str_replace( '_', '\_', $wpdb->prefix );
-					$adbc_sql = "SELECT table_name, data_free FROM information_schema.tables WHERE table_schema = '".DB_NAME."' and data_free > 0";
+					$adbc_sql = "SELECT table_name, data_free FROM information_schema.tables WHERE table_schema = '".DB_NAME."' and Engine <> 'InnoDB' and data_free > 0";
 					if(!is_main_site()){
 						$adbc_sql = $adbc_sql . " and table_name LIKE '{$prefix}%'";
 					}					
@@ -96,7 +96,19 @@
 				<input type="hidden" name="aDBc_optimize_schedule_form" value="" />
 				<input style="height:30px" type="submit" class="button-primary" value="<?php _e('Save','advanced-db-cleaner'); ?>" />
 			</form>
-			<div style="padding-top:15px; color:#111">&nbsp;<?php _e('Next run:','advanced-db-cleaner'); ?> <span style="color: green"><?php echo wp_next_scheduled('aDBc_optimize_scheduler') == true ? date('Y/m/d H:i:s', wp_next_scheduled('aDBc_optimize_scheduler')) : 'Not set'; ?></span></div>
+			<div style="padding-top:15px; color:#111;">
+				<?php _e('Next run:','advanced-db-cleaner'); ?>
+				<span style="color: green">
+					<?php 
+					if(wp_next_scheduled('aDBc_optimize_scheduler')){
+						$date_format = 'M j, Y @ H:i:s';
+						echo get_date_from_gmt(date('Y-m-d H:i:s', wp_next_scheduled('aDBc_optimize_scheduler')), $date_format);
+					}else{
+						echo 'Not set';
+					}
+					?>
+				</span>
+			</div>
 		</div>		
 
 		<div class="aDBCRightBox">
