@@ -1,36 +1,37 @@
-<div>
-	<center><h2 style="color:#999; font-size:18px; line-height:26px; font-weight:normal">Advanced Database<br/> Cleaner <?php echo ADB_CLEANER_PLUGIN_VERSION; ?></h2></center>
-	<p style="text-align: justify"><?php _e('If you love this plugin and would like to make a donation, then you\'re awesome.', 'advanced-db-cleaner'); ?></p>
-	<p style="text-align:right"><?php _e('Thank you!', 'advanced-db-cleaner'); ?></p>
-	<center>
-		<a href="http://www.sigmaplugin.com/donation" target="_blank">
-			<img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif"/>
-		</a>
-	</center>
-</div>
 
-<div style="height: 20px; background-color:#f9f9f9;">
-	<a style="text-decoration: none" href="https://wordpress.org/support/view/plugin-reviews/advanced-database-cleaner#postform">
-		<div class="aDBC-supportUs" style="width:250px; height:20px">
-			<span style="font-size: 13px; color:#777"><?php _e('Please rate us', 'advanced-db-cleaner'); ?></span>
+
+<?php 
+	if(ADBC_PLUGIN_F_TYPE == "free"){
+?>
+
+	<div style="margin-top:10px">
+
+		<div id="aDBc-upgrade">
+
+			<a target="_blank" href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner">
+
+				<img style="width:80px" src="<?php echo ADBC_PLUGIN_DIR_PATH; ?>/images/premium.svg" />
+
+				<h1 style="padding-top:20px;padding-bottom:5px"><?php _e('Upgrade to Pro', 'advanced-database-cleaner'); ?></h1>
+
+				<ul>
+					<li><span class="dashicons dashicons-yes"></span> <?php _e('Filter & search specific items', 'advanced-database-cleaner'); ?></li>
+					<li><span class="dashicons dashicons-yes"></span> <?php _e('Detect orphaned options', 'advanced-database-cleaner'); ?></li>
+					<li><span class="dashicons dashicons-yes"></span> <?php _e('Detect orphaned tables', 'advanced-database-cleaner'); ?></li>
+					<li><span class="dashicons dashicons-yes"></span> <?php _e('Detect orphaned cron tasks', 'advanced-database-cleaner'); ?></li>
+					<li><span class="dashicons dashicons-yes"></span> <?php _e('Premium & technical support', 'advanced-database-cleaner'); ?></li>
+				</ul>
+				
+				
+				<div style="text-align:center;border-top:1px dashed #ccc;padding:10px;color:#999"><?php echo __('The price will increase soon! Buy now at lower price!', 'advanced-database-cleaner' ); ?></div>
+
+			</a>
+
 		</div>
-	</a>
-</div>
 
-<div style="height: 20px; clear:both;">
-	<div style="float:left">
-		<span style="font-size: 13px; color:#777"><?php _e('Having issues?', 'advanced-db-cleaner'); ?></span>
 	</div>
-	<div style="float:right">
-		<a style="text-decoration: none" href="https://wordpress.org/support/plugin/advanced-database-cleaner"><?php _e('Create a ticket', 'advanced-db-cleaner'); ?></a>
-	</div>
-</div>
 
-<div style=" background-color:#f9f9f9; height: 20px; clear:both;">
-	<div style="float:left">
-		<span style="font-size: 13px; color:#777"><?php _e('Developed by:', 'advanced-db-cleaner'); ?></span>
-	</div>
-	<div style="float:right">
-		<a style="text-decoration: none" href="http://www.wpdatabasecleaner.com" target="_blank">{ Younes JFR. }</a>
-	</div>
-</div>
+<?php 
+	}
+?>
+
