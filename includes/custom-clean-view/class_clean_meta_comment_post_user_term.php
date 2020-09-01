@@ -218,7 +218,7 @@ class ADBC_Clean_Meta_Comment_Post_User_Term extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb($item) {
-		return sprintf('<input type="checkbox" name="aDBc_meta_to_clean[]" value="%s" />', $item['site_id']."|".$item['meta_id']);
+		return sprintf('<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', $item['site_id']."|".$item['meta_id']);
 	}
 
 	/** WP: Get bulk actions */
@@ -246,16 +246,21 @@ class ADBC_Clean_Meta_Comment_Post_User_Term extends WP_List_Table {
         $action = $this->current_action();
         if($action == 'clean'){
 			// If the user wants to clean the elements he/she selected
-			if(isset($_POST['aDBc_meta_to_clean'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				if(function_exists('is_multisite') && is_multisite()){
 					// Prepare meta to delete
 					$meta_to_delete = array();
-					foreach($_POST['aDBc_meta_to_clean'] as $meta){
-						$meta_info = explode("|", $meta);
-						if(empty($meta_to_delete[$meta_info[0]])){
-							$meta_to_delete[$meta_info[0]] = array();
+					foreach($_POST['aDBc_elements_to_process'] as $meta){
+						$meta_info 			= explode("|", $meta);
+						$sanitized_site_id 	= sanitize_html_class($meta_info[0]);
+						$sanitized_item_id 	= sanitize_html_class($meta_info[1]);
+						// For security, we only proceed if both parts are clean and are numbers
+						if(is_numeric($sanitized_site_id) && is_numeric($sanitized_item_id)){
+							if(empty($meta_to_delete[$sanitized_site_id])){
+								$meta_to_delete[$sanitized_site_id] = array();
+							}
+							array_push($meta_to_delete[$sanitized_site_id], $sanitized_item_id);
 						}
-						array_push($meta_to_delete[$meta_info[0]], $meta_info[1]);
 					}
 					// Delete meta
 					foreach($meta_to_delete as $site_id => $meta_ids){
@@ -270,9 +275,12 @@ class ADBC_Clean_Meta_Comment_Post_User_Term extends WP_List_Table {
 				}else{
 					global $wpdb;
 					$table_name = $wpdb->prefix . $this->aDBc_delete_from_table;
-					foreach($_POST['aDBc_meta_to_clean'] as $meta) {
-						$meta_info = explode("|", $meta);
-						$wpdb->query("DELETE FROM $table_name WHERE $this->aDBc_metaid_or_umetaid = " . $meta_info[1]);
+					foreach($_POST['aDBc_elements_to_process'] as $meta) {
+						$meta_info 		= explode("|", $meta);
+						$sanitized_id 	= sanitize_html_class($meta_info[1]);
+						if(is_numeric($sanitized_id)){
+							$wpdb->query("DELETE FROM $table_name WHERE $this->aDBc_metaid_or_umetaid = " . $sanitized_id);
+						}
 					}
 				}
 				// Update the message to show to the user

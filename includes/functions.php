@@ -254,7 +254,7 @@ function aDBc_optimize_scheduled_tables($schedule_name){
 					$table_name = $table->TABLE_NAME;
 				}
 
-				$wpdb->query("OPTIMIZE TABLE " . $table_name);			
+				$wpdb->query("OPTIMIZE TABLE " . $table_name);
 			}
 		}
 

@@ -5,7 +5,7 @@ Tags: clean, clean up, cleanup, database, optimize, performance, speed, optimizi
 Requires at least: 3.1.0
 Requires PHP: 5.0
 Tested up to: 5.5
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -134,6 +134,13 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.0.2 - 01/09/2020 =
+- Fix: fixing an issue in the general cleanup tab preventing users from deleting orphaned items
+- Tweak: we are now using SweetAlert for all popup boxes
+- Tweak: enhancing the JavaScript code
+- Tweak: enhancing some blocks of code
+- Tweak: enhancing the security of the plugin
 
 = 3.0.1 - 26/08/2020 =
 - Fix: some calls in the JS file has been corrected

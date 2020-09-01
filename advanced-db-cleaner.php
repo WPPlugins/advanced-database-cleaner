@@ -5,7 +5,7 @@ if (!is_main_site()) return;
 Plugin Name: Advanced Database Cleaner
 Plugin URI: https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner
 Description: Clean database by deleting unused data such as 'old revisions', 'old drafts', 'orphan options', etc. Optimize database and more.
-Version: 3.0.1
+Version: 3.0.2
 Author: Younes JFR.
 Author URI: https://www.sigmaplugin.com
 Contributors: symptote
@@ -30,7 +30,7 @@ class ADBC_Advanced_DB_Cleaner {
 
 		// Define common constants that should be modified in each version
 		if(!defined("ADBC_PLUGIN_F_TYPE")) 		define("ADBC_PLUGIN_F_TYPE", "free");
-		if(!defined("ADBC_PLUGIN_VERSION")) 	define("ADBC_PLUGIN_VERSION", "3.0.1");
+		if(!defined("ADBC_PLUGIN_VERSION")) 	define("ADBC_PLUGIN_VERSION", "3.0.2");
 
 		// Prevent conflicts between free and pro, load text-domain and check if should update settings after upgrade
 		add_action('plugins_loaded', array($this, 'plugins_loaded'));
@@ -235,11 +235,25 @@ class ADBC_Advanced_DB_Cleaner {
 		wp_enqueue_style('aDBc_css', ADBC_PLUGIN_DIR_PATH . '/css/admin.css');
 		wp_enqueue_script('aDBc_js', ADBC_PLUGIN_DIR_PATH . '/js/admin.js');
 
+		wp_enqueue_style('sweet2_css', ADBC_PLUGIN_DIR_PATH . '/css/sweetalert2.min.css');
+		wp_enqueue_script('sweet2_js', ADBC_PLUGIN_DIR_PATH . '/js/sweetalert2.min.js');
+
 		// The wp_localize_script allows us to output the ajax_url path for our script to use.
 		wp_localize_script('aDBc_js', 'aDBc_ajax_obj', array(
-														'ajaxurl' 						=> admin_url('admin-ajax.php'),
-														'images_path'					=> ADBC_PLUGIN_DIR_PATH . "/images/",
-														'sentence_scanning' 			=> __('Scanning ...', 'advanced-database-cleaner')
+
+		'ajaxurl' 				=> admin_url('admin-ajax.php'),
+		'images_path'			=> ADBC_PLUGIN_DIR_PATH . "/images/",
+		'sentence_scanning' 	=> __('Scanning ...', 'advanced-database-cleaner'),
+		'unexpected_error' 		=> __('Unexpected error! Please refresh the page and try again!', 'advanced-database-cleaner'),
+		'select_action' 		=> __('Please select an action!', 'advanced-database-cleaner'),
+		'no_items_selected' 	=> __('No items selected!', 'advanced-database-cleaner'),
+		'clean_items_warning' 	=> __('You are about to clean some of your unused data. This operation is irreversible!', 'advanced-database-cleaner'),
+		'empty_tables_warning' 	=> __('You are about to empty some of your tables. This operation is irreversible!', 'advanced-database-cleaner'),
+		'are_you_sure' 			=> __('Are you sure?', 'advanced-database-cleaner'),
+		'make_db_backup_first' 	=> __('Don\'t forget to make a backup of your database first!', 'advanced-database-cleaner'),
+		'cancel' 				=> __('Cancel', 'advanced-database-cleaner'),
+		'Continue' 				=> __('Continue', 'advanced-database-cleaner')
+
 														));
 		//wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-dialog');

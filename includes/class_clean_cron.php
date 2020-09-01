@@ -157,7 +157,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb($item) {
-		return sprintf("<input type='checkbox' name='aDBc_tasks_to_delete[]' value='%s' />", $item['site_id']."|".$item['hook_name']."|".$item['timestamp']."|".$item['arguments']);
+		return sprintf("<input type='checkbox' name='aDBc_elements_to_process[]' value='%s' />", $item['site_id']."|".$item['hook_name']."|".$item['timestamp']."|".$item['arguments']);
 	}
 
 	/** WP: Get bulk actions */
@@ -186,58 +186,69 @@ class ADBC_Tasks_List extends WP_List_Table {
 
         if($action == 'delete'){
 			// If the user wants to clean the tasks he/she selected
-			if(isset($_POST['aDBc_tasks_to_delete'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				if(function_exists('is_multisite') && is_multisite()){
 					// Prepare tasks to delete in organized array to minimize switching from blogs
 					$tasks_to_delete = array();
-					foreach($_POST['aDBc_tasks_to_delete'] as $task){
-						$task_info = explode("|", $task, 2);
-						if(empty($tasks_to_delete[$task_info[0]])){
-							$tasks_to_delete[$task_info[0]] = array();
+					foreach($_POST['aDBc_elements_to_process'] as $task){
+						$task_info 	= explode("|", $task, 2);
+						$site_id 	= sanitize_html_class($task_info[0]);
+						if(is_numeric($site_id)){
+							if(empty($tasks_to_delete[$site_id])){
+								$tasks_to_delete[$site_id] = array();
+							}
+							array_push($tasks_to_delete[$site_id], $task);
 						}
-						array_push($tasks_to_delete[$task_info[0]], $task);
 					}
 					// Delete tasks
 					foreach($tasks_to_delete as $site_id => $tasks_info){
 						switch_to_blog($site_id);
 						foreach($tasks_info as $task) {
 							$aDBc_cron_info = explode("|", $task, 4);
-							$hook = $aDBc_cron_info[1];
-							$timestamp = $aDBc_cron_info[2];
-							$args = $aDBc_cron_info[3];
-							if($args == "none"){
-								wp_unschedule_event($timestamp, $hook);
-							}else{
-								$args = unserialize(stripslashes($aDBc_cron_info[3]));
-								wp_unschedule_event($timestamp, $hook, $args);
-								// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
-								// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
-								if($hook == "aDBc_clean_scheduler"){
-									aDBc_update_task_in_db_after_delete($args[0], "aDBc_clean_schedule");
-								}else if($hook == "aDBc_optimize_scheduler"){
-									aDBc_update_task_in_db_after_delete($args[0], "aDBc_optimize_schedule");
-								}								
+							$hook 			= sanitize_text_field($aDBc_cron_info[1]);
+							// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+							$hook 			= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $hook);
+							$timestamp 		= sanitize_html_class($aDBc_cron_info[2]);
+							$args 			= sanitize_text_field($aDBc_cron_info[3]);
+							if(is_numeric($timestamp)){
+								if($args == "none"){
+									wp_unschedule_event($timestamp, $hook);
+								}else{
+									$args = unserialize(stripslashes($args));
+									wp_unschedule_event($timestamp, $hook, $args);
+									// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
+									// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
+									if($hook == "aDBc_clean_scheduler"){
+										aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_clean_schedule");
+									}else if($hook == "aDBc_optimize_scheduler"){
+										aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_optimize_schedule");
+									}								
+								}
 							}
 						}
 						restore_current_blog();
 					}
 				}else{
-					foreach($_POST['aDBc_tasks_to_delete'] as $task) {
+					foreach($_POST['aDBc_elements_to_process'] as $task){
 						$aDBc_cron_info = explode("|", $task, 4);
-						$hook = $aDBc_cron_info[1];
-						$timestamp = $aDBc_cron_info[2];
-						$args = $aDBc_cron_info[3];
-						if($args == "none"){
-							wp_unschedule_event($timestamp, $hook);
-						}else{
-							$args = unserialize(stripslashes($aDBc_cron_info[3]));
-							wp_unschedule_event($timestamp, $hook, $args);
-							// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
-							// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
-							if($hook == "aDBc_clean_scheduler"){
-								aDBc_update_task_in_db_after_delete($args[0], "aDBc_clean_schedule");
-							}else if($hook == "aDBc_optimize_scheduler"){
-								aDBc_update_task_in_db_after_delete($args[0], "aDBc_optimize_schedule");
+						$hook 			= sanitize_text_field($aDBc_cron_info[1]);
+						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+						$hook 			= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $hook);
+						$timestamp 		= sanitize_html_class($aDBc_cron_info[2]);
+						$args 			= sanitize_text_field($aDBc_cron_info[3]);
+						if(is_numeric($timestamp)){
+							if($args == "none"){
+								wp_unschedule_event($timestamp, $hook);
+							}else{
+								$args = unserialize(stripslashes($args));
+								wp_unschedule_event($timestamp, $hook, $args);
+								// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
+								// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
+								if($hook == "aDBc_clean_scheduler"){
+									aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_clean_schedule");
+								}else if($hook == "aDBc_optimize_scheduler"){
+									aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_optimize_schedule");
+								}
 							}
 						}
 					}
@@ -388,19 +399,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 			</form>
 
 		</div>
-		<div id="aDBc_dialog1" title="<?php _e('Cleaning...','advanced-database-cleaner'); ?>" class="aDBc-jquery-dialog">
-			<p class="aDBc-box-warning">
-				<?php echo __('You are about to clean some of your scheduled tasks. This operation is irreversible!','advanced-database-cleaner')  . "<span style='color:red'> " . __('Don\'t forget to make a backup of your database first.','advanced-database-cleaner') . "</span>" ; ?>
-			</p>
-			<p>
-				<?php _e('Are you sure to continue?','advanced-database-cleaner'); ?>
-			</p>
-		</div>
-		<div id="aDBc_dialogx" title="<?php _e('Action required','advanced-database-cleaner'); ?>" class="aDBc-jquery-dialog">
-			<p class="aDBc-box-info">
-				<?php _e('Please select an action!','advanced-database-cleaner'); ?>
-			</p>
-		</div>
+
 	<?php
 	}
 }

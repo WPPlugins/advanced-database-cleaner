@@ -72,11 +72,12 @@ class ADBC_Tables_List extends WP_List_Table {
 				return; //get out if we didn't click the delete link
 
 			// We delete the schedule
-			wp_clear_scheduled_hook('aDBc_optimize_scheduler', array($_POST['aDBc_delete_schedule']));
+			$aDBc_sanitized_schedule_name = sanitize_html_class($_POST['aDBc_delete_schedule']);
+			wp_clear_scheduled_hook('aDBc_optimize_scheduler', array($aDBc_sanitized_schedule_name));
 
 			// We delete the item from database
 			$aDBc_schedules = get_option('aDBc_optimize_schedule');
-			unset($aDBc_schedules[$_POST['aDBc_delete_schedule']]);
+			unset($aDBc_schedules[$aDBc_sanitized_schedule_name]);
 			update_option('aDBc_optimize_schedule', $aDBc_schedules, "no");
 
 			$this->aDBc_message = __('The clean-up schedule deleted successfully!', 'advanced-database-cleaner');
@@ -241,7 +242,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb($item) {
-		return sprintf('<input type="checkbox" name="aDBc_tables_to_delete[]" value="%s" />', $item['table_prefix']."|".$item['table_name']);
+		return sprintf('<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', $item['table_prefix']."|".$item['table_name']);
 	}
 
 	/** WP: Get bulk actions */
@@ -277,12 +278,17 @@ class ADBC_Tables_List extends WP_List_Table {
 
         if($action == 'delete'){
 			// If the user wants to clean the tables he/she selected
-			if(isset($_POST['aDBc_tables_to_delete'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				global $wpdb;
-				foreach($_POST['aDBc_tables_to_delete'] as $table) {
-					$table_info = explode("|", $table);
-					$wpdb->query("DROP TABLE " . $table_info[0].$table_info[1]);
-					array_push($names_deleted, $table_info[1]);
+				foreach($_POST['aDBc_elements_to_process'] as $table){
+					$table_info 	= explode("|", $table);
+					$table_prefix 	= sanitize_html_class($table_info[0]);
+					$table_name 	= sanitize_text_field($table_info[1]);
+					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);					
+					if($wpdb->query("DROP TABLE " . $table_prefix . $table_name)){
+						array_push($names_deleted, $table_name);
+					}
 				}
 				// After deleting tables, delete names also from file categorization
 				if(ADBC_PLUGIN_F_TYPE == "pro"){
@@ -294,34 +300,46 @@ class ADBC_Tables_List extends WP_List_Table {
 			}
         }else if($action == 'optimize'){
 			// If the user wants to optimize the tables he/she selected
-			if(isset($_POST['aDBc_tables_to_delete'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				global $wpdb;
-				foreach($_POST['aDBc_tables_to_delete'] as $table) {
-					$table_info = explode("|", $table); 
-					$wpdb->query("OPTIMIZE TABLE " . $table_info[0].$table_info[1]);
+				foreach($_POST['aDBc_elements_to_process'] as $table) {
+					$table_info 	= explode("|", $table);
+					$table_prefix 	= sanitize_html_class($table_info[0]);
+					$table_name 	= sanitize_text_field($table_info[1]);
+					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
+					$wpdb->query("OPTIMIZE TABLE " . $table_prefix . $table_name);
 				}
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected tables optimized successfully!', 'advanced-database-cleaner');
 			}
         }else if($action == 'empty'){
 			// If the user wants to empty the tables he/she selected
-			if(isset($_POST['aDBc_tables_to_delete'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				global $wpdb;
-				foreach($_POST['aDBc_tables_to_delete'] as $table) {
-					$table_info = explode("|", $table); 
-					$wpdb->query("TRUNCATE TABLE " . $table_info[0].$table_info[1]);
+				foreach($_POST['aDBc_elements_to_process'] as $table) {
+					$table_info 	= explode("|", $table);
+					$table_prefix 	= sanitize_html_class($table_info[0]);
+					$table_name 	= sanitize_text_field($table_info[1]);
+					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
+					$wpdb->query("TRUNCATE TABLE " . $table_prefix . $table_name);
 				}
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected tables emptied successfully!', 'advanced-database-cleaner');
 			}
         }else if($action == 'repair'){
 			// If the user wants to repair the tables he/she selected
-			if(isset($_POST['aDBc_tables_to_delete'])){
+			if(isset($_POST['aDBc_elements_to_process'])){
 				global $wpdb;
 				$cannot_repair = 0;
-				foreach($_POST['aDBc_tables_to_delete'] as $table) {
-					$table_info = explode("|", $table);
-					$query_result = $wpdb->get_results("REPAIR TABLE " . $table_info[0].$table_info[1]);
+				foreach($_POST['aDBc_elements_to_process'] as $table) {
+					$table_info 	= explode("|", $table);
+					$table_prefix 	= sanitize_html_class($table_info[0]);
+					$table_name 	= sanitize_text_field($table_info[1]);
+					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " ' 
+					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
+					$query_result 	= $wpdb->get_results("REPAIR TABLE " . $table_prefix . $table_name);
 					foreach($query_result as $row){
 						if($row->Msg_type == 'error'){
 							if(preg_match('/corrupt/i', $row->Msg_text)){
@@ -613,29 +631,8 @@ class ADBC_Tables_List extends WP_List_Table {
 
 			<div class="aDBc-clear-both"></div>
 
-		</div>
+		</div>	
 
-		<div id="aDBc_dialog1" title="<?php _e('Cleaning...','advanced-database-cleaner'); ?>" class="aDBc-jquery-dialog">
-			<p class="aDBc-box-warning">
-				<?php echo __('You are about to delete some of your tables. This operation is irreversible!','advanced-database-cleaner')  . "<span style='color:red'> " . __('Don\'t forget to make a backup of your database first.','advanced-database-cleaner') . "</span>" ; ?>
-			</p>
-			<p>
-				<?php _e('Are you sure to continue?','advanced-database-cleaner'); ?>
-			</p>
-		</div>
-		<div id="aDBc_dialog2" title="<?php _e('Cleaning...','advanced-database-cleaner'); ?>" class="aDBc-jquery-dialog">
-			<p class="aDBc-box-warning">
-				<?php echo __('You are about to empty some of your tables. This operation is irreversible!','advanced-database-cleaner')  . "<span style='color:red'> " . __('Don\'t forget to make a backup of your database first.','advanced-database-cleaner') . "</span>" ; ?>
-			</p>
-			<p>
-				<?php _e('Are you sure to continue?','advanced-database-cleaner'); ?>
-			</p>
-		</div>		
-		<div id="aDBc_dialogx" title="<?php _e('Action required','advanced-database-cleaner'); ?>" class="aDBc-jquery-dialog">
-			<p class="aDBc-box-info">
-				<?php _e('Please choose an action!','advanced-database-cleaner'); ?>
-			</p>
-		</div>
 	<?php
 	}
 }
