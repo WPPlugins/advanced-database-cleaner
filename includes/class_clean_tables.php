@@ -270,7 +270,15 @@ class ADBC_Tables_List extends WP_List_Table {
             $action = 'bulk-' . $this->_args['plural'];
             if (!wp_verify_nonce( $nonce, $action))
                 wp_die('Security check failed!');
-        }
+        }else{
+			// If $_POST['_wpnonce'] is not set, return
+			return;
+		}
+
+		// Check role
+		if(!current_user_can('administrator'))
+			wp_die('Security check failed!');
+
         $action = $this->current_action();
 
 		// Prepare an array containing names of tables deleted
@@ -289,10 +297,6 @@ class ADBC_Tables_List extends WP_List_Table {
 					if($wpdb->query("DROP TABLE " . $table_prefix . $table_name)){
 						array_push($names_deleted, $table_name);
 					}
-				}
-				// After deleting tables, delete names also from file categorization
-				if(ADBC_PLUGIN_F_TYPE == "pro"){
-					aDBc_refresh_categorization_file_after_delete($names_deleted, 'tables');
 				}
 
 				// Update the message to show to the user
@@ -387,17 +391,6 @@ class ADBC_Tables_List extends WP_List_Table {
 		?>
 		<div class="aDBc-content-max-width">
 
-			<!-- Print a notice/warning according to each type of tables -->
-			<?php
-			if(ADBC_PLUGIN_F_TYPE == "pro"){
-				if($_GET['aDBc_cat'] == 'o' && $this->aDBc_tables_categories_info['o']['count'] > 0){
-					echo '<div class="aDBc-box-warning-orphan">' . __('Tables below seem to be orphan! However, please delete only those you are sure to be orphan!','advanced-database-cleaner') . '</div>';
-				}else if(($_GET['aDBc_cat'] == 'all' || $_GET['aDBc_cat'] == 'u') && $this->aDBc_tables_categories_info['u']['count'] > 0){
-					echo '<div class="aDBc-box-info">' . __('Some of your tables are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') . '</div>';
-				}
-			}
-			?>
-		
 			<div class="aDBc-clear-both" style="margin-top:15px"></div>
 
 			<!-- Code for "run new search" button + Show loading image -->
@@ -419,21 +412,10 @@ class ADBC_Tables_List extends WP_List_Table {
 				<input type="hidden" id="aDBc_still_searching" value="<?php echo $still_searching; ?>"/>
 				<input type="hidden" id="aDBc_iteration" value="<?php echo $iteration; ?>"/>
 
-				<?php 
-				if(ADBC_PLUGIN_F_TYPE == "free"){
-				?>
 				<div class="aDBc_premium_tooltip">
 					<input id="aDBc_new_search_button" type="submit" class="aDBc-run-new-search" value="<?php echo $aDBc_search_text; ?>"  name="aDBc_new_search_button" style="opacity:0.5" disabled/>
 					<span style="width:390px" class="aDBc_premium_tooltiptext"><?php _e('Please <a href="?page=advanced_db_cleaner&aDBc_tab=premium">upgrade</a> to Pro to categorize and detect orphaned tables','advanced-database-cleaner') ?></span>
 				</div>
-				<?php
-				}else { ?>
-
-					<input id="aDBc_new_search_button" type="submit" class="aDBc-run-new-search" value="<?php echo $aDBc_search_text; ?>"  name="aDBc_new_search_button" />
-
-				<?php	
-				}
-				?>
 
 			</div>
 
@@ -450,7 +432,7 @@ class ADBC_Tables_List extends WP_List_Table {
 					<span class="<?php echo $abreviation == $_GET['aDBc_cat'] ? 'aDBc-selected-category' : ''?>" style="<?php echo $abreviation == $_GET['aDBc_cat'] ? 'border-bottom: 1px solid ' . $category_info['color'] : '' ?>">
 
 						<?php 
-						if(ADBC_PLUGIN_F_TYPE == "pro" || $abreviation == "all"|| $abreviation == "u"){ 
+						if($abreviation == "all"|| $abreviation == "u"){
 							$aDBc_link_style = "color:" . $category_info['color'];
 							$aDBc_category_info_count = "(". $category_info['count'] . ")";
 						}else{
@@ -465,7 +447,7 @@ class ADBC_Tables_List extends WP_List_Table {
 								<span><?php echo $category_info['name']; ?></span>
 								<span><?php echo $aDBc_category_info_count ;?></span>
 							</a>
-							<?php if(ADBC_PLUGIN_F_TYPE == "free" && $abreviation != "all" && $abreviation != "u"){ ?>
+							<?php if($abreviation != "all" && $abreviation != "u"){ ?>
 								<span style="width:150px" class="aDBc_premium_tooltiptext"><?php _e('Available in Pro version!','advanced-database-cleaner') ?></span>
 							<?php } ?>
 						</span>

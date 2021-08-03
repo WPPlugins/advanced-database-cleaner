@@ -22,9 +22,6 @@ class ADBC_Clean_Relationship extends WP_List_Table {
 		$this->aDBc_plural_title = __('Orphaned Relationships', 'advanced-database-cleaner');
 
 		// Prepare additional sql args if any: per page, LIMIT, OFFSET, etc.
-		if(ADBC_PLUGIN_F_TYPE == "pro"){
-			$this->aDBc_search_sql_arg 				= aDBc_get_search_sql_arg("term_taxonomy_id", "term_order");
-		}
 		$this->aDBc_order_by_sql_arg 			= aDBc_get_order_by_sql_arg("object_id");
 		$this->aDBc_limit_offset_sql_arg 		= aDBc_get_limit_offset_sql_args();
 
@@ -192,8 +189,17 @@ class ADBC_Clean_Relationship extends WP_List_Table {
             $action = 'bulk-' . $this->_args['plural'];
             if (!wp_verify_nonce( $nonce, $action))
                 wp_die('Security check failed!');
-        }
+        }else{
+			// If $_POST['_wpnonce'] is not set, return
+			return;
+		}
+
+		// Check role
+		if(!current_user_can('administrator'))
+			wp_die('Security check failed!');
+
         $action = $this->current_action();
+
         if($action == 'clean'){
 			// If the user wants to clean the elements he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
