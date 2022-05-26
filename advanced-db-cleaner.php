@@ -5,7 +5,7 @@ if (!is_main_site()) return;
 Plugin Name: Advanced Database Cleaner
 Plugin URI: https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner
 Description: Clean database by deleting unused data such as 'old revisions', 'old drafts', 'orphan options', etc. Optimize database and more.
-Version: 3.0.3
+Version: 3.0.4
 Author: Younes JFR.
 Author URI: https://www.sigmaplugin.com
 Contributors: symptote
@@ -29,7 +29,7 @@ class ADBC_Advanced_DB_Cleaner {
 	public function __construct(){
 
 		// Define common constants that should be modified in each version
-		if(!defined("ADBC_PLUGIN_VERSION")) 	define("ADBC_PLUGIN_VERSION", "3.0.3");
+		if(!defined("ADBC_PLUGIN_VERSION")) 	define("ADBC_PLUGIN_VERSION", "3.0.4");
 
 		// Prevent conflicts between free and pro, load text-domain and check if should update settings after upgrade
 		add_action('plugins_loaded', array($this, 'plugins_loaded'));

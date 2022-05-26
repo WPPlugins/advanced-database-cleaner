@@ -4,8 +4,8 @@ Donate Link: https://www.sigmaplugin.com/donation
 Tags: clean, clean up, cleanup, database, optimize, performance, speed, optimizing, clean-up, orphan, orphaned, tables, options
 Requires at least: 3.1.0
 Requires PHP: 5.0
-Tested up to: 5.8
-Stable tag: 3.0.3
+Tested up to: 6.0
+Stable tag: 3.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,10 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.0.4 - 21/01/2022 =
+- Tweak: Enhancing the security of the plugin
+- Tweak: Testing the plugin with latest versions of WP
 
 = 3.0.3 - 06/10/2020 =
 - Tweak: Cleaning the code by deleting unused blocks of code

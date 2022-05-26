@@ -12,8 +12,11 @@
 					<?php 
 					// Generate current parameters in URL
 					foreach($_GET as $name => $value){
-						if($name != "s" && $name != "paged" && $name != "aDBc_cat")
+						if($name != "s" && $name != "paged" && $name != "aDBc_cat"){
+							$name 	= esc_attr(sanitize_text_field($name));
+							$value 	= esc_attr(sanitize_text_field($value));							
 							echo "<input type='hidden' name='$name' value='$value'/>";
+						}
 					}
 					// Return always paged to page 1
 					echo "<input type='hidden' name='paged' value='1'/>";
@@ -123,8 +126,11 @@
 				<?php 
 				// Generate current parameters in URL
 				foreach($_GET as $name => $value){
-					if($name != "per_page" && $name != "paged")
+					if($name != "per_page" && $name != "paged"){
+						$name 	= esc_attr(sanitize_text_field($name));
+						$value 	= esc_attr(sanitize_text_field($value));
 						echo "<input type='hidden' name='$name' value='$value'/>";
+					}
 				}
 				// Return paged to page 1
 				echo "<input type='hidden' name='paged' value='1'/>";
