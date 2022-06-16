@@ -19,4 +19,4 @@ if($this->aDBc_message != ""){
 			?>
 		</form>
 	</div>
-</div>	
+</div>

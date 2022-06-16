@@ -16,16 +16,16 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 ***************************************************************************************************************************/
 
 // this is the URL our updater / license checker pings. This should be the URL of the site with EDD installed
-define( 'ADBC_EDD_STORE_URL', 'https://sigmaplugin.com' ); // you should use your own CONSTANT name, and be sure to replace it throughout this file
+define('ADBC_EDD_STORE_URL', 'https://sigmaplugin.com'); // you should use your own CONSTANT name, and be sure to replace it throughout this file
 
 // the download ID for the product in Easy Digital Downloads
-define( 'ADBC_EDD_ITEM_ID', 10); // you should use your own CONSTANT name, and be sure to replace it throughout this file
+define('ADBC_EDD_ITEM_ID', 10); // you should use your own CONSTANT name, and be sure to replace it throughout this file
 
 // the name of your product. This should match the download name in EDD exactly
-define( 'ADBC_EDD_ITEM_NAME', 'WordPress Advanced Database Cleaner' ); // you should use your own CONSTANT name, and be sure to replace it in this file
+define('ADBC_EDD_ITEM_NAME', 'WordPress Advanced Database Cleaner'); // you should use your own CONSTANT name, and be sure to replace it in this file
 
 // The name of the settings page for the license input to be displayed
-define( 'ADBC_EDD_PLUGIN_LICENSE_PAGE', 'advanced_db_cleaner&aDBc_tab=license' );
+define('ADBC_EDD_PLUGIN_LICENSE_PAGE', 'advanced_db_cleaner&aDBc_tab=license');
 
 if(!class_exists('ADBC_EDD_SL_Plugin_Updater')){
 	// load our custom updater
@@ -38,12 +38,12 @@ function aDBc_edd_sl_plugin_updater(){
 	$license_key = trim(get_option('aDBc_edd_license_key'));
 
 	// setup the updater
-	$edd_updater = new ADBC_EDD_SL_Plugin_Updater( ADBC_EDD_STORE_URL, ADBC_MAIN_PLUGIN_FILE_PATH, array(
+	$edd_updater = new ADBC_EDD_SL_Plugin_Updater(ADBC_EDD_STORE_URL, ADBC_MAIN_PLUGIN_FILE_PATH, array(
 			'version' 	=> ADBC_PLUGIN_VERSION,     // current version number
 			'license' 	=> $license_key,            // license key (used get_option above to retrieve from DB)
 			'item_id' 	=> ADBC_EDD_ITEM_ID,       	// ID of the product
 			'item_name' => ADBC_EDD_ITEM_NAME,      // name of the product
-			'author'  	=> 'Younes JFR.', 			// author of this plugin
+			'author'  	=> 'Younes JFR.', 					// author of this plugin
 			'beta'    	=> false,
 		)
 	);
@@ -52,72 +52,84 @@ function aDBc_edd_sl_plugin_updater(){
 add_action('admin_init', 'aDBc_edd_sl_plugin_updater', 0);
 
 /**************************************************************************
-* the code below is just a standard options page. Substitute with your own.
+* The code below is just a standard options page. Substitute with your own.
 **************************************************************************/
-function aDBc_edd_license_page() {
-	$license = get_option( 'aDBc_edd_license_key' );
-	$status  = get_option( 'aDBc_edd_license_status' );
-	// When the user activates the license, hide it by stars like passwords
-	if(!empty(trim($license)) && $status !== false && $status == 'valid'){
-		$license_key_hidden = substr(trim($license), 0, 4) . "************************" . substr(trim($license), -4);
-	}else{
-		$license_key_hidden = esc_attr($license);
+function aDBc_edd_license_page(){
+
+	$license = get_option('aDBc_edd_license_key');
+	$status  = get_option('aDBc_edd_license_status');
+
+	// Hide license after activation
+	if ( ! empty( $license ) && $status !== false && $status == 'valid' ) {
+		$license_key_hidden = substr( $license, 0, 4 ) . "************************" . substr( $license, -4 );
+	} else {
+		$license_key_hidden = esc_attr( $license );
 	}
 	?>
 	<form method="post" action="options.php">
 
 		<?php settings_fields('aDBc_edd_license'); ?>
 
-		<table style="font-size:15px;text-align:left;" cellspacing="20px">
-			<tr>
-				<td>
-					<b><?php _e('Enter your license key', 'advanced-database-cleaner'); ?></b>
-				</td>
-				<td>
-					<input id="aDBc_edd_license_key" name="aDBc_edd_license_key" type="text" class="regular-text" value="<?php echo $license_key_hidden; ?>" />
-				</td>
-				<td>
-					<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save new license key', 'advanced-database-cleaner'); ?>"  />
-					<?php //submit_button(); ?>
-				</td>
-			</tr>
+		<div class="aDBc-content-max-width aDBc-padding-20">
 
-			<?php if(false !== $license){ ?>
-			<tr>
-				<td>
-					<b><?php _e('Activate license', 'advanced-database-cleaner'); ?></b>
-				</td>
-				<td>
+				<div>
 
-					<?php if( $status !== false && $status == 'valid' ) { ?>
-						<span style="color:green;font-size:13px; background:#eee;padding:4px 8px;vertical-align:middle;border:1px solid #f1f1f1"><b><?php _e('Active', 'advanced-database-cleaner'); ?></b></span>
+					<span class="aDBc-license-label"><?php _e('Your license key', 'advanced-database-cleaner'); ?></span>
+
+					<input id="aDBc_edd_license_key" class="aDBc-license-key-input"  name="aDBc_edd_license_key" type="text" value="<?php echo $license_key_hidden; ?>" />
+
+					<input id="submit" class="button button-primary aDBc-license-submit" name="submit" type="submit" value="<?php _e('Save license', 'advanced-database-cleaner'); ?>"  />
+
+				</div>
+
+				<?php
+				if (false !== $license ) {
+				?>
+
+					<div class="aDBc-margin-t-30">
+
+						<?php
+						if ( $status !== false && $status == 'valid' ) {
+							$license_status_class 	= "aDBc-license-active";
+							$license_status 	  	= __( 'Active', 'advanced-database-cleaner' );
+							$button_name 		  	= "aDBc_edd_license_deactivate";
+							$button_value           = __( 'Deactivate license', 'advanced-database-cleaner' );
+						} else {
+							$license_status_class 	= "aDBc-license-inactive";
+							$license_status 		= __( 'Inactive', 'advanced-database-cleaner' );
+							$button_name 			= "aDBc_edd_license_activate";
+							$button_value           = __( 'Activate license', 'advanced-database-cleaner' );
+						}
+						?>
+
+						<span class="aDBc-license-label"></span>
+
+						<span class="<?php echo $license_status_class ?>"><b><?php echo $license_status ?></b></span>
+
+						<input type="submit" class="button-secondary aDBc-vertical-align-m" name="<?php echo $button_name ?>" value="<?php echo $button_value ?>"/>
+
 						<?php wp_nonce_field( 'aDBc_edd_nonce', 'aDBc_edd_nonce' ); ?>
-						<input style="vertical-align:middle" type="submit" class="button-secondary" name="aDBc_edd_license_deactivate" value="<?php _e('Deactivate license', 'advanced-database-cleaner'); ?>"/>
-					<?php } else { ?>
-						<span style="color:red;font-size:13px; background:#f9f9f9;padding:4px 8px;vertical-align:middle;border:1px solid #f1f1f1"><b><?php _e('Inactive', 'advanced-database-cleaner'); ?></b></span>
-						<?php wp_nonce_field( 'aDBc_edd_nonce', 'aDBc_edd_nonce' ); ?>
-						<input style="vertical-align:middle" type="submit" class="button-secondary" name="aDBc_edd_license_activate" value="<?php _e('Activate license', 'advanced-database-cleaner'); ?>"/>
-					<?php } ?>
 
-				</td>
-			</tr>
-			<?php } ?>
-		</table>
+					</div>
 
+				<?php
+				}
+				?>
+		</div>
 	</form>
 	<?php
 }
 
-function aDBc_edd_register_option() {
+function aDBc_edd_register_option(){
 	// creates our settings in the options table
 	register_setting('aDBc_edd_license', 'aDBc_edd_license_key', 'aDBc_edd_sanitize_license');
 }
 add_action('admin_init', 'aDBc_edd_register_option');
 
-function aDBc_edd_sanitize_license( $new ) {
-	$old = get_option( 'aDBc_edd_license_key' );
-	if( $old && $old != $new ) {
-		delete_option( 'aDBc_edd_license_status' ); // new license has been entered, so must reactivate
+function aDBc_edd_sanitize_license($new){
+	$old = get_option('aDBc_edd_license_key');
+	if($old && $old != $new){
+		delete_option('aDBc_edd_license_status'); // new license has been entered, so must reactivate
 	}
 	return $new;
 }
@@ -126,7 +138,7 @@ function aDBc_edd_sanitize_license( $new ) {
 * this illustrates how to activate a license key
 ************************************************/
 
-function aDBc_edd_activate_license() {
+function aDBc_edd_activate_license(){
 
 	// listen for our activate button to be clicked
 	if( isset( $_POST['aDBc_edd_license_activate'] ) ) {
@@ -316,7 +328,7 @@ function aDBc_edd_deactivate_license_after_uninstall() {
 }
 
 /*********************************************************************************************
-* this illustrates how to check if a license key is still valid the updater does this for you, 
+* this illustrates how to check if a license key is still valid the updater does this for you,
 * so this is only needed if you want to do something custom
 *********************************************************************************************/
 function aDBc_edd_check_license(){

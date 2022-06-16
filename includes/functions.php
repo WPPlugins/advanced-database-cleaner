@@ -108,7 +108,7 @@ function aDBc_clean_elements_type($type){
 		case "trash-posts":
 			$trash_post_date = aDBc_get_keep_last_sql_arg('trash-posts','post_modified');
 			$wpdb->query("DELETE FROM $wpdb->posts WHERE post_status = 'trash'" . $trash_post_date);
-			break;					
+			break;
 		case "moderated-comments":
 			$moderated_comment_date = aDBc_get_keep_last_sql_arg('moderated-comments','comment_date');
 			$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = '0'" . $moderated_comment_date);
@@ -128,7 +128,7 @@ function aDBc_clean_elements_type($type){
 		case "trackbacks":
 			$trackback_date = aDBc_get_keep_last_sql_arg('trackbacks','comment_date');
 			$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_type = 'trackback'" . $trackback_date);
-			break;			
+			break;
 		case "orphan-postmeta":
 			$wpdb->query("DELETE pm FROM $wpdb->postmeta pm LEFT JOIN $wpdb->posts wp ON wp.ID = pm.post_id WHERE wp.ID IS NULL");
 			break;
@@ -148,14 +148,6 @@ function aDBc_clean_elements_type($type){
 			$type_arg = " AND b.option_value < UNIX_TIMESTAMP()";
 			aDBc_clean_all_transients($type_arg);
 			break;
-		//case "transients-with-expiration":
-		//	$type_arg = " AND b.option_value > UNIX_TIMESTAMP()";
-		//	aDBc_clean_all_transients($type_arg);
-		//	break;
-		//case "transients-with-no-expiration":
-		//	$type_arg = " AND b.option_value is NULL";
-		//	aDBc_clean_all_transients($type_arg);
-		//	break;
 	}
 }
 
@@ -164,7 +156,7 @@ function aDBc_clean_all_transients($type_arg){
 
 	global $wpdb;
 
-	$aDBc_transients = $wpdb->get_results("SELECT a.option_name, b.option_value FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name = 
+	$aDBc_transients = $wpdb->get_results("SELECT a.option_name, b.option_value FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name =
 	CONCAT(
 		CASE WHEN a.option_name LIKE '_site_transient_%'
 			THEN '_site_transient_timeout_'
@@ -202,7 +194,7 @@ function aDBc_clean_scheduled_elements($schedule_name){
 
 		$schedule_params = $schedule_settings[$schedule_name];
 		$elements_to_clean = $schedule_params['elements_to_clean'];
-		
+
 		if(function_exists('is_multisite') && is_multisite()){
 			$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
 			foreach($blogs_ids as $blog_id){
@@ -302,19 +294,19 @@ function aDBc_return_array_all_elements_to_clean(){
 	$aDBc_unused["auto-draft"]['URL_blog'] 					= "https://sigmaplugin.com/blog/what-are-wordpress-auto-drafts-and-how-to-clean-them";
 	$aDBc_unused["trash-posts"]['name'] 					= __('Trashed posts','advanced-database-cleaner');
 	$aDBc_unused["trash-posts"]['URL_blog'] 				= "https://sigmaplugin.com/blog/what-are-wordpress-trash-posts-and-how-to-clean-them";
-	
+
 	$aDBc_unused["moderated-comments"]['name'] 				= __('Pending comments','advanced-database-cleaner');
 	$aDBc_unused["moderated-comments"]['URL_blog'] 			= "https://sigmaplugin.com/blog/what-are-wordpress-pending-comments-and-how-to-clean-them";
 	$aDBc_unused["spam-comments"]['name'] 					= __('Spam comments','advanced-database-cleaner');
 	$aDBc_unused["spam-comments"]['URL_blog'] 				= "https://sigmaplugin.com/blog/what-are-wordpress-spam-comments-and-how-to-clean-them";
 	$aDBc_unused["trash-comments"]['name'] 					= __('Trashed comments','advanced-database-cleaner');
 	$aDBc_unused["trash-comments"]['URL_blog'] 				= "https://sigmaplugin.com/blog/what-are-wordpress-trash-comments-and-how-to-clean-them";
-	
+
 	$aDBc_unused["pingbacks"]['name'] 						= __('Pingbacks','advanced-database-cleaner');
 	$aDBc_unused["pingbacks"]['URL_blog'] 					= "https://sigmaplugin.com/blog/what-are-wordpress-pingbacks-and-how-to-clean-them";
 	$aDBc_unused["trackbacks"]['name'] 						= __('Trackbacks','advanced-database-cleaner');
 	$aDBc_unused["trackbacks"]['URL_blog'] 					= "https://sigmaplugin.com/blog/what-are-wordpress-trackbacks-and-how-to-clean-them";
-	
+
 	$aDBc_unused["orphan-postmeta"]['name'] 				= __('Orphaned post meta','advanced-database-cleaner');
 	$aDBc_unused["orphan-postmeta"]['URL_blog'] 			= "https://sigmaplugin.com/blog/what-are-wordpress-orphan-posts-meta-and-how-to-clean-them";
 	$aDBc_unused["orphan-commentmeta"]['name'] 				= __('Orphaned comment meta','advanced-database-cleaner');
@@ -323,25 +315,13 @@ function aDBc_return_array_all_elements_to_clean(){
 	$aDBc_unused["orphan-usermeta"]['URL_blog'] 			= "https://sigmaplugin.com/blog/what-are-wordpress-orphaned-user-meta-and-how-to-clean-them";
 	$aDBc_unused["orphan-termmeta"]['name'] 				= __('Orphaned term meta','advanced-database-cleaner');
 	$aDBc_unused["orphan-termmeta"]['URL_blog'] 			= "https://sigmaplugin.com/blog/what-are-wordpress-orphaned-term-meta-and-how-to-clean-them";
-	
+
 	$aDBc_unused["orphan-relationships"]['name'] 			= __('Orphaned relationships','advanced-database-cleaner');
 	$aDBc_unused["orphan-relationships"]['URL_blog'] 		= "https://sigmaplugin.com/blog/what-are-wordpress-orphan-relationships-and-how-to-clean-them";
 
 	$aDBc_unused["expired-transients"]['name'] 				= __("Expired transients","advanced-database-cleaner");
 	$aDBc_unused["expired-transients"]['URL_blog'] 			= "https://sigmaplugin.com/blog/what-are-wordpress-transients";
-	
-	
-	/*$aDBc_transient_toolip = "<span class='aDBc-tooltips-headers'>
-								<img style='width:12px' class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
-								<span>" . __('Do not clean these items unless you know what you are doing!','advanced-database-cleaner') ." </span>
-							</span>";
-	
-	$aDBc_unused["transients-with-expiration"]['name'] 		= __("Transients with an expiration","advanced-database-cleaner") . "<br><span class='aDBc-caution'>" . __("Use with caution!","advanced-database-cleaner") . "</span>" . $aDBc_transient_toolip;
-	$aDBc_unused["transients-with-expiration"]['URL_blog'] 	= "https://sigmaplugin.com/blog/what-are-wordpress-transients";
-	
-	$aDBc_unused["transients-with-no-expiration"]['name'] 	= __("Transients with no expiration","advanced-database-cleaner") . "<br><span class='aDBc-caution'>" . __("Use with caution!","advanced-database-cleaner") . "</span>" . $aDBc_transient_toolip;
-	$aDBc_unused["transients-with-no-expiration"]['URL_blog'] 	= "https://sigmaplugin.com/blog/what-are-wordpress-transients";*/
-	
+
 	return $aDBc_unused;
 
 }
@@ -361,7 +341,7 @@ function aDBc_count_all_elements_to_clean(){
 		$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
 		foreach($blogs_ids as $blog_id){
 			switch_to_blog($blog_id);
-			aDBc_count_elements_to_clean($aDBc_unused);	
+			aDBc_count_elements_to_clean($aDBc_unused);
 			restore_current_blog();
 		}
 	}else{
@@ -404,25 +384,14 @@ function aDBc_count_elements_to_clean(&$aDBc_unused){
 	if(is_main_site()){
 		$aDBc_unused["orphan-usermeta"]['count'] += $wpdb->get_var("SELECT COUNT(umeta_id) FROM $wpdb->usermeta WHERE user_id NOT IN (SELECT ID FROM $wpdb->users)");
 	}
-	
+
 	$aDBc_unused["orphan-termmeta"]['count'] += $wpdb->get_var("SELECT COUNT(meta_id) FROM $wpdb->termmeta WHERE term_id NOT IN (SELECT term_id FROM $wpdb->terms)");
 
 	$aDBc_unused["orphan-relationships"]['count'] += $wpdb->get_var("SELECT COUNT(object_id) FROM $wpdb->term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT ID FROM $wpdb->posts)");
 
-	// Section for transients
-	//$all_transients_names = $wpdb->get_col("SELECT option_name FROM $wpdb->options where (option_name LIKE '_transient_%' OR option_name LIKE '_site_transient_%') AND option_name NOT LIKE '_transient_timeout_%' AND option_name NOT LIKE '_site_transient_timeout_%'");
-
 	$expired_transient_names = $wpdb->get_col("SELECT REPLACE(option_name, '_timeout', '') FROM $wpdb->options where (option_name LIKE '_transient_timeout_%' OR option_name LIKE '_site_transient_timeout_%') AND option_value < UNIX_TIMESTAMP()");
 
-	//$transient_with_expiration_names = $wpdb->get_col("SELECT REPLACE(option_name, '_timeout', '') FROM $wpdb->options where option_value > UNIX_TIMESTAMP() AND (option_name LIKE '_transient_timeout_%' OR option_name LIKE '_site_transient_timeout_%')");
-
-	// Get transients with no expiration
-	//$transients_with_no_expiration = array_diff($all_transients_names, $expired_transient_names, $transient_with_expiration_names);
-
 	$aDBc_unused["expired-transients"]['count'] += count($expired_transient_names);
-	//$aDBc_unused["transients-with-expiration"]['count'] += count($transient_with_expiration_names);
-	//$aDBc_unused["transients-with-no-expiration"]['count'] += count($transients_with_no_expiration);
-	// End of transients section
 
 }
 
@@ -466,7 +435,7 @@ function aDBc_filter_results_in_all_items_array_free(&$aDBc_all_items, $aDBc_tab
 					}
 				}
 			}
-		}	
+		}
 
 	}else{
 
@@ -481,7 +450,7 @@ function aDBc_filter_results_in_all_items_array_free(&$aDBc_all_items, $aDBc_tab
 				$array_names = $aDBc_tables_name_to_optimize;
 			}else{
 				$array_names = $aDBc_tables_name_to_repair;
-			}			
+			}
 		}
 
 		foreach($aDBc_all_items as $item_name => $item_info){
@@ -556,54 +525,96 @@ function aDBc_prepare_items_to_display(
 			break;
 	}
 
-	$aDBc_saved_items_file = "";
-	// xxx change this later, no need for this test in the free verion. Moreover, ADBC_UPLOAD_DIR_PATH_TO_ADBC is not defined here
-	/*if(file_exists(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/" . $items_type . ".txt")){
-		$aDBc_saved_items_file 				= fopen(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/" . $items_type . ".txt", "r");
-	}*/
 
-	// Affect type and belongs_to to items. 
-	if ($aDBc_saved_items_file) {
-		while(($item = fgets($aDBc_saved_items_file)) !== false) {
-			$columns = explode(":", trim($item));
-			// We replace +=+ by : because names that contain : have been transformed to +=+ to prevent problems with split based on :
-			$item_name = str_replace("+=+", ":", $columns[0]);
-			// Prevent adding an item that was cleaned (maybe by other plugins) but not updated in file
-			if(array_key_exists($item_name, $aDBc_all_items) && empty($aDBc_all_items[$item_name]['belongs_to'])) {
+	if ( ADBC_PLUGIN_PLAN == "pro" ) {
 
-				$aDBc_all_items[$item_name]['belongs_to'] = $columns[1];
-				$aDBc_all_items[$item_name]['type'] = $columns[2];
+		$aDBc_saved_items_file = "";
+		if(file_exists(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/" . $items_type . ".txt")){
+			$aDBc_saved_items_file 				= fopen(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/" . $items_type . ".txt", "r");
+		}
 
-				// Add this belongs_to to array for display in dropdown filter
-				$belongs_to_value = explode("(", $columns[1], 2);
-				$belongs_to_value = trim($belongs_to_value[0]);
-				$belongs_to_value = str_replace(" ", "-", $belongs_to_value);
-				if($items_type == "tasks"){
-					if(!array_key_exists($belongs_to_value, $array_belongs_to_counts)){
-						$array_belongs_to_counts[$belongs_to_value]['type'] = $columns[2];
-						foreach($aDBc_all_items[$item_name]['sites'] as $site => $info){
-							$array_belongs_to_counts[$belongs_to_value]['count'] = count($aDBc_all_items[$item_name]['sites'][$site]['args']);
-						}
+		$aDBc_manually_corrected_items_path 	= ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/" . $items_type . "_corrected_manually.txt";
+
+		// Prepare an array containing user manually corrected results
+		$aDBc_user_corrections = array();
+		if(file_exists($aDBc_manually_corrected_items_path)){
+			$aDBc_user_corrections = json_decode(trim(file_get_contents($aDBc_manually_corrected_items_path)), true);
+		}
+
+		// Affect type and belongs_to to items.
+		if($aDBc_saved_items_file) {
+			while(($item = fgets($aDBc_saved_items_file)) !== false) {
+				$columns = explode(":", trim($item), 4);
+				// We replace +=+ by : because names that contain : have been transformed to +=+ to prevent problems with split based on :
+				$item_name = str_replace("+=+", ":", $columns[0]);
+				// Prevent adding an item that was cleaned (maybe by other plugins) but not updated in file
+				if(array_key_exists($item_name, $aDBc_all_items) && empty($aDBc_all_items[$item_name]['belongs_to'])) {
+
+					// If needed, we correct items that users have corrected manually
+					if(!empty($aDBc_user_corrections[$item_name])){
+						// If we are here, this means that the user has provided a correction to this item, we apply it
+						$correction_by_user = $aDBc_user_corrections[$item_name];
+						$correction_by_user = explode(":", $correction_by_user);
+
+						$aDBc_all_items[$item_name]['belongs_to'] = $correction_by_user[0];
+						$aDBc_all_items[$item_name]['type'] = $correction_by_user[1];
 					}else{
-						foreach($aDBc_all_items[$item_name]['sites'] as $site => $info){
-						$array_belongs_to_counts[$belongs_to_value]['count'] += count($aDBc_all_items[$item_name]['sites'][$site]['args']);
+						// By default, affect the plugin scan results to items
+						$aDBc_all_items[$item_name]['belongs_to'] = $columns[1];
+						$aDBc_all_items[$item_name]['type'] = $columns[2];
+
+						// xxx verify if we should display info about orphaned items to which plugins/theme they may belong after double check
+						// This information is stored in $columns[3] of each line
+						if(!empty($columns[3])){
+							//$aDBc_all_items[$item_name]['corrections_info'] = aDBc_get_correction_info_for_orphaned_items($columns[3]);
 						}
 					}
-				}else{
-					if(!array_key_exists($belongs_to_value, $array_belongs_to_counts)){
-						$array_belongs_to_counts[$belongs_to_value]['type'] = $columns[2];
-						$array_belongs_to_counts[$belongs_to_value]['count'] = count($aDBc_all_items[$item_name]['sites']);
+
+					// Add this belongs_to to array for display in dropdown filter
+					// Get only the first part in belongs_to with %
+					$belongs_to_value = $aDBc_all_items[$item_name]['belongs_to'];
+					$belongs_to_value = explode("(", $belongs_to_value, 2);
+					$belongs_to_value = trim($belongs_to_value[0]);
+					$belongs_to_value = str_replace(" ", "-", $belongs_to_value);
+					// Get the type
+					$belongs_to_type = $aDBc_all_items[$item_name]['type'];
+
+					if($items_type == "tasks"){
+						if(!array_key_exists($belongs_to_value, $array_belongs_to_counts)){
+							$array_belongs_to_counts[$belongs_to_value]['type'] = $belongs_to_type;
+							foreach($aDBc_all_items[$item_name]['sites'] as $site => $info){
+								$array_belongs_to_counts[$belongs_to_value]['count'] = count($aDBc_all_items[$item_name]['sites'][$site]['args']);
+							}
+						}else{
+							foreach($aDBc_all_items[$item_name]['sites'] as $site => $info){
+							$array_belongs_to_counts[$belongs_to_value]['count'] += count($aDBc_all_items[$item_name]['sites'][$site]['args']);
+							}
+						}
 					}else{
-						$array_belongs_to_counts[$belongs_to_value]['count'] += count($aDBc_all_items[$item_name]['sites']);
+						if(!array_key_exists($belongs_to_value, $array_belongs_to_counts)){
+							$array_belongs_to_counts[$belongs_to_value]['type'] = $belongs_to_type;
+							$array_belongs_to_counts[$belongs_to_value]['count'] = count($aDBc_all_items[$item_name]['sites']);
+						}else{
+							$array_belongs_to_counts[$belongs_to_value]['count'] += count($aDBc_all_items[$item_name]['sites']);
+						}
 					}
 				}
 			}
+			fclose($aDBc_saved_items_file);
 		}
-		fclose($aDBc_saved_items_file);
 	}
 
 	// Filter results according to users choices and args
-	aDBc_filter_results_in_all_items_array_free($aDBc_all_items, $aDBc_tables_name_to_optimize, $aDBc_tables_name_to_repair);
+
+	if ( ADBC_PLUGIN_PLAN == "pro" ) {
+
+		aDBc_filter_results_in_all_items_array( $aDBc_all_items, $aDBc_tables_name_to_optimize, $aDBc_tables_name_to_repair );
+
+	} elseif ( ADBC_PLUGIN_PLAN == "free" ) {
+
+		aDBc_filter_results_in_all_items_array_free( $aDBc_all_items, $aDBc_tables_name_to_optimize, $aDBc_tables_name_to_repair );
+
+	}
 
 	// Put 'u' type to all uncategorized items and count all items
 	foreach($aDBc_all_items as $item_name => $item_info){
@@ -631,76 +642,115 @@ function aDBc_prepare_items_to_display(
 	}
 
 	// Prepare items to display
-	$aDBc_not_categorized_toolip = "<span class='aDBc-tooltips-headers'>
-						<img class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
-						<span>" . __('This item is not categorized yet! Please click on scan button above to categorize it.','advanced-database-cleaner') ." </span>
-						 </span>";		
-	foreach($aDBc_all_items as $item_name => $item_info){
 
-		if($_GET['aDBc_cat'] != "all" && $item_info['type'] != $_GET['aDBc_cat']){
+	$aDBc_not_categorized_toolip = "";
+
+	if ( ADBC_PLUGIN_PLAN == "pro" ) {
+
+		$aDBc_not_categorized_toolip = "<span class='aDBc-tooltips-headers'>
+							<img class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
+							<span>" . __('This item is not categorized yet! Please click on scan button above to categorize it.','advanced-database-cleaner') ." </span>
+							</span>";
+
+	}
+
+	foreach ( $aDBc_all_items as $item_name => $item_info ) {
+
+		if ( $_GET['aDBc_cat'] != "all" && $item_info['type'] != $_GET['aDBc_cat'] ) {
 			continue;
 		}
 
-		switch($item_info['type']){
+		switch ( $item_info['type'] ) {
+
 			case 'u' :
-				$belongs_to_without_html = __('Available in Pro version!', 'advanced-database-cleaner');
-				$belongs_to = '<span style="color:#999">' . $belongs_to_without_html . '</span>';
+
+				if ( ADBC_PLUGIN_PLAN == "pro" ) {
+
+					$belongs_to_without_html = __( 'Uncategorized!', 'advanced-database-cleaner' );
+
+				} else {
+
+					$belongs_to_without_html = __('Available in Pro version!', 'advanced-database-cleaner');
+
+				}
+
+				$belongs_to = '<span style="color:#999">' . $belongs_to_without_html . '</span>' . $aDBc_not_categorized_toolip;
 				break;
+
 			case 'o' :
-				$belongs_to_without_html = __('Orphan!', 'advanced-database-cleaner');
+
+				$belongs_to_without_html = __( 'Orphan!', 'advanced-database-cleaner' );
 				$belongs_to = '<span style="color:#E97F31">' . $belongs_to_without_html . '</span>';
 				break;
+
 			case 'w' :
-				$belongs_to_without_html = __('Wordpress core', 'advanced-database-cleaner');
+
+				$belongs_to_without_html = __( 'Wordpress core', 'advanced-database-cleaner' );
 				$belongs_to = '<span style="color:#D091BE">' . $belongs_to_without_html;
 				// Add percent % if any
-				$belongs_to .= $item_info['belongs_to'] == "w" ? "" : " ".$item_info['belongs_to'];
+				$belongs_to .= $item_info['belongs_to'] == "w" ? "" : " " . $item_info['belongs_to'];
 				$belongs_to .= '</span>';
 				break;
+
 			case 'p' :
+
 				$belongs_to_without_html = $item_info['belongs_to'];
 				$belongs_to = '<span style="color:#00BAFF">' . $belongs_to_without_html . '</span>';
 				break;
+
 			case 't' :
+
 				$belongs_to_without_html = $item_info['belongs_to'];
 				$belongs_to = '<span style="color:#45C966">' . $belongs_to_without_html . '</span>';
 				break;
 		}
-		foreach($item_info['sites'] as $site_id => $site_item_info){
-			switch($items_type){
+
+		foreach ( $item_info['sites'] as $site_id => $site_item_info ) {
+
+			switch ( $items_type ) {
+
 				case 'tasks' :
-					foreach($site_item_info['args'] as $args_info){
-						array_push($items_to_display, array(
-								'hook_name' 				=> $item_name,
-								'arguments' 				=> $args_info['arguments'],
-								'site_id' 					=> $site_id,
-								'next_run' 					=> $args_info['next_run'] . ' - ' . $args_info['frequency'],
-								'timestamp'					=> $args_info['timestamp'],
-								'hook_belongs_to'			=> $belongs_to
-						));
+
+					foreach ( $site_item_info['args'] as $args_info ) {
+
+						array_push( $items_to_display, array(
+							'hook_name' 			=> $item_name,
+							'arguments' 			=> $args_info['arguments'],
+							'site_id' 				=> $site_id,
+							'next_run' 				=> $args_info['next_run'] . ' - ' . $args_info['frequency'],
+							'timestamp'				=> $args_info['timestamp'],
+							'hook_belongs_to'		=> $belongs_to . $item_info['corrections_info']
+						) );
 					}
+
 					break;
+
 				case 'options' :
-					array_push($items_to_display, array(
-							'option_name' 				=> $item_name,
-							'option_value' 				=> $site_item_info['value'],
-							'option_autoload' 			=> $site_item_info['autoload'],
-							'option_size'				=> $site_item_info['size'],
-							'site_id' 					=> $site_id,
-							'option_belongs_to' 		=> $belongs_to
-					));
+
+					array_push( $items_to_display, array(
+						'option_name' 				=> $item_name,
+						'option_value' 				=> $site_item_info['value'],
+						'option_autoload' 			=> $site_item_info['autoload'],
+						'option_size'				=> $site_item_info['size'],
+						'site_id' 					=> $site_id,
+						'option_belongs_to' 		=> $belongs_to . $item_info['corrections_info']
+					) );
+
 					break;
+
 				case 'tables' :
-					array_push($items_to_display, array(
-							'table_name' 				=> $item_name,
-							'table_prefix' 				=> $site_item_info['prefix'],
-							'table_full_name' 			=> $site_item_info['prefix'].$item_name,
-							'table_rows' 				=> $site_item_info['rows'],
-							'table_size' 				=> $site_item_info['size'],
-							'table_lost' 				=> $site_item_info['lost'],
-							'site_id' 					=> $site_id,
-							'table_belongs_to' 			=> $belongs_to
-					));
+
+					array_push( $items_to_display, array(
+						'table_name' 				=> $item_name,
+						'table_prefix' 				=> $site_item_info['prefix'],
+						'table_full_name' 			=> $site_item_info['prefix'].$item_name,
+						'table_rows' 				=> $site_item_info['rows'],
+						'table_size' 				=> $site_item_info['size'],
+						'table_lost' 				=> $site_item_info['lost'],
+						'site_id' 					=> $site_id,
+						'table_belongs_to' 			=> $belongs_to . $item_info['corrections_info']
+					) );
+
 					break;
 			}
 		}
@@ -780,7 +830,7 @@ function aDBc_add_options(&$aDBc_all_options, $blog_id){
 	foreach($aDBc_options_in_db as $option){
 		// If the option has not been added yet, add it and initiate its info
 		if(empty($aDBc_all_options[$option->option_name])){
-			$aDBc_all_options[$option->option_name] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'type' => '', 'sites' => array());
+			$aDBc_all_options[$option->option_name] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'corrections_info' => '', 'type' => '', 'sites' => array());
 		}
 
 		// Add info of the option according to the current site
@@ -875,14 +925,14 @@ function aDBc_get_all_tables() {
 		// Add table information to the global array
 		// If the table has not been added yet, add it and initiate its info
 		if(empty($aDBc_all_tables[$aDBc_table_name_without_prefix])){
-			$aDBc_all_tables[$aDBc_table_name_without_prefix] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'type' => '', 'sites' => array());
+			$aDBc_all_tables[$aDBc_table_name_without_prefix] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'corrections_info' => '', 'type' => '', 'sites' => array());
 		}
 		// Add info of the task according to the current site
 		$aDBc_all_tables[$aDBc_table_name_without_prefix]['sites'][$aDBc_table_site] = array('prefix' 	=> $aDBc_table_prefix,
 																							 'rows'		=> $aDBc_tables_rows_sizes[$table_name]['rows'],
 																							 'size'		=> $aDBc_tables_rows_sizes[$table_name]['size'],
 																							 'lost'		=> $aDBc_tables_rows_sizes[$table_name]['lost'],
-																						);		
+																						);
 	}
 	return $aDBc_all_tables;
 }
@@ -943,7 +993,7 @@ function aDBc_add_scheduled_tasks(&$aDBc_all_tasks, $blog_id) {
 				// If the task has not been added yet, add it and initiate its info
 				if(empty($aDBc_all_tasks[$hook])){
 
-					$aDBc_all_tasks[$hook] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'type' => '', 'sites' => array());
+					$aDBc_all_tasks[$hook] = array('belongs_to' => '', 'maybe_belongs_to' => '', 'corrections_info' => '', 'type' => '', 'sites' => array());
 
 				}
 
@@ -1003,26 +1053,30 @@ function aDBc_create_folder_plus_index_file($folder) {
 	// }
 }
 
-/************************************************************************************************** 
+/**************************************************************************************************
  * Delete folder with its content
  *************************************************************************************************/
-function aDBc_delete_folder_with_content($path){
+function aDBc_delete_folder_with_content( $path ) {
 
-	if(!file_exists($path))
+	if ( ! file_exists( $path ) )
 		return;
-	$dir = opendir($path);
-	while(($file = readdir($dir)) !== false){
-		if ($file != '.' && $file != '..'){
-			unlink($path . "/" . $file);
+
+	$dir = opendir( $path );
+
+	while ( ( $file = readdir( $dir ) ) !== false ) {
+
+		if ( $file != '.' && $file != '..' ) {
+			unlink( $path . "/" . $file );
 		}
 	}
-	closedir($dir);
+
+	closedir( $dir );
 	rmdir( $path );
 
 }
 
-/************************************************************************************************** 
- * Uupdate task in db after being deleted
+/**************************************************************************************************
+ * Update task in db after being deleted
  *************************************************************************************************/
 function aDBc_update_task_in_db_after_delete($arg_name, $db_option_name){
 
@@ -1273,7 +1327,7 @@ function aDBc_get_core_options() {
 		'user_roles',
 		'widget_nav_menu',
 	);
-	
+
 	// Before doing anything, we add some special options to the WP core options array
 	// The 'user_roles' option is added in Multi-site as $prefix.'user_roles'. So for each site we should add this options in that format
 	if(function_exists('is_multisite') && is_multisite()){
@@ -1285,6 +1339,31 @@ function aDBc_get_core_options() {
 	}
 
 	return $aDBc_wp_core_options;
+}
+
+
+/***********************************************************************************
+* Get All options and tasks used by the ADBC plugin
+***********************************************************************************/
+function aDBc_get_ADBC_options_and_tasks_names() {
+
+	// yyy: Always make sure to keep this list up to date and put here only valid options after scan not temp ones that will be deleted
+
+	$aDBc_names = array(
+		// Active options
+		'aDBc_settings',
+		'aDBc_security_folder_code',
+		'aDBc_edd_license_key',
+		'aDBc_edd_license_status',
+		// Scheduled tasks
+		'aDBc_optimize_schedule',
+		'aDBc_clean_schedule',
+		'aDBc_last_search_ok_tables',
+		'aDBc_last_search_ok_options',
+		'aDBc_last_search_ok_tasks'
+	);
+
+	return $aDBc_names;
 }
 
 ?>
