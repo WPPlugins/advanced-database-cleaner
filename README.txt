@@ -4,8 +4,8 @@ Donate Link: https://www.sigmaplugin.com/donation
 Tags: clean, clean up, cleanup, database, optimize, performance, speed, optimizing, clean-up, orphan, orphaned, tables, options
 Requires at least: 3.1.0
 Requires PHP: 5.0
-Tested up to: 6.0
-Stable tag: 3.1.0
+Tested up to: 6.1
+Stable tag: 3.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,9 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.1.1 - 24/06/2022 =
+- Security fix: enhancing the security of the plugin by escaping some URLs before outputting them
 
 = 3.1.0 - 16/06/2022 =
 - Fix: fixing the error 'Fatal error: Can't use function return value in write context'

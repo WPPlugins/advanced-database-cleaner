@@ -279,7 +279,7 @@
 		?>
 
 		<div class="aDBc-delete-custom-filter">
-			<a style="color:red" href="<?php echo $aDBc_new_URI; ?>">
+			<a style="color:red" href="<?php echo esc_url( $aDBc_new_URI ); ?>">
 				<?php _e( 'Delete custom filter', 'advanced-database-cleaner' ); ?>
 			</a>
 		</div>

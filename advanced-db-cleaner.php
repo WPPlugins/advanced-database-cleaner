@@ -4,7 +4,7 @@
 Plugin Name: Advanced Database Cleaner
 Plugin URI: https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner
 Description: Clean database by deleting unused data such as 'old revisions', 'old drafts', 'orphan options', etc. Optimize database and more.
-Version: 3.1.0
+Version: 3.1.1
 Author: Younes JFR.
 Author URI: https://www.sigmaplugin.com
 Contributors: symptote
@@ -30,7 +30,7 @@ class ADBC_Advanced_DB_Cleaner {
 	public function __construct() {
 
 		// Define constants that should be modified in each version
-		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 	define( "ADBC_PLUGIN_VERSION", "3.1.0" );
+		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 	define( "ADBC_PLUGIN_VERSION", "3.1.1" );
 		if( ! defined( "ADBC_PLUGIN_PLAN" ) ) 		define( "ADBC_PLUGIN_PLAN", "free" );
 
 		// Prevent conflicts between free and pro, load text-domain and check if we should update settings after upgrade
@@ -635,7 +635,7 @@ class ADBC_Advanced_DB_Cleaner {
 					$aDBc_new_URI = $_SERVER['REQUEST_URI'];
 					$aDBc_new_URI = add_query_arg('adbc-ignore-notice', '0', $aDBc_new_URI);
 					echo '<div class="updated"><p>';
-					printf(__('Awesome! You have been using <a href="admin.php?page=advanced_db_cleaner">Advanced DB Cleaner</a> for more than 1 week. Would you mind taking a few seconds to give it a 5-star rating on WordPress? Thank you in advance :) <a href="%2$s" target="_blank">Ok, you deserved it</a> | <a href="%1$s">I already did</a> | <a href="%1$s">No, not good enough</a>', 'advanced-database-cleaner'), $aDBc_new_URI,
+					printf(__('Awesome! You have been using <a href="admin.php?page=advanced_db_cleaner">Advanced DB Cleaner</a> for more than 1 week. Would you mind taking a few seconds to give it a 5-star rating on WordPress? Thank you in advance :) <a href="%2$s" target="_blank">Ok, you deserved it</a> | <a href="%1$s">I already did</a> | <a href="%1$s">No, not good enough</a>', 'advanced-database-cleaner'), esc_url( $aDBc_new_URI ),
 					'https://wordpress.org/support/plugin/advanced-database-cleaner/reviews/?filter=5');
 					echo "</p></div>";
 				}
@@ -788,7 +788,7 @@ class ADBC_Advanced_DB_Cleaner {
 
 					<span style="float:left;margin-bottom:20px"><?php _e('Important notice to premium users!', 'advanced-database-cleaner'); ?></span>
 
-					<a style="text-decoration:none;float:right" href="<?php echo $aDBc_new_URI ?>">
+					<a style="text-decoration:none;float:right" href="<?php echo esc_url( $aDBc_new_URI ) ?>">
 						<span class="dashicons-dismiss dashicons"></span>
 					</a>
 

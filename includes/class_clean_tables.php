@@ -593,7 +593,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 						<span class="aDBc-premium-tooltip aDBc-category-span">
 
-							<a href="<?php echo $aDBc_new_URI ?>" class="aDBc-category-counts-links" style="<?php echo $aDBc_link_style ?>">
+							<a href="<?php echo esc_url( $aDBc_new_URI ); ?>" class="aDBc-category-counts-links" style="<?php echo $aDBc_link_style ?>">
 
 								<span><?php echo $category_info['name']; ?></span>
 
@@ -689,7 +689,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 						?>
 							<div class="aDBc-text-status-db">
-								<b><a href="<?php echo $aDBc_new_URI; ?>"><?php echo $this->aDBc_total_tables_to_optimize; ?></a></b>
+								<b><a href="<?php echo esc_url( $aDBc_new_URI ); ?>"><?php echo $this->aDBc_total_tables_to_optimize; ?></a></b>
 								<?php _e( 'table(s) should be optimized!', 'advanced-database-cleaner' ); ?>
 							</div>
 
@@ -710,7 +710,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 						?>
 							<div class="aDBc-text-status-db <?php echo $to_repair_css; ?>">
-								<b><a href="<?php echo $aDBc_new_URI; ?>"><?php echo $this->aDBc_total_tables_to_repair; ?></a></b>
+								<b><a href="<?php echo esc_url( $aDBc_new_URI ); ?>"><?php echo $this->aDBc_total_tables_to_repair; ?></a></b>
 								<?php _e( 'table(s) should be repaired!', 'advanced-database-cleaner' ); ?>
 							</div>
 
@@ -791,7 +791,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 						<span class="aDBc-edit-delete-schedule">
 
-							<a href="<?php echo $aDBc_new_URI ?>" class="aDBc-edit-schedule-link">
+							<a href="<?php echo esc_url( $aDBc_new_URI ); ?>" class="aDBc-edit-schedule-link">
 								<?php _e( 'Edit', 'advanced-database-cleaner' ); ?>
 							</a>
 							|
@@ -812,7 +812,7 @@ class ADBC_Tables_List extends WP_List_Table {
 					$aDBc_new_URI = add_query_arg('aDBc_view', 'add_optimize_schedule', $aDBc_new_URI);
 					?>
 
-					<a href="<?php echo $aDBc_new_URI ?>" id="aDBc_add_schedule" class="button-primary aDBc-add-new-schedule">
+					<a href="<?php echo esc_url( $aDBc_new_URI ); ?>" id="aDBc_add_schedule" class="button-primary aDBc-add-new-schedule">
 						<?php _e('Add new schedule','advanced-database-cleaner'); ?>
 					</a>
 

@@ -116,7 +116,7 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 				$color = "red";
 				$aDBc_count = "<font color='$color' style='font-weight:bold'>" . $element_info['count'] . "</font>";
 				$aDBc_new_URI = add_query_arg('aDBc_view', $element_type, $aDBc_new_URI);
-				$aDBc_see = "<a href='$aDBc_new_URI'><img width='20px' alt='view' src='".ADBC_PLUGIN_DIR_PATH . '/images/see.svg'."'/></a>";
+				$aDBc_see = "<a href='" . esc_url( $aDBc_new_URI ) . "'><img width='20px' alt='view' src='".ADBC_PLUGIN_DIR_PATH . '/images/see.svg'."'/></a>";
 			}else{
 				$aDBc_count = "<font color='#ccc' style='font-weight:bold'>0</font>";
 				$aDBc_see = "<img width='20px' alt='-' src='".ADBC_PLUGIN_DIR_PATH . '/images/nothing_to_see.svg'."'/>";
@@ -410,7 +410,7 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 
 						<span class="aDBc-edit-delete-schedule">
 
-							<a href="<?php echo $aDBc_new_URI ?>" class="aDBc-edit-schedule-link">
+							<a href="<?php echo esc_url( $aDBc_new_URI ) ?>" class="aDBc-edit-schedule-link">
 								<?php _e( 'Edit', 'advanced-database-cleaner' ); ?>
 							</a>
 							|
@@ -431,7 +431,7 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 					$aDBc_new_URI = add_query_arg('aDBc_view', 'add_cleanup_schedule', $aDBc_new_URI);
 					?>
 
-					<a href="<?php echo $aDBc_new_URI ?>" id="aDBc_add_schedule" class="button-primary aDBc-add-new-schedule">
+					<a href="<?php echo esc_url( $aDBc_new_URI ) ?>" id="aDBc_add_schedule" class="button-primary aDBc-add-new-schedule">
 						<?php _e('Add new schedule','advanced-database-cleaner'); ?>
 					</a>
 

@@ -466,7 +466,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 
 						<span class="aDBc-premium-tooltip aDBc-category-span">
 
-							<a href="<?php echo $aDBc_new_URI ?>" class="aDBc-category-counts-links" style="<?php echo $aDBc_link_style ?>">
+							<a href="<?php echo esc_url( $aDBc_new_URI ) ?>" class="aDBc-category-counts-links" style="<?php echo $aDBc_link_style ?>">
 
 								<span><?php echo $category_info['name']; ?></span>
 
