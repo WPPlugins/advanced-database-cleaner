@@ -283,32 +283,41 @@ class ADBC_Options_List extends WP_List_Table {
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected options cleaned successfully!', 'advanced-database-cleaner');
 			}
-        }else if($action == 'autoload_yes' || $action == 'autoload_no'){
 
-			if($action == 'autoload_yes'){
+        } else if ( $action == 'autoload_yes' || $action == 'autoload_no' ) {
+
+			$autoload_value = "no";
+
+			if ( $action == 'autoload_yes' )
+
 				$autoload_value = "yes";
-			}else{
-				$autoload_value = "no";
-			}
 
 			// If the user wants to change autoload to yes for selected options
 			// xxx, changing autoload using update_option works only on WP 4.2 and newer. Should I set minimum required wp to 4.2 in my plugin header?
-			if(isset($_POST['aDBc_elements_to_process'])){
-				$additional_msg = "";
-				if(function_exists('is_multisite') && is_multisite()){
+			if ( isset( $_POST['aDBc_elements_to_process'] ) ) {
+
+				if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+
 					// Prepare options to process in organized array to minimize switching from blogs
 					$options_to_process = array();
-					foreach($_POST['aDBc_elements_to_process'] as $option){
-						$option_info 	= explode("|", $option);
-						$site_id 		= sanitize_html_class($option_info[0]);
-						$option_name 	= sanitize_text_field($option_info[1]);
-						if(is_numeric($site_id)){
-							if(empty($options_to_process[$site_id])){
+
+					foreach ( $_POST['aDBc_elements_to_process'] as $option ) {
+
+						$option_info 	= explode( "|", $option );
+						$site_id 		= sanitize_html_class( $option_info[0] );
+						$option_name 	= sanitize_text_field ($option_info[1] );
+
+						if ( is_numeric( $site_id ) ) {
+
+							if ( empty( $options_to_process[$site_id] ) )
+
 								$options_to_process[$site_id] = array();
-							}
+
 							// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-							$option_name = preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name);
-							array_push($options_to_process[$site_id], $option_name);
+							$option_name = preg_replace( "/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name );
+
+							array_push( $options_to_process[$site_id], $option_name );
+
 						}
 					}
 
@@ -319,46 +328,50 @@ class ADBC_Options_List extends WP_List_Table {
 
 						foreach ( $options as $option ) {
 
-							// EDD will delete 'aDBc_edd_license_status' if 'aDBc_edd_license_key' changed. Prevent this!
-							if ( $option != "aDBc_edd_license_key" ) {
+							$options_value = get_option( $option );
 
-								$options_value = get_option( $option );
+							if ( false !== $options_value ) {
+
 								update_option( $option, "xyz" );
 								update_option( $option, $options_value, $autoload_value );
 
-							} else {
-
-								$additional_msg = "<span style='color:orange'>" . __( 'For technical concerns, the option aDBc_edd_license_key cannot be changed!', 'advanced-database-cleaner' ) . "</span>";
-
 							}
+
 						}
 
 						restore_current_blog();
 					}
 
-				}else{
-					foreach($_POST['aDBc_elements_to_process'] as $option) {
-						$aDBc_option_info 	= explode("|", $option);
-						$option_name 		= sanitize_text_field($aDBc_option_info[1]);
+				} else {
+
+					foreach ( $_POST['aDBc_elements_to_process'] as $option ) {
+
+						$aDBc_option_info 	= explode( "|", $option );
+						$option_name 		= sanitize_text_field( $aDBc_option_info[1] );
+
 						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$option_name 		= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name);
-						// In adbc-edd-sample-plugin, EDD deletes aDBc_edd_license_status if aDBc_edd_license_key has been changed
-						// This means that we should not change its value to prevent this to happen
-						if($option_name != "aDBc_edd_license_key"){
-							$options_value = get_option($option_name);
-							// Wordpress does not allow to change to autoload if the value have not been changed as well
-							// We should change the value to something such as xyz, then change it back again to its original value
-							update_option($option_name, "xyz");
-							update_option($option_name, $options_value, $autoload_value);
-						}else{
-							$additional_msg = "<span style='color:orange'>" . __('For technical concerns, the option aDBc_edd_license_key cannot be changed!', 'advanced-database-cleaner') . "</span>";
+						$option_name 	= preg_replace( "/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name );
+
+						$options_value 	= get_option( $option_name );
+
+						// Wordpress does not allow to change the autoload if the value have not been changed as well
+						// We should change the value to something such as xyz, then change it back again to its original value
+						if ( false !== $options_value ) {
+
+							update_option( $option_name, "xyz" );
+							update_option( $option_name, $options_value, $autoload_value );
+
 						}
 					}
 				}
+
 				// Update the message to show to the user
-				$this->aDBc_message = __('Autoload value successfully changed!', 'advanced-database-cleaner') . " " . $additional_msg;
+				$this->aDBc_message = __( 'Autoload value successfully changed!', 'advanced-database-cleaner' );
+
 			}
-		}else if($action == 'edit_categorization'){
+
+		} else if ( $action == 'edit_categorization' ) {
+
 			// If the user wants to edit categorization of the options he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
 				// Create a temp file containing options names to change categorization for
@@ -423,7 +436,7 @@ class ADBC_Options_List extends WP_List_Table {
 
 			<!-- Code for "run new search" button + Show loading image -->
 			<div style="float:left">
-				
+
 				<?php
 				if ( $this->aDBc_which_button_to_show == "new_search" ) {
 					$aDBc_search_text  	= __( 'Scan options', 'advanced-database-cleaner' );

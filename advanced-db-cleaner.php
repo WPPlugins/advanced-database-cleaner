@@ -4,7 +4,7 @@
 Plugin Name: Advanced Database Cleaner
 Plugin URI: https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner
 Description: Clean database by deleting unused data such as 'old revisions', 'old drafts', 'orphan options', etc. Optimize database and more.
-Version: 3.1.1
+Version: 3.1.2
 Author: Younes JFR.
 Author URI: https://www.sigmaplugin.com
 Contributors: symptote
@@ -18,22 +18,41 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 if ( ! defined( 'ABSPATH' ) ) return;
 if ( ! is_main_site() ) return;
 
-// Require WordPress List Table Administration API
-if ( ! class_exists( 'WP_List_Table' ) ) {
-
-	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
-
-}
-
 class ADBC_Advanced_DB_Cleaner {
 
 	public function __construct() {
 
-		// Define constants that should be modified in each version
-		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 	define( "ADBC_PLUGIN_VERSION", "3.1.1" );
-		if( ! defined( "ADBC_PLUGIN_PLAN" ) ) 		define( "ADBC_PLUGIN_PLAN", "free" );
+		/***************************************************************************
+		* Prevent conflict between free and pro versions
+		***************************************************************************/
 
-		// Prevent conflicts between free and pro, load text-domain and check if we should update settings after upgrade
+		if ( ! function_exists( 'deactivate_plugins' ) ) include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
+		// Prevent conflict between free and pro versions
+		if ( is_plugin_active( 'advanced-database-cleaner-pro/advanced-db-cleaner.php' ) &&
+			 is_plugin_active( 'advanced-database-cleaner/advanced-db-cleaner.php' ) ) {
+
+			// Deactivate the free version in silent mode to keep scheduled tasks for pro
+			deactivate_plugins( 'advanced-database-cleaner/advanced-db-cleaner.php', true );
+			add_action( 'admin_notices', array( $this, 'aDBc_conflict_notice_free' ) );
+			return;
+		}
+
+		// Prevent conflict between new pro and old pro versions
+		if ( is_plugin_active( 'advanced-database-cleaner-pro/advanced-db-cleaner.php' ) &&
+			 is_plugin_active( 'advanced-db-cleaner/advanced-db-cleaner.php' ) ) {
+
+			// Deactivate the old pro in silent mode to keep scheduled tasks for pro
+			deactivate_plugins( 'advanced-db-cleaner/advanced-db-cleaner.php', true );
+			add_action( 'admin_notices', array( $this, 'aDBc_conflict_notice_old_pro' ) );
+			return;
+		}
+
+		/***************************************************************************
+		* Add actions and filters
+		***************************************************************************/
+
+		// Load plugin
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 
 		// Load CSS and JS
@@ -51,69 +70,24 @@ class ADBC_Advanced_DB_Cleaner {
 		register_deactivation_hook	( __FILE__, array( $this, 'aDBc_deactivate_plugin' ) );
 		register_uninstall_hook		( __FILE__, array( 'ADBC_Advanced_DB_Cleaner', 'aDBc_uninstall' ) );
 
-		// Add admin notice to rate plugin
-		add_action( 'admin_notices', array( $this, 'aDBc_rate_notice' ) );
 		// Ignore admin notice if needed + ignore double check if needed
 		add_action( 'admin_init', array( $this, 'aDBc_ignore_notice' ) );
 
-		// Update settings if changed by users
-		$this->aDBc_update_settings();
+		// Add admin notice to rate plugin
+		add_action( 'admin_notices', array( $this, 'aDBc_rate_notice' ) );
 
 	}
 
-	// Do this on plugins loded : prevent conflict between free and pro, load text-domain and check if we should update settings in DB
+	// Do this on plugins loaded : load text-domain and check if we should update settings in DB
 	public function plugins_loaded() {
 
-		// Prevent conflicts between free and pro versions and between old pro and new pro
-		if ( ! function_exists( 'deactivate_plugins' ) ) include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		/***************************************************************************
+		* Define common constants and variables (we switch all "\" to "/" in paths)
+		***************************************************************************/
 
-		// Test if the user wants to activate the pro but the free is activated
-		if ( is_plugin_active( 'advanced-database-cleaner-pro/advanced-db-cleaner.php' ) &&
-		     is_plugin_active( 'advanced-database-cleaner/advanced-db-cleaner.php' ) ) {
+		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 			define( "ADBC_PLUGIN_VERSION", "3.1.2" );
 
-			// Deactivate the free version in silent mode to keep scheduled tasks for pro
-			deactivate_plugins( 'advanced-database-cleaner/advanced-db-cleaner.php', true );
-			add_action( 'admin_notices', array( $this, 'aDBc_conflict_notice_free' ) );
-
-			return;
-		}
-
-		// Test if the user wants to activate the pro version but he has the old pro activated
-		if ( is_plugin_active( 'advanced-database-cleaner-pro/advanced-db-cleaner.php' ) &&
-		     is_plugin_active( 'advanced-db-cleaner/advanced-db-cleaner.php' ) ) {
-
-			// Deactivate the old pro in silent mode to keep scheduled tasks for pro
-			deactivate_plugins( 'advanced-db-cleaner/advanced-db-cleaner.php', true );
-			add_action( 'admin_notices', array( $this, 'aDBc_conflict_notice_old_pro' ) );
-
-			return;
-		}
-
-		/********************************************************************
-		* Include functions and specific elements for pro version
-		********************************************************************/
-
-		include_once 'includes/functions.php';
-
-		// In pro, include these as well
-
-		if ( ADBC_PLUGIN_PLAN == "pro" ) {
-
-			include_once 'includes/functions_pro.php';
-
-			register_shutdown_function( 'aDBc_shutdown_due_to_timeout' );
-
-			include_once 'includes/license/adbc-edd-sample-plugin.php';
-
-			add_action( 'wp_ajax_aDBc_new_run_search_for_items', 'aDBc_new_run_search_for_items' );
-			add_action( 'wp_ajax_aDBc_get_progress_bar_width', 'aDBc_get_progress_bar_width' );
-			add_action( 'wp_ajax_aDBc_double_check_items', 'aDBc_double_check_items' );
-			add_action( 'wp_ajax_aDBc_stop_search', 'aDBc_stop_search' );
-		}
-
-		/********************************************************************
-		* Define other variables (we switch all "\" to "/" in paths)
-		********************************************************************/
+		if( ! defined( "ADBC_PLUGIN_PLAN" ) ) 				define( "ADBC_PLUGIN_PLAN", "free" );
 
 		if ( ! defined( "ADBC_PLUGIN_DIR_PATH" ) ) 			define( "ADBC_PLUGIN_DIR_PATH", plugins_url( '' , __FILE__ ) );
 
@@ -142,6 +116,47 @@ class ADBC_Advanced_DB_Cleaner {
 		$aDBc_upload_dir = wp_upload_dir();
 
 		if ( ! defined( "ADBC_UPLOAD_DIR_PATH" ) ) 			define( "ADBC_UPLOAD_DIR_PATH", str_replace( '\\' ,'/', $aDBc_upload_dir['basedir'] ) );
+
+		/***************************************************************************
+		* Include functions and add Ajax functions
+		***************************************************************************/
+
+		include_once 'includes/functions.php';
+
+		// Add Ajax functions used by both free and pro versions
+		add_action( 'wp_ajax_aDBc_save_settings_callback', 'aDBc_save_settings_callback' );
+
+		// In pro, include these as well
+		if ( ADBC_PLUGIN_PLAN == "pro" ) {
+
+			include_once 'includes/functions_pro.php';
+
+			register_shutdown_function( 'aDBc_shutdown_due_to_timeout' );
+
+			include_once 'includes/license/adbc-edd-sample-plugin.php';
+
+			add_action( 'wp_ajax_aDBc_license_actions_callback', 'aDBc_license_actions_callback' );
+			add_action( 'wp_ajax_aDBc_new_run_search_for_items', 'aDBc_new_run_search_for_items' );
+			add_action( 'wp_ajax_aDBc_get_progress_bar_width', 'aDBc_get_progress_bar_width' );
+			add_action( 'wp_ajax_aDBc_double_check_items', 'aDBc_double_check_items' );
+			add_action( 'wp_ajax_aDBc_stop_search', 'aDBc_stop_search' );
+		}
+
+		/***************************************************************************
+		* Add default settings if needed
+		***************************************************************************/
+
+		$settings = get_option( 'aDBc_settings' );
+
+		if ( empty( $settings ) ) {
+
+			$settings['left_menu'] 			= "1";
+			$settings['menu_under_tools'] 	= "1";
+			$settings['plugin_version'] 	= ADBC_PLUGIN_VERSION;
+			$settings['installed_on'] 		= date( "Y/m/d" );
+			update_option( 'aDBc_settings', $settings, "no" );
+
+		}
 
 		/**************************************************************************************************************
 		*
@@ -188,7 +203,6 @@ class ADBC_Advanced_DB_Cleaner {
 		}
 
 		// Define & increase timeout
-
 		if ( ! defined( "ADBC_ORIGINAL_TIMEOUT" ) )	{
 
 			define( "ADBC_ORIGINAL_TIMEOUT", ini_get( 'max_execution_time' ) );
@@ -197,40 +211,46 @@ class ADBC_Advanced_DB_Cleaner {
 
 		if ( ADBC_PLUGIN_PLAN == "pro" && function_exists( 'set_time_limit' ) && ADBC_ORIGINAL_TIMEOUT < 300 ) {
 
+			// xxx do this only before scanning
 			@set_time_limit( 300 );
 
 		}
 
-		// Add 'Database Cleaner' to Wordpress menu
-
+		// Add plugin menu to Wordpress menus
 		add_action('admin_menu', array($this, 'aDBc_add_admin_menu'));
 
 		// Load text-domain
-
 		load_plugin_textdomain('advanced-database-cleaner', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
 		// If plugin get updated, make changes to old version
-
 		$this->aDBc_update_plugin_check();
 
 	}
 
-	// Show notice if conflict detected between free and pro version when installed together
-	function aDBc_conflict_notice_free(){
+	// Show notice if conflict detected between free and pro versions
+	function aDBc_conflict_notice_free() {
+
 		echo '<div class="error"><p>';
-		_e('The free version of Advanced DB Cleaner has been de-activated since the pro version is active.', 'advanced-database-cleaner');
+		_e( 'The free version of Advanced DB Cleaner has been de-activated since the pro version is active.', 'advanced-database-cleaner' );
 		echo "</p></div>";
+
 	}
-	function aDBc_conflict_notice_old_pro(){
+
+	// Show notice if conflict detected between old pro and new pro versions
+	function aDBc_conflict_notice_old_pro() {
+
 		echo '<div class="error"><p>';
-		_e('The old pro of Advanced DB Cleaner has been de-activated since the new pro version is active.', 'advanced-database-cleaner');
+		_e( 'The old pro of Advanced DB Cleaner has been de-activated since the new pro version is active.', 'advanced-database-cleaner' );
 		echo "</p></div>";
+
 	}
 
 	// Add 'Database Cleaner' to Wordpress menu
 	function aDBc_add_admin_menu(){
 
-		global $aDBc_settings, $aDBc_left_menu, $aDBc_tool_submenu;
+		global $aDBc_left_menu, $aDBc_tool_submenu;
+
+		$aDBc_settings = get_option('aDBc_settings');
 
 		$icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg width="20" height="20" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path fill="#a0a5aa" d="M896 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-384q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-1152q208 0 385 34.5t280 93.5 103 128v128q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-128q0-69 103-128t280-93.5 385-34.5z"/></svg>');
 
@@ -266,7 +286,9 @@ class ADBC_Advanced_DB_Cleaner {
 
 		'ajaxurl' 				=> admin_url( 'admin-ajax.php' ),
 		'images_path'			=> ADBC_PLUGIN_DIR_PATH . "/images/",
+		'ajax_nonce'	 		=> wp_create_nonce('aDBc_nonce'),
 		'sentence_scanning' 	=> __( 'Scanning ...', 'advanced-database-cleaner' ),
+		'please_wait' 			=> __( 'Please wait ...', 'advanced-database-cleaner' ),
 		'all_items' 			=> __( 'All items', 'advanced-database-cleaner' ),
 		'all_items2' 			=> __( 'Scan all items', 'advanced-database-cleaner' ),
 		'uncategorized' 		=> __( 'Uncategorized', 'advanced-database-cleaner' ),
@@ -281,7 +303,9 @@ class ADBC_Advanced_DB_Cleaner {
 		'are_you_sure' 			=> __( 'Are you sure?', 'advanced-database-cleaner' ),
 		'make_db_backup_first' 	=> __( 'Don\'t forget to make a backup of your database first!', 'advanced-database-cleaner' ),
 		'cancel' 				=> __( 'Cancel', 'advanced-database-cleaner' ),
-		'Continue' 				=> __( 'Continue', 'advanced-database-cleaner' )
+		'Continue' 				=> __( 'Continue', 'advanced-database-cleaner' ),
+		'active' 				=> __( 'Active', 'advanced-database-cleaner' ),
+		'inactive' 				=> __( 'Inactive', 'advanced-database-cleaner' )
 
 						));
 
@@ -295,7 +319,7 @@ class ADBC_Advanced_DB_Cleaner {
 	* Get more info here: http://codex.wordpress.org/Plugin_API/Filter_Reference/cron_schedules
 	******************************************************************************************/
 	function aDBc_additional_schedules($schedules){
-		// hourly, daily and twicedaily are default schedules in WP, we will add weekly and monthly
+		// hourly, daily and twice-daily are default schedules in WP, we will add weekly and monthly
 		// Add weekly schedule
 		$schedules['weekly'] = array(
 			'interval' => 604800,
@@ -309,23 +333,13 @@ class ADBC_Advanced_DB_Cleaner {
 		return $schedules;
 	}
 
-	// Register activation of the plugin
-	function aDBc_activate_plugin(){
-		// Add default settings if not exists for normal installation
-		$settings = get_option('aDBc_settings');
-		if(empty($settings)){
-			$settings['left_menu'] = "1";
-			$settings['menu_under_tools'] = "1";
-			$settings['plugin_version'] = ADBC_PLUGIN_VERSION;
-			$settings['installed_on'] = date("Y/m/d");
-			update_option('aDBc_settings', $settings, "no");
-		}
-	}
+	// Register activation of the plugin (nothing to do)
+	function aDBc_activate_plugin(){}
 
 	// Register deactivation hook
 	function aDBc_deactivate_plugin($network_wide){
 
-		// Clean these in case there are any remining tasks from older versions < 3.0.0. Those tasks were without arguments
+		// Clean these in case there are any remaining tasks from older versions < 3.0.0. Those tasks were without arguments
 		wp_clear_scheduled_hook('aDBc_optimize_scheduler');
 		wp_clear_scheduled_hook('aDBc_clean_scheduler');
 
@@ -363,7 +377,7 @@ class ADBC_Advanced_DB_Cleaner {
 
 		// Delete these options in pro
 
-		if ( ADBC_PLUGIN_PLAN == "pro" ) {
+		if ( __METHOD__ == 'ADBC_Advanced_DB_Cleaner_Pro::aDBc_uninstall' ) {
 
 			// These options should not exist after the scan. Make sure to clean them just in case
 
@@ -454,7 +468,7 @@ class ADBC_Advanced_DB_Cleaner {
 			if(empty($settings['plugin_version'])){
 
 				// If settings is not empty, this means that the users had already installed ADBC plugin
-				// if empty($settings['plugin_version']) => the user will update to or will install the version >= 3.0.0 for the first time, because in previous verions, this option "plugin_version" does not exist
+				// if empty($settings['plugin_version']) => the user will update to or will install the version >= 3.0.0 for the first time, because in previous versions, this option "plugin_version" does not exist
 
 				// Before starting the update, make all previous plugin options to autoload "no"
 				$options_array = array('aDBc_optimize_schedule', 'aDBc_clean_schedule', 'aDBc_settings', 'aDBc_edd_license_key', 'aDBc_edd_license_status');
@@ -467,7 +481,9 @@ class ADBC_Advanced_DB_Cleaner {
 				}
 
 				// Proceed to update routine. First, add some options
-				$settings['ignore_premium'] = "no";
+
+				// xxx we have deleted this process in all version from 09.02.2023. Delete $settings['ignore_premium'] later
+				// $settings['ignore_premium'] = "no";
 				$settings['plugin_version'] = ADBC_PLUGIN_VERSION;
 				$settings['installed_on'] = date("Y/m/d");
 				// Delete some unused options
@@ -494,7 +510,7 @@ class ADBC_Advanced_DB_Cleaner {
 					wp_clear_scheduled_hook('aDBc_clean_scheduler');
 					wp_schedule_event($timestamp, $repeat, "aDBc_clean_scheduler", array('cleanup_schedule'));
 				}else{
-					// If no scheduled task, delete any remining option in DB
+					// If no scheduled task, delete any remaining option in DB
 					delete_option('aDBc_clean_schedule');
 				}
 
@@ -518,7 +534,7 @@ class ADBC_Advanced_DB_Cleaner {
 					wp_clear_scheduled_hook('aDBc_optimize_scheduler');
 					wp_schedule_event($timestamp, $repeat, "aDBc_optimize_scheduler", array('optimize_schedule'));
 				}else{
-					// If no scheduled task, delete any remining option in DB
+					// If no scheduled task, delete any remaining option in DB
 					delete_option('aDBc_optimize_schedule');
 				}
 
@@ -642,6 +658,7 @@ class ADBC_Advanced_DB_Cleaner {
 			}
 		}
 	}
+
 	function aDBc_ignore_notice(){
 		// Disable rating notice
 		if(isset($_GET['adbc-ignore-notice']) && $_GET['adbc-ignore-notice'] == "0"){
@@ -650,7 +667,7 @@ class ADBC_Advanced_DB_Cleaner {
 			update_option('aDBc_settings', $settings, "no");
 		}
 
-		// In pro, hide double check message
+		// xxx In pro, hide double check message, this is not working for now
 		if ( ADBC_PLUGIN_PLAN == "pro" ) {
 			if(isset($_GET['ignore-double-check-tables'])){
 				delete_option('aDBc_last_search_ok_tables');
@@ -664,46 +681,12 @@ class ADBC_Advanced_DB_Cleaner {
 		}
 	}
 
-	// Update settings when saved in "overview & settings" tab. Test also to disable premium notice if closed by users
-	function aDBc_update_settings(){
-
-		global $aDBc_settings;
-		$aDBc_settings = get_option('aDBc_settings');
-		if(isset($_POST['save_settings'])){
-			$aDBc_settings['left_menu'] 				= isset($_POST['aDBc_left_menu']) ? "1" : "0";
-			$aDBc_settings['menu_under_tools'] 			= isset($_POST['aDBc_menu_under_tools']) ? "1" : "0";
-			// In case the user does not select any of menu positions, we force the menu under tools to be shown
-			if(!isset($_POST['aDBc_left_menu']) && !isset($_POST['aDBc_menu_under_tools'])){
-				$aDBc_settings['left_menu'] 	= "1";
-			}
-
-			if ( ADBC_PLUGIN_PLAN == "free" ) {
-
-				$aDBc_settings['hide_premium_tab'] = isset( $_POST['aDBc_hide_premium_tab'] ) ? "1" : "0";
-
-			}
-
-			// Update settings in DB
-			update_option( 'aDBc_settings', $aDBc_settings, "no" );
-		}
-
-
-		/********************************************************************
-		* In free, update premium notice for lost licenses
-		********************************************************************/
-		if ( ADBC_PLUGIN_PLAN == "free" ) {
-			if(isset($_GET['ignore-premium-notice']) && $_GET['ignore-premium-notice'] == "yes"){
-				$aDBc_settings['ignore_premium'] = "yes";
-				update_option('aDBc_settings', $aDBc_settings, "no");
-			}
-		}
-
-
-	}
-
 	// The admin page of the plugin
 
 	function aDBc_main_page_callback() {
+
+		// Require WordPress List Table Administration API
+		if ( ! class_exists( 'WP_List_Table' ) )  require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 
 	?>
 
@@ -764,57 +747,22 @@ class ADBC_Advanced_DB_Cleaner {
 			</div>
 
 			<h2></h2>
-			
+
 			<?php
 
-			if ( ADBC_PLUGIN_PLAN == "pro" && ! aDBc_edd_is_license_activated() ) {
+			if ( ADBC_PLUGIN_PLAN == "pro") {
 
-				echo '<div class="aDBc-please-activate-msg notice is-dismissible"><p>';
+				$visibility_style = aDBc_edd_is_license_activated() ? "display:none" : "";
+
+				echo '<div class="aDBc-please-activate-msg notice is-dismissible" style="' . $visibility_style .'"><p>';
 				echo __( 'Please activate your license key to get lifetime automatic updates and support.', 'advanced-database-cleaner' );
 				echo ' <a href="?page=advanced_db_cleaner&aDBc_tab=license">' . __( 'Activate now', 'advanced-database-cleaner' ) . "</a>";
 				echo '</p></div>';
+
 			}
-			// zzz
-			global $aDBc_settings;
 
-			// Notice to users who will lose their pro after upgrading to 3.0.0 from an old version
-
-			if ( ADBC_PLUGIN_PLAN == "free" && ! empty( $aDBc_settings['ignore_premium'] ) && $aDBc_settings['ignore_premium'] == "no" ) {
-
-				$aDBc_new_URI = $_SERVER['REQUEST_URI'];
-				$aDBc_new_URI = add_query_arg( 'ignore-premium-notice', 'yes', $aDBc_new_URI ); ?>
-
-				<div id="aDBc_main_msg" class="aDBc-premium-lost-msg">
-
-					<span style="float:left;margin-bottom:20px"><?php _e('Important notice to premium users!', 'advanced-database-cleaner'); ?></span>
-
-					<a style="text-decoration:none;float:right" href="<?php echo esc_url( $aDBc_new_URI ) ?>">
-						<span class="dashicons-dismiss dashicons"></span>
-					</a>
-
-					<p style="font-size:13px;clear:both">
-
-						<?php
-
-						_e('You will probably lose the pro version after this upgrade (This is due to a conflict between the free and pro versions which is now solved). If it is the case, please follow these <a target ="_blank" href="https://sigmaplugin.com/blog/restore-pro-version-after-upgrade-to-3-0-0">steps to restore your pro version</a> with all new features. Thank you :)', 'advanced-database-cleaner');
-
-						?>
-
-						<br/>
-
-						<span style="font-size:12px;color:#999">
-
-							<?php
-
-							_e('If you are not a premium user, please kindly just close this message since you are not concerned by this issue!', 'advanced-database-cleaner');
-
-							?>
-
-						</span>
-					</p>
-				</div>
-			<?php
-			}
+			// YY. Notice to users who will lose their pro after upgrading to 3.0.0 from an old version
+			// YY. This process has been deleted, no need for it anymore
 
 			$main_content_style = "";
 
@@ -841,7 +789,8 @@ class ADBC_Advanced_DB_Cleaner {
 									    'license' 	=> __( 'License', 'advanced-database-cleaner' )
 									  );
 
-					// Hide premium tab in pro + In free, test if the the user choosed to hide the premium tab
+					// Hide premium tab in pro + In free, test if the user chose to hide the premium tab
+					$aDBc_settings = get_option('aDBc_settings');
 					if ( ADBC_PLUGIN_PLAN == "pro" ||
 					    ( ADBC_PLUGIN_PLAN == "free" && ! empty( $aDBc_settings['hide_premium_tab'] ) && $aDBc_settings['hide_premium_tab'] == "1" )
 					   ) {

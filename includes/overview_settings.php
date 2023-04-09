@@ -70,16 +70,6 @@ if(function_exists('is_multisite') && is_multisite()){
 	$aDBc_number_sites = "1";
 }
 
-// Get settings
-global $aDBc_settings;
-if(isset($_POST['save_settings'])){
-	if(isset($_POST['aDBc_left_menu']) || isset($_POST['aDBc_menu_under_tools'])){
-		echo '<div id="aDBc_message" class="updated notice is-dismissible"><p>' . __('Settings saved successfully!', 'advanced-database-cleaner') . '</p></div>';
-	}else{
-		echo '<div id="aDBc_message" class="updated notice is-dismissible"><p>' . __('Settings saved successfully! The default position of the plugin menu is the left side of the admin panel', 'advanced-database-cleaner') . '</p></div>';
-	}
-}
-
 ?>
 
 <div class="aDBc-content-max-width">
@@ -173,15 +163,12 @@ if(isset($_POST['save_settings'])){
 				<li style="padding-top:10px;padding-bottom:20px">
 
 					<?php
-					if((!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] == '1') ||
-						(empty($aDBc_settings['left_menu']) && empty($aDBc_settings['menu_under_tools']))){
-						$aDBc_checked = "checked='checked'";
-					}else{
-						$aDBc_checked = "";
-					}
+
+					$aDBc_settings = get_option('aDBc_settings');
+
 					?>
 
-					<input type="checkbox" name="aDBc_left_menu" <?php echo $aDBc_checked ?>/>
+					<input type="checkbox" name="aDBc_left_menu" <?php echo (!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] == '1') ? "checked='checked'" : "" ?>/>
 					<?php _e('Show plugin left menu', 'advanced-database-cleaner'); ?>
 					<div class="aDBc-overview-setting-desc">
 						<?php _e('Displays a menu at the left side of your WP admin', 'advanced-database-cleaner'); ?>
@@ -189,7 +176,7 @@ if(isset($_POST['save_settings'])){
 				</li>
 
 				<li style="padding-bottom:10px">
-					<input type="checkbox" name="aDBc_menu_under_tools" <?php echo (!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] == '1') ? "checked='checked'" : ""?>/>
+					<input type="checkbox" name="aDBc_menu_under_tools" <?php echo (!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] == '1') ? "checked='checked'" : "" ?>/>
 					<?php _e('Show plugin menu under tools', 'advanced-database-cleaner'); ?>
 					<div class="aDBc-overview-setting-desc">
 						<?php _e('Displays a menu under "tools" menu', 'advanced-database-cleaner'); ?>
@@ -214,7 +201,13 @@ if(isset($_POST['save_settings'])){
 
 			</ul>
 
-			<input name="save_settings" type="submit" class="button-primary aDBc-save-settings" value="<?php _e('Save settings','advanced-database-cleaner'); ?>" />
+			<div id="aDBc_save_settings" class="button-primary aDBc-save-settings">
+
+				<span id="aDBc_save_icon" class="dashicons dashicons-saved aDBc-button-icon"></span>
+
+				<?php _e( 'Save settings', 'advanced-database-cleaner' ); ?>
+
+			</div>
 
 		</form>
 

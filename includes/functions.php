@@ -1,11 +1,11 @@
 <?php
-/** If we are in MU, define the main blog ID. This will be usefull to call get_option correctly when we switch between blogs */
+/** If we are in MU, define the main blog ID. This will be useful to call get_option correctly when we switch between blogs */
 /** Used mainly in aDBc_get_keep_last_sql_arg() */
 if(function_exists('is_multisite') && is_multisite()){
 	if(!defined("ADBC_MAIN_SITE_ID")) 		define("ADBC_MAIN_SITE_ID", get_current_blog_id());
 }
 
-/** Reduces the value of the string in parameter according to max lenght then create a tooltip for it */
+/** Reduces the value of the string in parameter according to max length then create a tooltip for it */
 function aDBc_create_tooltip_for_long_string($string_value, $max_characters){
 	$new_name = esc_html($string_value);
 	if(strlen($new_name) > $max_characters){
@@ -15,7 +15,7 @@ function aDBc_create_tooltip_for_long_string($string_value, $max_characters){
 	return $new_name;
 }
 
-/** Reduces the value of the string in parameter according to max lenght then create a tooltip for it */
+/** Reduces the value of the string in parameter according to max length then create a tooltip for it */
 function aDBc_create_tooltip_by_replace($string_value, $max_characters, $tooltip_content){
 	$new_name = $string_value;
 	if(strlen($new_name) > $max_characters){
@@ -25,7 +25,7 @@ function aDBc_create_tooltip_by_replace($string_value, $max_characters, $tooltip
 	return $new_name;
 }
 
-/** Reduces the value of the option value according to max lenght then create a tooltip for it */
+/** Reduces the value of the option value according to max length then create a tooltip for it */
 function aDBc_create_tooltip_for_option_value($string_value, $max_characters){
 
 	$option_content = maybe_unserialize($string_value);
@@ -250,7 +250,7 @@ function aDBc_optimize_scheduled_tables($schedule_name){
 			}
 		}
 
-		// Perfom repair operation
+		// Perform repair operation
 		if(in_array("repair", $operations)){
 			$result = $wpdb->get_results("SELECT table_name FROM information_schema.tables WHERE table_schema = '" . DB_NAME ."' and Engine IN ('CSV', 'MyISAM', 'ARCHIVE')");
 			foreach($result as $table){
@@ -398,7 +398,7 @@ function aDBc_count_elements_to_clean(&$aDBc_unused){
 /** Prepare keep_last element if any **/
 function aDBc_get_keep_last_sql_arg($element_type, $column_name){
 
-	// If we are in MU, we shoul call settings from the main site since here in are inside switch_blog and therefore calling get_option will lead to calling the current blog options
+	// If we are in MU, we should call settings from the main site since here in are inside switch_blog and therefore calling get_option will lead to calling the current blog options
 	if(function_exists('is_multisite') && is_multisite()){
 		$settings = get_blog_option(ADBC_MAIN_SITE_ID, 'aDBc_settings');
 	}else{
@@ -643,11 +643,11 @@ function aDBc_prepare_items_to_display(
 
 	// Prepare items to display
 
-	$aDBc_not_categorized_toolip = "";
+	$aDBc_not_categorized_tooltip = "";
 
 	if ( ADBC_PLUGIN_PLAN == "pro" ) {
 
-		$aDBc_not_categorized_toolip = "<span class='aDBc-tooltips-headers'>
+		$aDBc_not_categorized_tooltip = "<span class='aDBc-tooltips-headers'>
 							<img class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
 							<span>" . __('This item is not categorized yet! Please click on scan button above to categorize it.','advanced-database-cleaner') ." </span>
 							</span>";
@@ -674,7 +674,7 @@ function aDBc_prepare_items_to_display(
 
 				}
 
-				$belongs_to = '<span style="color:#999">' . $belongs_to_without_html . '</span>' . $aDBc_not_categorized_toolip;
+				$belongs_to = '<span style="color:#999">' . $belongs_to_without_html . '</span>' . $aDBc_not_categorized_tooltip;
 				break;
 
 			case 'o' :
@@ -1013,7 +1013,7 @@ function aDBc_add_scheduled_tasks(&$aDBc_all_tasks, $blog_id) {
 
 
 /***********************************************************************************
-* Transfrom bytes to corresponding best size system: KB, MB or GB
+* Transform bytes to corresponding best size system: KB, MB or GB
 ***********************************************************************************/
 function aDBc_get_size_from_bytes($bytes) {
 	$size = $bytes / 1024;
@@ -1364,6 +1364,56 @@ function aDBc_get_ADBC_options_and_tasks_names() {
 	);
 
 	return $aDBc_names;
+}
+
+/***********************************************************************************
+* Save settings
+***********************************************************************************/
+
+function aDBc_save_settings_callback() {
+
+	check_ajax_referer( 'aDBc_nonce', 'security' );
+
+	if ( ! current_user_can( 'administrator' ) )
+
+		wp_send_json_error( __( 'Not sufficient permissions!', 'advanced-database-cleaner' ) );
+
+	$aDBc_settings = get_option( 'aDBc_settings' );
+
+	// Data validation
+
+	$left_menu 			= intval( $_REQUEST['left_menu'] );
+	$menu_under_tools 	= intval( $_REQUEST['menu_under_tools'] );
+	$hide_premium_tab 	= intval( $_REQUEST['hide_premium_tab'] );
+
+	$allowed_values = array(0, 1);
+
+	if ( ! in_array( $left_menu, $allowed_values, true ) ||
+		 ! in_array( $menu_under_tools, $allowed_values, true ) ||
+		 ! in_array( $hide_premium_tab, $allowed_values, true ) ) {
+
+		wp_send_json_error( __( 'An error has occurred. Please try again!', 'advanced-database-cleaner' ) );
+
+	}
+
+	if ( $left_menu == 0 && $menu_under_tools == 0 )
+
+		wp_send_json_error( __( 'Please select at least one menu to show the plugin', 'advanced-database-cleaner' ) );
+
+	// Set new values
+
+	$aDBc_settings['left_menu'] 		= $left_menu;
+	$aDBc_settings['menu_under_tools'] 	= $menu_under_tools;
+
+	if ( ADBC_PLUGIN_PLAN == "free" )
+
+		$aDBc_settings['hide_premium_tab'] = $hide_premium_tab;
+
+	update_option( 'aDBc_settings', $aDBc_settings, "no" );
+
+	// If no error reported before, success and die
+	wp_send_json_success();
+
 }
 
 ?>
