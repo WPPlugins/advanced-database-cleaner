@@ -259,24 +259,21 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 
 	/** WP: Process bulk actions */
     public function process_bulk_action() {
-        // security check!
-        if (isset($_POST['_wpnonce']) && !empty($_POST['_wpnonce'])){
-            $nonce  = filter_input(INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING);
-            $action = 'bulk-' . $this->_args['plural'];
-            if (!wp_verify_nonce( $nonce, $action))
-                wp_die('Security check failed!');
-        }else{
-			// If $_POST['_wpnonce'] is not set, return
+        
+		// Detect when a bulk action is being triggered.
+		$action = $this->current_action();
+
+		if ( ! $action )
 			return;
-		}
+
+		// security check!
+		check_admin_referer( 'bulk-' . $this->_args['plural'] );
 
 		// Check role
-		if(!current_user_can('administrator'))
-			wp_die('Security check failed!');
+		if ( ! current_user_can( 'administrator' ) )
+			wp_die( 'Security check failed!' );
 
-        $action = $this->current_action();
-
-        if($action == 'clean'){
+        if ( $action == 'clean' ) {
 
 			// If the user wants to clean the elements he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
@@ -368,7 +365,7 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 						// We convert hook name to a string because the arg maybe only a digit!
 						$timestamp = wp_next_scheduled( "aDBc_clean_scheduler", array( $hook_name . '' ) );
 						if($timestamp){
-							$next_run = get_date_from_gmt(date('Y-m-d H:i:s', $timestamp), 'M j, Y - H:i');
+							$next_run = get_date_from_gmt(date('Y-m-d H:i:s', (int) $timestamp), 'M j, Y - H:i');
 						}else{
 							$next_run = "---";
 						}

@@ -224,27 +224,20 @@ class ADBC_Options_List extends WP_List_Table {
 	/** WP: Process bulk actions */
     public function process_bulk_action() {
 
-        // security check!
-        if ( isset( $_POST['_wpnonce'] ) && !empty( $_POST['_wpnonce'] ) ) {
+		// Detect when a bulk action is being triggered.
+		$action = $this->current_action();
 
-            $nonce  = filter_input( INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING );
-            $action = 'bulk-' . $this->_args['plural'];
-
-            if ( !wp_verify_nonce( $nonce, $action ) )
-                wp_die( 'Security check failed!' );
-
-        } else {
-
+		if ( ! $action )
 			return;
-		}
+
+		// security check!
+		check_admin_referer( 'bulk-' . $this->_args['plural'] );
 
 		// Check role
-		if(!current_user_can('administrator'))
-			wp_die('Security check failed!');
+		if ( ! current_user_can( 'administrator' ) )
+			wp_die( 'Security check failed!' );
 
-        $action = $this->current_action();
-
-        if($action == 'delete'){
+        if ( $action == 'delete' ) {
 			// If the user wants to clean the options he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
 				if(function_exists('is_multisite') && is_multisite()){

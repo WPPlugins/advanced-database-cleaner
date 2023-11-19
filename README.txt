@@ -4,8 +4,8 @@ Donate Link: https://www.sigmaplugin.com/donation
 Tags: clean, clean up, cleanup, database, optimize, performance, speed, optimizing, clean-up, orphan, orphaned, tables, options
 Requires at least: 3.1.0
 Requires PHP: 5.0
-Tested up to: 6.2
-Stable tag: 3.1.2
+Tested up to: 6.4
+Stable tag: 3.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,14 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.1.3 - 12/09/2023 =
+- Security: enhanced the security by sanitizing some parameters
+- Fix: fixed 'Constant FILTER_SANITIZE_STRING is deprecated in PHP 8'
+- Fix: fixed 'Undefined property : stdClass::$data_free'
+- Fix: fixed 'PHP Fatal error:  Uncaught TypeError: date(): Argument #2 ($timestamp) must be of type ?int'
+- Tweak: better handling of nonces
+- Compatibility: tested with the latest version of WordPress 6.3.1
 
 = 3.1.2 - 22/02/2023 =
 - Security fix: when saving the settings

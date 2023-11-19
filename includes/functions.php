@@ -47,9 +47,19 @@ function aDBc_get_order_by_sql_arg($default_order_by){
 
 		// Prepare ORDER BY and ORDER
 		$order_by = " ORDER BY " . $default_order_by . " ASC";
+
 		if(!empty($_GET['orderby'])){
-			$order_by = " ORDER BY " . esc_sql($_GET['orderby']);
-			$order_by .= empty($_GET['order']) ? " ASC" : " " . esc_sql($_GET['order']);
+
+			$sanitized_orderby = preg_replace('/[^a-zA-Z0-9_\.]/', '', $_GET['orderby']);
+
+			$order_by = " ORDER BY " . $sanitized_orderby;
+
+			if(!empty($_GET['order'])){
+				$order_by .= 'DESC' === strtoupper( $_GET['order'] ) ? ' DESC' : ' ASC';
+			} else {
+				$order_by .= " ASC";
+			}
+
 		}
 
 		return $order_by;
@@ -758,8 +768,13 @@ function aDBc_prepare_items_to_display(
 
 	// Sort items if necessary
 	if(!empty($_GET['orderby'])){
-		$order_by 	= esc_sql($_GET['orderby']);
-		$order 		= empty($_GET['order']) ? "asc" : esc_sql($_GET['order']);
+
+		$order_by 	= preg_replace('/[^a-zA-Z0-9_\.]/', '', $_GET['orderby']);
+		$order 		= "asc";
+
+		if(!empty($_GET['order'])){
+			$order = 'DESC' === strtoupper( $_GET['order'] ) ? 'desc' : 'asc';
+		}
 
 		if($order_by == "table_name"){
 			$order_by = "table_full_name";
@@ -1003,7 +1018,7 @@ function aDBc_add_scheduled_tasks(&$aDBc_all_tasks, $blog_id) {
 				}
 
 				array_push($aDBc_all_tasks[$hook]['sites'][$blog_id]['args'], array('frequency' => $aDBc_frequency,
-																	      'next_run' => get_date_from_gmt(@date('Y-m-d H:i:s', $timestamp), 'M j, Y @ H:i:s'),
+																	      'next_run' => get_date_from_gmt(date('Y-m-d H:i:s', (int) $timestamp), 'M j, Y @ H:i:s'),
 																		  'timestamp' => $timestamp,
 																		  'arguments' => $args_string));
 			}

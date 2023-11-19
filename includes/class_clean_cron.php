@@ -223,27 +223,20 @@ class ADBC_Tasks_List extends WP_List_Table {
 	/** WP: Process bulk actions */
     public function process_bulk_action() {
 
-        // security check!
-        if ( isset( $_POST['_wpnonce'] ) && !empty( $_POST['_wpnonce'] ) ) {
+		// Detect when a bulk action is being triggered.
+		$action = $this->current_action();
 
-            $nonce  = filter_input( INPUT_POST, '_wpnonce', FILTER_SANITIZE_STRING );
-            $action = 'bulk-' . $this->_args['plural'];
-
-            if ( !wp_verify_nonce( $nonce, $action ) )
-                wp_die( 'Security check failed!' );
-
-		} else {
-
+		if ( ! $action )
 			return;
-		}
+
+		// security check!
+		check_admin_referer( 'bulk-' . $this->_args['plural'] );
 
 		// Check role
-		if(!current_user_can('administrator'))
-			wp_die('Security check failed!');
+		if ( ! current_user_can( 'administrator' ) )
+			wp_die( 'Security check failed!' );
 
-        $action = $this->current_action();
-
-        if($action == 'delete'){
+        if ( $action == 'delete' ) {
 
 			// xxx Have a look at the remark with the code 16230-code in Trello
 			// If the user wants to clean the tasks he/she selected
@@ -383,7 +376,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 
 			<!-- Code for "run new search" button + Show loading image -->
 			<div style="float:left">
-				
+
 				<?php
 				if ( $this->aDBc_which_button_to_show == "new_search" ) {
 					$aDBc_search_text  	= __( 'Scan tasks', 'advanced-database-cleaner' );
