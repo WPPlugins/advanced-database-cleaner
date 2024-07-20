@@ -175,7 +175,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 				if($item[$column_name] == "none"){
 					return "<span>" . __('None', 'advanced-database-cleaner') . "</span>";
 				}else{
-					$unserialized_args = unserialize($item[$column_name]);
+					$unserialized_args = json_decode($item[$column_name]);
 					return "<span class='aDBc-arguments'>" . implode(" / ", $unserialized_args) . "</span>";
 				}
 				break;
@@ -269,7 +269,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 								if($args == "none"){
 									wp_unschedule_event($timestamp, $hook);
 								}else{
-									$args = unserialize(stripslashes($args));
+									$args = json_decode(stripslashes($args));
 									wp_unschedule_event($timestamp, $hook, $args);
 									// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
 									// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
@@ -295,7 +295,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 							if($args == "none"){
 								wp_unschedule_event($timestamp, $hook);
 							}else{
-								$args = unserialize(stripslashes($args));
+								$args = json_decode(stripslashes($args));
 								wp_unschedule_event($timestamp, $hook, $args);
 								// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
 								// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args

@@ -1003,7 +1003,7 @@ function aDBc_add_scheduled_tasks(&$aDBc_all_tasks, $blog_id) {
 				if(empty($aDBc_args_array)){
 					$args_string = "none";
 				}else{
-					$args_string = serialize($aDBc_args_array);
+					$args_string = json_encode($aDBc_args_array);
 				}
 				// If the task has not been added yet, add it and initiate its info
 				if(empty($aDBc_all_tasks[$hook])){
