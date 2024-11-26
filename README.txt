@@ -4,8 +4,8 @@ Donate Link: https://www.sigmaplugin.com/donation
 Tags: clean, database, optimize, performance, postmeta
 Requires at least: 3.1.0
 Requires PHP: 5.0
-Tested up to: 6.6
-Stable tag: 3.1.4
+Tested up to: 6.7
+Stable tag: 3.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,11 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.1.5 - 19/09/2024 =
+- Fix: Automatic conversion of false to array is deprecated
+- Fix: Cannot modify header information - headers already sent..
+- Fix: Object of class stdClass could not be converted to string
 
 = 3.1.4 - 23/01/2024 =
 - Security: enhancing the security by avoiding deserialization (thanks to Richard Telleng from Wordfence)

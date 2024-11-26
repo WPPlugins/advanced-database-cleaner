@@ -176,7 +176,17 @@ class ADBC_Tasks_List extends WP_List_Table {
 					return "<span>" . __('None', 'advanced-database-cleaner') . "</span>";
 				}else{
 					$unserialized_args = json_decode($item[$column_name]);
-					return "<span class='aDBc-arguments'>" . implode(" / ", $unserialized_args) . "</span>";
+
+					// If the arguments are not an array, we return [N/A]
+					if (is_array($unserialized_args)) {
+						$args_as_string = array_map(function($arg) {
+							return (is_object($arg) || is_array($arg)) ? json_encode($arg) : (string) $arg;
+						}, $unserialized_args);
+					
+						return "<span class='aDBc-arguments'>" . implode(" / ", $args_as_string) . "</span>";
+					} else {
+						return "<span class='aDBc-arguments'>[N/A]</span>";
+					}
 				}
 				break;
 			case 'hook_name':
