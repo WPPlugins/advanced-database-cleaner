@@ -4,7 +4,7 @@
 Plugin Name: Advanced Database Cleaner
 Plugin URI: https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner
 Description: Clean database by deleting unused data such as 'old revisions', 'old drafts', 'orphan options', etc. Optimize database and more.
-Version: 3.1.5
+Version: 3.1.6
 Author: Younes JFR.
 Author URI: https://www.sigmaplugin.com
 Contributors: symptote
@@ -55,6 +55,9 @@ class ADBC_Advanced_DB_Cleaner {
 		// Load plugin
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 
+		// Load text-domain
+		add_action( 'init', array( $this, 'aDBc_init' ) );
+
 		// Load CSS and JS
 		add_action( 'admin_enqueue_scripts', array( $this, 'aDBc_load_styles_and_scripts' ) );
 
@@ -85,7 +88,7 @@ class ADBC_Advanced_DB_Cleaner {
 		* Define common constants and variables (we switch all "\" to "/" in paths)
 		***************************************************************************/
 
-		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 			define( "ADBC_PLUGIN_VERSION", "3.1.5" );
+		if( ! defined( "ADBC_PLUGIN_VERSION" ) ) 			define( "ADBC_PLUGIN_VERSION", "3.1.6" );
 
 		if( ! defined( "ADBC_PLUGIN_PLAN" ) ) 				define( "ADBC_PLUGIN_PLAN", "free" );
 
@@ -140,6 +143,7 @@ class ADBC_Advanced_DB_Cleaner {
 			add_action( 'wp_ajax_aDBc_get_progress_bar_width', 'aDBc_get_progress_bar_width' );
 			add_action( 'wp_ajax_aDBc_double_check_items', 'aDBc_double_check_items' );
 			add_action( 'wp_ajax_aDBc_stop_search', 'aDBc_stop_search' );
+			add_action('wp_ajax_aDBc_hide_not_categorized_yet_msg', 'aDBc_hide_not_categorized_yet_msg');
 		}
 
 		/***************************************************************************
@@ -149,11 +153,18 @@ class ADBC_Advanced_DB_Cleaner {
 		$settings = get_option( 'aDBc_settings' );
 
 		// Check if the option is not set or returns false
-		if ( $settings === false ) {
-			$settings = []; // Initialize it as an empty array
+		if ( $settings === false || empty( $settings ) ) {
+			$settings = array(); // Initialize an empty array
 
-			$settings['left_menu'] 			= "1";
-			$settings['menu_under_tools'] 	= "1";
+			if (is_multisite()){
+				$settings['network_menu'] 		= 1;
+				$settings['left_menu'] 			= 0;
+				$settings['menu_under_tools'] 	= 0;
+			} else {
+				$settings['left_menu'] 			= 1;
+				$settings['menu_under_tools'] 	= 1;
+			}
+
 			$settings['plugin_version'] 	= ADBC_PLUGIN_VERSION;
 			$settings['installed_on'] 		= date( "Y/m/d" );
 			update_option( 'aDBc_settings', $settings, "no" );
@@ -211,21 +222,24 @@ class ADBC_Advanced_DB_Cleaner {
 
 		}
 
-		if ( ADBC_PLUGIN_PLAN == "pro" && function_exists( 'set_time_limit' ) && ADBC_ORIGINAL_TIMEOUT < 300 ) {
-
-			// xxx do this only before scanning
-			@set_time_limit( 300 );
-
-		}
-
-		// Add plugin menu to Wordpress menus
+		// Add plugin menu to Wordpress admin dashboard in main site
 		add_action('admin_menu', array($this, 'aDBc_add_admin_menu'));
 
-		// Load text-domain
-		load_plugin_textdomain('advanced-database-cleaner', false, dirname(plugin_basename(__FILE__)) . '/languages');
+		// Add plugin menu to network admin in multisite
+		if (function_exists('is_multisite') && is_multisite()) {
+			add_action('network_admin_menu', array($this, 'aDBc_add_network_admin_menu'));
+		}
 
 		// If plugin get updated, make changes to old version
 		$this->aDBc_update_plugin_check();
+
+	}
+
+	// Load text-domain
+	function aDBc_init() {
+
+		// Load text-domain
+		load_plugin_textdomain('advanced-database-cleaner', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
 	}
 
@@ -256,15 +270,38 @@ class ADBC_Advanced_DB_Cleaner {
 
 		$icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg width="20" height="20" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path fill="#a0a5aa" d="M896 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-384q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-1152q208 0 385 34.5t280 93.5 103 128v128q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-128q0-69 103-128t280-93.5 385-34.5z"/></svg>');
 
-		if(!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] == "1"){
+		// Add the menu to the admin dashboard in main site
+
+		if(!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] != 0){
 			$aDBc_left_menu = add_menu_page('Advanced DB Cleaner', 'WP DB Cleaner', 'manage_options', 'advanced_db_cleaner', array($this, 'aDBc_main_page_callback'), $icon_svg, '80.01123');
 		}
-		if(!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] == "1"){
+
+		if(!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] != 0){
 			$aDBc_tool_submenu = add_submenu_page('tools.php', 'Advanced DB Cleaner', 'WP DB Cleaner', 'manage_options', 'advanced_db_cleaner', array($this, 'aDBc_main_page_callback'));
 		}
+
 		// In case the settings has been deleted by accident, create left menu
-		if(empty($aDBc_settings['left_menu']) && empty($aDBc_settings['menu_under_tools'])){
-			$aDBc_left_menu = add_menu_page('Advanced DB Cleaner', 'WP DB Cleaner', 'manage_options', 'advanced_db_cleaner', array($this, 'aDBc_main_page_callback'), $icon_svg, '80.01123');
+		if (!is_multisite()) {
+			if(empty($aDBc_settings['left_menu']) && empty($aDBc_settings['menu_under_tools'])){
+				$aDBc_left_menu = add_menu_page('Advanced DB Cleaner', 'WP DB Cleaner', 'manage_options', 'advanced_db_cleaner', array($this, 'aDBc_main_page_callback'), $icon_svg, '80.01123');
+			}
+		}
+	}
+	
+	// Add 'Database Cleaner' to network admin menu in multisite
+	function aDBc_add_network_admin_menu() {
+
+		global $aDBc_network_menu;
+
+		$aDBc_settings = get_option('aDBc_settings');
+		
+		$icon_svg = 'data:image/svg+xml;base64,' . base64_encode('<svg width="20" height="20" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path fill="#a0a5aa" d="M896 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0 768q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-384q237 0 443-43t325-127v170q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-170q119 84 325 127t443 43zm0-1152q208 0 385 34.5t280 93.5 103 128v128q0 69-103 128t-280 93.5-385 34.5-385-34.5-280-93.5-103-128v-128q0-69 103-128t280-93.5 385-34.5z"/></svg>');
+	
+		if((!empty($aDBc_settings['network_menu']) && $aDBc_settings['network_menu'] != 0) ||
+			(empty($aDBc_settings['left_menu']) && empty($aDBc_settings['menu_under_tools']) && empty($aDBc_settings['network_menu']))
+		){
+			// Add the menu to network admin dashboard
+			$aDBc_network_menu = add_menu_page('Advanced DB Cleaner', 'WP DB Cleaner', 'manage_network_options', 'advanced_db_cleaner', array($this, 'aDBc_main_page_callback'), $icon_svg, '80.01123');
 		}
 	}
 
@@ -272,21 +309,23 @@ class ADBC_Advanced_DB_Cleaner {
 	function aDBc_load_styles_and_scripts($hook){
 
 		// Enqueue our js and css in the plugin pages only
-		global $aDBc_left_menu, $aDBc_tool_submenu;
-		if($hook != $aDBc_left_menu && $hook != $aDBc_tool_submenu){
+		global $aDBc_left_menu, $aDBc_tool_submenu, $aDBc_network_menu;
+		if($hook != $aDBc_left_menu && $hook != $aDBc_tool_submenu && $hook != $aDBc_network_menu){
 			return;
 		}
 
-		wp_enqueue_style('aDBc_css', 				ADBC_PLUGIN_DIR_PATH . '/css/admin.css');
+		wp_enqueue_style('aDBc_css', 				ADBC_PLUGIN_DIR_PATH . '/css/admin.css', array(), ADBC_PLUGIN_VERSION);
 		wp_enqueue_style('aDBc_sweet2_css', 		ADBC_PLUGIN_DIR_PATH . '/css/sweetalert2.min.css');
 
-		wp_enqueue_script('aDBc_js', 				ADBC_PLUGIN_DIR_PATH . '/js/admin.js');
+		wp_enqueue_script('aDBc_js', 				ADBC_PLUGIN_DIR_PATH . '/js/admin.js', array(), ADBC_PLUGIN_VERSION);
 		wp_enqueue_script('aDBc_sweet2_js', 		ADBC_PLUGIN_DIR_PATH . '/js/sweetalert2.min.js');
 
 		// The wp_localize_script allows us to output the ajax_url path for our script to use.
 		wp_localize_script('aDBc_js', 'aDBc_ajax_obj', array(
 
 		'ajaxurl' 				=> admin_url( 'admin-ajax.php' ),
+		'network_admin_url' 	=> network_admin_url(),
+		'is_multisite' 			=> is_multisite() ? "1" : "0",
 		'images_path'			=> ADBC_PLUGIN_DIR_PATH . "/images/",
 		'ajax_nonce'	 		=> wp_create_nonce('aDBc_nonce'),
 		'sentence_scanning' 	=> __( 'Scanning ...', 'advanced-database-cleaner' ),
@@ -295,7 +334,7 @@ class ADBC_Advanced_DB_Cleaner {
 		'all_items2' 			=> __( 'Scan all items', 'advanced-database-cleaner' ),
 		'uncategorized' 		=> __( 'Uncategorized', 'advanced-database-cleaner' ),
 		'scan_time_depends' 	=> __( 'The scan time depends on your DB size and number of files', 'advanced-database-cleaner' ),
-		'scan_all_only'			=> __( 'The scan will process all uncategorized items, continue?', 'advanced-database-cleaner' ),
+		'scan_all_only'			=> __( 'The scan will process all items, continue?', 'advanced-database-cleaner' ),
 		'scan_all_or_u' 		=> __( 'Do you want to scan all items or only uncategorized ones?', 'advanced-database-cleaner' ),
 		'unexpected_error' 		=> __( 'Unexpected error! Please refresh the page and try again!', 'advanced-database-cleaner' ),
 		'select_action' 		=> __( 'Please select an action!', 'advanced-database-cleaner' ),
@@ -309,7 +348,7 @@ class ADBC_Advanced_DB_Cleaner {
 		'active' 				=> __( 'Active', 'advanced-database-cleaner' ),
 		'inactive' 				=> __( 'Inactive', 'advanced-database-cleaner' )
 
-						));
+		));
 
 		//wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-dialog');
@@ -387,13 +426,20 @@ class ADBC_Advanced_DB_Cleaner {
 
 			foreach ( $array_items as $item ) {
 
-				delete_option( 'aDBc_temp_last_iteration_' 	. $item );
-				delete_option( 'aDBc_temp_still_searching_' . $item );
-				delete_option( 'aDBc_temp_last_item_line_' 	. $item );
-				delete_option( 'aDBc_temp_last_file_line_' 	. $item );
-				delete_option( 'aDBc_last_search_ok_' 		. $item );
-				delete_option( 'aDBc_temp_total_files_' 	. $item );
-				delete_option( 'aDBc_temp_maybe_scores_' 	. $item );
+				delete_option( 'aDBc_temp_last_iteration_' 				. $item );
+				delete_option( 'aDBc_temp_still_searching_' 			. $item );
+				delete_option( 'aDBc_temp_last_item_line_' 				. $item );
+				delete_option( 'aDBc_temp_last_file_line_' 				. $item );
+				delete_option( 'aDBc_last_search_ok_' 					. $item );
+				delete_option( 'aDBc_temp_total_files_' 				. $item );
+				delete_option( 'aDBc_temp_maybe_scores_' 				. $item );
+				delete_option( 'aDBc_temp_currently_scanning_'			. $item );
+				delete_option( 'aDBc_temp_progress_scan_' 				. $item );
+				delete_option( 'aDBc_temp_progress_files_preparation_' 	. $item );
+				delete_option( 'aDBc_temp_last_collected_file_path_' 	. $item );
+				delete_option( 'aDBc_temp_items_to_scan_' 				. $item );
+				delete_option( 'aDBc_temp_scan_type_' 					. $item );
+				delete_option( 'aDBc_temp_current_scan_step_' 			. $item );
 
 			}
 
@@ -471,16 +517,6 @@ class ADBC_Advanced_DB_Cleaner {
 
 				// If settings is not empty, this means that the users had already installed ADBC plugin
 				// if empty($settings['plugin_version']) => the user will update to or will install the version >= 3.0.0 for the first time, because in previous versions, this option "plugin_version" does not exist
-
-				// Before starting the update, make all previous plugin options to autoload "no"
-				$options_array = array('aDBc_optimize_schedule', 'aDBc_clean_schedule', 'aDBc_settings', 'aDBc_edd_license_key', 'aDBc_edd_license_status');
-				foreach($options_array as $option_name){
-					$options_value = get_option($option_name);
-					if(!empty($options_value)){
-						update_option($option_name, "xyz");
-						update_option($option_name, $options_value, "no");
-					}
-				}
 
 				// Proceed to update routine. First, add some options
 
@@ -642,6 +678,7 @@ class ADBC_Advanced_DB_Cleaner {
 	// Add admin notice to rate plugin
 	function aDBc_rate_notice(){
 		$settings = get_option('aDBc_settings');
+		$rating_url = 'https://wordpress.org/support/plugin/advanced-database-cleaner/reviews/?filter=5';
 		if(!empty($settings['installed_on'])){
 			$ignore_rating = empty($settings['ignore_rating']) ? "" : $settings['ignore_rating'];
 			if($ignore_rating != "yes"){
@@ -652,10 +689,31 @@ class ADBC_Advanced_DB_Cleaner {
 				if($days >= 7){
 					$aDBc_new_URI = $_SERVER['REQUEST_URI'];
 					$aDBc_new_URI = add_query_arg('adbc-ignore-notice', '0', $aDBc_new_URI);
-					echo '<div class="updated"><p>';
-					printf(__('Awesome! You have been using <a href="admin.php?page=advanced_db_cleaner">Advanced DB Cleaner</a> for more than 1 week. Would you mind taking a few seconds to give it a 5-star rating on WordPress? Thank you in advance :) <a href="%2$s" target="_blank">Ok, you deserved it</a> | <a href="%1$s">I already did</a> | <a href="%1$s">No, not good enough</a>', 'advanced-database-cleaner'), esc_url( $aDBc_new_URI ),
-					'https://wordpress.org/support/plugin/advanced-database-cleaner/reviews/?filter=5');
-					echo "</p></div>";
+					echo '<div id="aDBc-rating-notice" class="notice notice-success" style="display:flex;padding:15px">';
+						
+						echo '<div style="width:100%;">';
+
+						echo '<span style="font-weight:bold;color:green;font-size:16px">' . __('Awesome!', 'advanced-database-cleaner') . '</span> ';
+						echo __('You have been using <a href="admin.php?page=advanced_db_cleaner">Advanced DB Cleaner</a> for more than 1 week. Would you mind taking a few seconds to give it a 5-star rating on WordPress? Thank you in advance :)','advanced-database-cleaner');
+
+							echo '<div style="padding-top:15px">';
+
+							echo '<a href="' . $rating_url . '" target="_blank" class="button-secondary" style="margin-right:5px;padding:0px 5px"><span class="dashicons dashicons-smiley" style="color:black;margin-top:2px;margin-right:5px"></span><b>' . __('Ok, you deserved it', 'advanced-database-cleaner') . '</b></a>';
+
+							echo '<a href="' . esc_url($aDBc_new_URI) . '" class="button-secondary" style="margin-right:5px;border:0">' . __('I already did', 'advanced-database-cleaner') . '</a>';
+
+							echo '<a href="' . esc_url($aDBc_new_URI) . '" class="button-secondary" style="margin-right:5px;border:0">' . __('No, not good enough', 'advanced-database-cleaner') . '</a>';
+
+							echo '</div>';
+
+						echo '</div>';
+
+						echo '<div>';
+							echo '<a href="' . esc_url($aDBc_new_URI) . '" id="aDBc-dismiss-rating-notice" title="' . __('Dismiss', 'advanced-database-cleaner') . '"><span class="dashicons dashicons-dismiss" style="text-decoration:none"></span></a>';
+						echo '</div>';
+
+					echo '</div>';
+
 				}
 			}
 		}

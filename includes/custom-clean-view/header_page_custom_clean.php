@@ -88,9 +88,9 @@
 				?>
 
 					<span style="width:150px" class="aDBc-premium-tooltiptext">
-
-						<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
-
+						<a href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner/" target="_blank">
+							<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
+						</a>
 					</span>
 
 				<?php

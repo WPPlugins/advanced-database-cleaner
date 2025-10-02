@@ -4,8 +4,8 @@ Donate Link: https://www.sigmaplugin.com/donation
 Tags: clean, database, optimize, performance, postmeta
 Requires at least: 3.1.0
 Requires PHP: 5.0
-Tested up to: 6.7
-Stable tag: 3.1.5
+Tested up to: 6.8
+Stable tag: 3.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,22 @@ This section describes how to install the plugin. In general, there are 3 ways t
 8. Overview and settings page
 
 == Changelog ==
+
+= 3.1.6 - 24/03/2025 =
+- Tested with the latest WordPress version (October 2, 2025)
+- Fix: names containing HTML were not displayed correctly.
+- Fix: certain transients, options, tables, and cron jobs could not be deleted.
+- Fix: function _load_textdomain_just_in_time was called incorrectly.
+- Fix: after optimizing tables, the plugin now refreshes the data to accurately reflect the database’s real status.
+- Fix: enhanced the plugin's security.
+- Fix (PRO): sometimes users were unable to deactivate their license.
+- Tweak: improved how the plugin edits the autoload value for options.
+- Tweak: increased the max_execution_time only after a scan has started, and under specific conditions.
+- Tweak: cleaned up and enhanced some PHP, CSS, and JS code parts.
+- New: the Options tab now displays the total size of autoloaded options.
+- New: in Multisite, users can now choose to display the plugin menu in the Network Admin panel.
+- New (PRO): added support for new autoload option values in filters: on, auto, auto-on, auto-off.
+- New (PRO): users can now assign items to WordPress using the “manual categorization” feature.
 
 = 3.1.5 - 19/09/2024 =
 - Fix: Automatic conversion of false to array is deprecated

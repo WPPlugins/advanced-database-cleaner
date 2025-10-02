@@ -20,9 +20,6 @@ class ADBC_Options_List extends WP_List_Table {
 	// This array contains belongs_to info about plugins and themes
 	private $array_belongs_to_counts = array();
 
-	// Holds msg that will be shown if the scan has finished with success
-	private $aDBc_search_has_finished_msg = "";
-
 	// Holds msg that will be shown if folder adbc_uploads cannot be created by the plugin (This is verified after clicking on scan button)
 	private $aDBc_permission_adbc_folder_msg = "";
 
@@ -42,9 +39,6 @@ class ADBC_Options_List extends WP_List_Table {
 	function aDBc_prepare_and_count_options() {
 
 		if ( ADBC_PLUGIN_PLAN == "pro" ) {
-
-			// If the search has finished, show a msg success to users + button to double check results against our server database
-			$this->aDBc_search_has_finished_msg = aDBc_get_msg_double_check( "options" );
 
 			// Verify if the adbc_uploads cannot be created
 			$adbc_folder_permission = get_option( "aDBc_permission_adbc_folder_needed" );
@@ -109,24 +103,38 @@ class ADBC_Options_List extends WP_List_Table {
 
 	/** WP: Get columns */
 	function get_columns(){
-		$aDBc_belongs_to_toolip = "<span class='aDBc-tooltips-headers'>
+		$aDBc_belongs_to_tooltip = "<span class='aDBc-tooltips-headers'>
 									<img class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
 									<span>" . __('Indicates the creator of the option: either a plugin, a theme or WordPress itself. If not sure about the creator, an estimation (%) will be displayed. The higher the percentage is, the more likely that the option belongs to that creator.','advanced-database-cleaner') ." </span>
 								  </span>";
 
-		$aDBc_option_size_toolip = "<span class='aDBc-tooltips-headers' style='position:absolute;margin-left:15px'>
+		$autoload_true_values  = 'yes';
+		$autoload_false_values = 'no';
+
+		if(function_exists('wp_autoload_values_to_autoload')){
+			$autoload_true_values  = 'yes, on, auto, auto-on';
+			$autoload_false_values = 'no, off, auto-off';
+		}
+
+		$autoload_message = sprintf(
+			__( 'Indicates whether an option is autoloaded or not. Values to autoload are: %1$s. Values to not autoload are: %2$s', 'advanced-database-cleaner' ),
+			$autoload_true_values,
+			$autoload_false_values
+		);
+
+		$aDBc_autoload_tooltip = "<span class='aDBc-tooltips-headers' style='position:absolute;margin-left:18px;margin-top:-1px'>
 									<img class='aDBc-info-image' src='".  ADBC_PLUGIN_DIR_PATH . '/images/information2.svg' . "'/>
-									<span>" . __('The size is in Bits! This is an estimation, not a precise value!','advanced-database-cleaner') ." </span>
+									<span>" . $autoload_message ." </span>
 								  </span>";
 
 		$columns = array(
 			'cb'          		=> '<input type="checkbox" />',
 			'option_name' 		=> __('Option name','advanced-database-cleaner'),
 			'option_value' 		=> __('Value','advanced-database-cleaner'),
-			'option_size' 		=> __('Size','advanced-database-cleaner') . $aDBc_option_size_toolip,
-			'option_autoload' 	=> __('Autoload','advanced-database-cleaner'),
+			'option_size' 		=> __('Size','advanced-database-cleaner'),
+			'option_autoload' 	=> __('Autoload','advanced-database-cleaner') . $aDBc_autoload_tooltip,
 			'site_id'   		=> __('Site','advanced-database-cleaner'),
-			'option_belongs_to' => __('Belongs to','advanced-database-cleaner') . $aDBc_belongs_to_toolip
+			'option_belongs_to' => __('Belongs to','advanced-database-cleaner') . $aDBc_belongs_to_tooltip
 		);
 		return $columns;
 	}
@@ -177,8 +185,10 @@ class ADBC_Options_List extends WP_List_Table {
 	function column_default($item, $column_name){
 		switch($column_name){
 			case 'option_name':
-			case 'option_value':
+				return esc_html($item[$column_name]);
 			case 'option_size':
+				return aDBc_format_bytes((int) $item[$column_name]);
+			case 'option_value':
 			case 'option_autoload':
 			case 'site_id':
 			case 'option_belongs_to':
@@ -190,17 +200,24 @@ class ADBC_Options_List extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb($item) {
-		return sprintf('<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', $item['site_id']."|".$item['option_name']);
+		$value = $item['site_id'] . "|" . $item['option_name'];
+		return sprintf(
+			'<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', 
+			esc_attr($value)
+		);
 	}
 
 	/** WP: Get bulk actions */
 	function get_bulk_actions() {
 
+		$autoload_on = function_exists('wp_autoload_values_to_autoload') ? " (on)" : "";
+		$autoload_off = function_exists('wp_autoload_values_to_autoload') ? " (off)" : "";
+
 		$actions = array(
 			'scan_selected' 		=> __( 'Scan selected options','advanced-database-cleaner' ),
 			'edit_categorization' 	=> __( 'Edit categorization','advanced-database-cleaner' ),
-			'autoload_yes'  		=> __( 'Set autoload to yes','advanced-database-cleaner' ),
-			'autoload_no'  			=> __( 'Set autoload to no','advanced-database-cleaner' ),
+			'autoload_yes'  		=> __( 'Set autoload to yes','advanced-database-cleaner' ) . $autoload_on,
+			'autoload_no'  			=> __( 'Set autoload to no','advanced-database-cleaner' ) . $autoload_off,
 			'delete'    			=> __( 'Delete','advanced-database-cleaner' )
 		);
 
@@ -224,6 +241,8 @@ class ADBC_Options_List extends WP_List_Table {
 	/** WP: Process bulk actions */
     public function process_bulk_action() {
 
+		global $wpdb;
+
 		// Detect when a bulk action is being triggered.
 		$action = $this->current_action();
 
@@ -244,15 +263,13 @@ class ADBC_Options_List extends WP_List_Table {
 					// Prepare options to delete in organized array to minimize switching from blogs
 					$options_to_delete = array();
 					foreach($_POST['aDBc_elements_to_process'] as $option){
-						$option_info 	= explode("|", $option);
+						$option_info 	= explode("|", $option, 2);
 						$site_id 		= sanitize_html_class($option_info[0]);
-						$option_name 	= sanitize_text_field($option_info[1]);
+						$option_name 	= wp_unslash($option_info[1]);
 						if(is_numeric($site_id)){
 							if(empty($options_to_delete[$site_id])){
 								$options_to_delete[$site_id] = array();
 							}
-							// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-							$option_name = preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name);
 							array_push($options_to_delete[$site_id], $option_name);
 						}
 					}
@@ -266,10 +283,8 @@ class ADBC_Options_List extends WP_List_Table {
 					}
 				}else{
 					foreach($_POST['aDBc_elements_to_process'] as $option) {
-						$aDBc_option_info 	= explode("|", $option);
-						$option_name 		= sanitize_text_field($aDBc_option_info[1]);
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$option_name 		= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name);
+						$aDBc_option_info 	= explode("|", $option, 2);
+						$option_name 		= wp_unslash($aDBc_option_info[1]); // Because WP adds slashes to options in the POST array
 						delete_option($option_name);
 					}
 				}
@@ -279,14 +294,11 @@ class ADBC_Options_List extends WP_List_Table {
 
         } else if ( $action == 'autoload_yes' || $action == 'autoload_no' ) {
 
-			$autoload_value = "no";
+			$autoload_value = function_exists( 'wp_autoload_values_to_autoload' )
+				? ( $action == 'autoload_yes' ? 'on' : 'off' )
+				: ( $action == 'autoload_yes' ? 'yes' : 'no' );
 
-			if ( $action == 'autoload_yes' )
-
-				$autoload_value = "yes";
-
-			// If the user wants to change autoload to yes for selected options
-			// xxx, changing autoload using update_option works only on WP 4.2 and newer. Should I set minimum required wp to 4.2 in my plugin header?
+			// If the user wants to change autoload for selected options
 			if ( isset( $_POST['aDBc_elements_to_process'] ) ) {
 
 				if ( function_exists( 'is_multisite' ) && is_multisite() ) {
@@ -296,18 +308,14 @@ class ADBC_Options_List extends WP_List_Table {
 
 					foreach ( $_POST['aDBc_elements_to_process'] as $option ) {
 
-						$option_info 	= explode( "|", $option );
+						$option_info 	= explode( "|", $option, 2);
 						$site_id 		= sanitize_html_class( $option_info[0] );
-						$option_name 	= sanitize_text_field ($option_info[1] );
+						$option_name 	= wp_unslash($option_info[1]); // Because WP adds slashes to options in the POST array
 
 						if ( is_numeric( $site_id ) ) {
 
 							if ( empty( $options_to_process[$site_id] ) )
-
 								$options_to_process[$site_id] = array();
-
-							// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-							$option_name = preg_replace( "/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name );
 
 							array_push( $options_to_process[$site_id], $option_name );
 
@@ -319,43 +327,49 @@ class ADBC_Options_List extends WP_List_Table {
 
 						switch_to_blog( $site_id );
 
-						foreach ( $options as $option ) {
-
-							$options_value = get_option( $option );
-
-							if ( false !== $options_value ) {
-
-								update_option( $option, "xyz" );
-								update_option( $option, $options_value, $autoload_value );
-
+							if ( ! empty( $options ) ) {
+								// Build the placeholders for each option name.
+								$placeholders = implode( ',', array_fill( 0, count( $options ), '%s' ) );
+								// Construct the options table name with the blog prefix.
+								$table_name = $wpdb->prefix . 'options';
+								// Create the SQL update statement.
+								$sql = "UPDATE {$table_name} SET autoload = %s WHERE option_name IN ($placeholders)";
+								// Merge the autoload value and option names into a single array.
+								$args = array_merge( [ $autoload_value ], $options );
+								// Execute the prepared query.
+								$wpdb->query( $wpdb->prepare( $sql, $args ) );
 							}
-
-						}
 
 						restore_current_blog();
 					}
 
 				} else {
 
+					// Array to store the option names to update
+					$options_list = array();
+
+					// Loop through the selected options
 					foreach ( $_POST['aDBc_elements_to_process'] as $option ) {
 
-						$aDBc_option_info 	= explode( "|", $option );
-						$option_name 		= sanitize_text_field( $aDBc_option_info[1] );
+						$aDBc_option_info 	= explode( "|", $option, 2 );
+						$option_name 		= wp_unslash($aDBc_option_info[1]); // Because WP adds slashes to options in the POST array
 
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$option_name 	= preg_replace( "/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name );
-
-						$options_value 	= get_option( $option_name );
-
-						// Wordpress does not allow to change the autoload if the value have not been changed as well
-						// We should change the value to something such as xyz, then change it back again to its original value
-						if ( false !== $options_value ) {
-
-							update_option( $option_name, "xyz" );
-							update_option( $option_name, $options_value, $autoload_value );
-
-						}
+						// Collect the option names to update
+						$options_list[]   = $option_name;
 					}
+
+					// Update the autoload value for the selected options
+					if ( ! empty( $options_list ) ) {
+						// Build the placeholders for each option name
+						$placeholders = implode( ',', array_fill( 0, count( $options_list ), "'%s'" ) );
+						// Create the SQL update statement
+						$sql = "UPDATE {$wpdb->options} SET autoload = %s WHERE option_name IN ($placeholders)";
+						// Merge the autoload value and option names into a single array
+						$args = array_merge( [ $autoload_value ], $options_list );
+						// Execute the prepared query
+						$wpdb->query( $wpdb->prepare( $sql, $args ) );
+					}
+
 				}
 
 				// Update the message to show to the user
@@ -371,10 +385,8 @@ class ADBC_Options_List extends WP_List_Table {
 				$aDBc_path_items = @fopen(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/options_manually_correction_temp.txt", "w");
 				if($aDBc_path_items){
 					foreach($_POST['aDBc_elements_to_process'] as $option){
-						$option_info = explode("|", $option);
-						$option_name = sanitize_text_field($option_info[1]);
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$option_name = preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $option_name);
+						$option_info = explode("|", $option, 2);
+						$option_name = wp_unslash($option_info[1]); // Because WP adds slashes to options in the POST array
 						fwrite($aDBc_path_items, $option_name . "\n");
 					}
 					fclose($aDBc_path_items);
@@ -385,13 +397,11 @@ class ADBC_Options_List extends WP_List_Table {
 
 	/** Print the page content */
 	function aDBc_print_page_content(){
+
 		// Print a message if any
 		if($this->aDBc_message != ""){
 			echo '<div id="aDBc_message" class="' . $this->aDBc_class_message . ' notice is-dismissible"><p>' . $this->aDBc_message . '</p></div>';
 		}
-
-		// If the search has finished, show a msg success to users + button to double check results against our server database
-		echo $this->aDBc_search_has_finished_msg;
 
 		// If the folder adbc_uploads cannot be created, show a msg to users
 		if(!empty($this->aDBc_permission_adbc_folder_msg)){
@@ -415,12 +425,26 @@ class ADBC_Options_List extends WP_List_Table {
 			// Print a notice/warning according to each type of options
 			if ( ADBC_PLUGIN_PLAN == "pro" ) {
 
-				if($_GET['aDBc_cat'] == 'o' && $this->aDBc_options_categories_info['o']['count'] > 0){
-					echo '<div class="aDBc-box-warning-orphan">' . __('Options below seem to be orphan! However, please delete only those you are sure to be orphan!','advanced-database-cleaner') . '</div>';
-				}else if(($_GET['aDBc_cat'] == 'all' || $_GET['aDBc_cat'] == 'u') && $this->aDBc_options_categories_info['u']['count'] > 0){
-					echo '<div class="aDBc-box-info">' . __('Some of your options are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') . '</div>';
-				}
+				$aDBc_iteration = get_option( "aDBc_temp_last_iteration_options" );
+				$aDBc_currently_scanning = get_option( "aDBc_temp_currently_scanning_options" );
 
+				if ($aDBc_iteration === false && $aDBc_currently_scanning === false) {
+					if($_GET['aDBc_cat'] == 'o' && $this->aDBc_options_categories_info['o']['count'] > 0){
+						echo '<div class="aDBc-box-warning-orphan">' . __('Options below seem to be orphan! However, please delete only those you are sure to be orphan!','advanced-database-cleaner') . '</div>';
+					}else if(($_GET['aDBc_cat'] == 'all' || $_GET['aDBc_cat'] == 'u') && $this->aDBc_options_categories_info['u']['count'] > 0){
+
+						$aDBc_settings = get_option('aDBc_settings');
+						$hide_not_categorized_msg = empty($aDBc_settings['hide_not_categorized_yet_msg']) ? "" : $aDBc_settings['hide_not_categorized_yet_msg'];
+						if ( $hide_not_categorized_msg != "yes" ) {
+							echo '<div id="aDBc-box-info" class="aDBc-box-info">' 
+								. '<div style="width:100%">' 
+								. __('Some of your options are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') 
+								. '</div>'
+								. '<div><a href="#" id="aDBc-dismiss-not-categorized-yet-msg" title="' . __('Dismiss similar messages', 'advanced-database-cleaner') . '"><span class="dashicons dashicons-dismiss" style="text-decoration:none;font-size:16px;margin-top:4px"></span></a></div>'
+							. '</div>';
+						}
+					}
+				}
 			}
 
 		?>
@@ -434,7 +458,7 @@ class ADBC_Options_List extends WP_List_Table {
 				if ( $this->aDBc_which_button_to_show == "new_search" ) {
 					$aDBc_search_text  	= __( 'Scan options', 'advanced-database-cleaner' );
 				} else {
-					$aDBc_search_text  	= __( 'Continue scannig ...', 'advanced-database-cleaner' );
+					$aDBc_search_text  	= __( 'Continue scanning ...', 'advanced-database-cleaner' );
 				}
 				?>
 
@@ -444,7 +468,9 @@ class ADBC_Options_List extends WP_List_Table {
 				<?php
 				// These hidden inputs are used by ajax to see if we should execute the scan automatically after reloading a page
 				$iteration = get_option("aDBc_temp_last_iteration_options");
+				$currently_scanning = get_option("aDBc_temp_currently_scanning_options");
 				?>
+				<input type="hidden" id="aDBc_currently_scanning" value="<?php echo $currently_scanning; ?>"/>
 				<input type="hidden" id="aDBc_iteration" value="<?php echo $iteration; ?>"/>
 				<input type="hidden" id="aDBc_count_uncategorized" value="<?php echo $this->aDBc_options_categories_info['u']['count']; ?>"/>
 				<input type="hidden" id="aDBc_count_all_items" value="<?php echo $this->aDBc_options_categories_info['all']['count']; ?>"/>
@@ -528,9 +554,9 @@ class ADBC_Options_List extends WP_List_Table {
 							?>
 
 								<span style="width:150px" class="aDBc-premium-tooltiptext">
-
-									<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
-
+									<a href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner/" target="_blank">
+										<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
+									</a>
 								</span>
 
 							<?php
@@ -551,6 +577,9 @@ class ADBC_Options_List extends WP_List_Table {
 
 			<div id="aDBc-progress-container">
 
+				<span id="aDBc_collected_files" href="#" style="color:gray">
+				</span>
+
 				<div class="aDBc-progress-background">
 					<div id="aDBc-progress-bar" class="aDBc-progress-bar"></div>
 				</div>
@@ -566,8 +595,22 @@ class ADBC_Options_List extends WP_List_Table {
 			</div>
 
 			<?php include_once 'header_page_filter.php'; ?>
+			
 
 			<div class="aDBc-clear-both"></div>
+
+			<?php
+				// print the total size of autoloaded options
+				[$total_size, $health_status] = adbc_get_total_autoload_size('KB');
+				$style = $health_status == 'good' ? 'background:rgb(235, 252, 239);border:1px solid rgb(207, 246, 217)':'background:rgb(255, 242, 242);border:1px solid rgb(242, 217, 217)';
+				$dashicon = $health_status == 'good' ? 'dashicons-yes' : 'dashicons-warning';
+				$dashicon_style = $health_status == 'good' ? 'color:green' : 'color:orange';
+				$status_sentence = $health_status == 'good' ? '[' . __('Good', 'advanced-database-cleaner') . ']' : __('This size should be reduced to prevent performance issues', 'advanced-database-cleaner');
+				
+				echo '<div style="' . $style . ';color:#222;margin-top:-10px;margin-bottom:15px;padding-bottom:10px;padding-left:10px;padding-right:10px;border-radius:4px">' 
+				. '<span class="dashicons ' . $dashicon . '" style="' . $dashicon_style . ';padding-right:5px"></span>'
+				. __('Total size of autoloaded options: ','advanced-database-cleaner') . '<b>' . $total_size . '</b> KB. ' . $status_sentence . '</div>';
+			?>
 
 			<form id="aDBc_form" action="" method="post">
 

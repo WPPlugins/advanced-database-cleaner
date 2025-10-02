@@ -38,7 +38,7 @@
 				if ( ! empty( $item ) ) {
 
 					array_push( $items_to_correct_array, $item );
-					echo "<span class='aDBc-correction-item'>" . $item . "</span>";
+					echo "<span class='aDBc-correction-item'>" . esc_html($item) . "</span>";
 
 				}
 			}
@@ -99,23 +99,17 @@
 
 				</optgroup>
 
+				<optgroup label="<?php echo __( 'WordPress', 'advanced-database-cleaner' ); ?>">
+
+					<?php
+					echo "<option value='w|w'>" . __( 'WordPress core', 'advanced-database-cleaner' ) . "</option>";
+					?>
+
+				</optgroup>
+
 			</select>
 
 		</div>
-
-		<!--<div style="margin-top:15px">
-			<div>
-				<input type="checkbox" name="aDBc_send_correction_to_server"/>
-				<span id="send_manual_correction_to_server">
-					<?php //_e("Send this correction to the plugin server? (by sending this correction, you benefit from others' corrections)","advanced-database-cleaner") ?>
-				</span>
-			</div>-->
-			<!-- xxx I should add link to read more -->
-			<!--<div style="color:grey;margin-left:25px;">
-				<?php //echo __("No sensitive info is sent","advanced-database-cleaner") . " <a href='#'>[" . __("Read more here", "advanced-database-cleaner") . "]</a>"; ?>
-			</div>
-
-		</div>-->
 
 		<div class="aDBc-clear-both"></div>
 

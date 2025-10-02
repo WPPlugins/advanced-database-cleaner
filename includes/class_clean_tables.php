@@ -27,9 +27,6 @@ class ADBC_Tables_List extends WP_List_Table {
 	// This array contains belongs_to info about plugins and themes
 	private $array_belongs_to_counts = array();
 
-	// Holds msg that will be shown if the scan has finished with success
-	private $aDBc_search_has_finished_msg = "";
-
 	// Holds msg that will be shown if folder adbc_uploads cannot be created by the plugin (This is verified after clicking on scan button)
 	private $aDBc_permission_adbc_folder_msg = "";
 
@@ -49,9 +46,6 @@ class ADBC_Tables_List extends WP_List_Table {
 	function aDBc_prepare_and_count_tables() {
 
 		if ( ADBC_PLUGIN_PLAN == "pro" ) {
-
-			// If the search has finished, show a msg success to users + button to double check results against our server database
-			$this->aDBc_search_has_finished_msg = aDBc_get_msg_double_check( "tables" );
 
 			// Verify if the adbc_uploads cannot be created
 			$adbc_folder_permission = get_option( "aDBc_permission_adbc_folder_needed" );
@@ -153,7 +147,7 @@ class ADBC_Tables_List extends WP_List_Table {
 				$table_name = $table->TABLE_NAME;
 			}
 
-			$query_result = $wpdb->get_results("CHECK TABLE " . $table_name);
+			$query_result = $wpdb->get_results("CHECK TABLE `" . $table_name. "`");
 			foreach($query_result as $row){
 				if($row->Msg_type == 'error'){
 					if(preg_match('/corrupt/i', $row->Msg_text)){
@@ -258,7 +252,7 @@ class ADBC_Tables_List extends WP_List_Table {
 
 				$prefix_and_name = $item['table_prefix'] . $item[$column_name];
 
-				$return_name = "<span class='aDBc-bold'>" . $item['table_prefix'] . "</span>" . $item[$column_name];
+				$return_name = "<span class='aDBc-bold'>" . esc_html($item['table_prefix']) . "</span>" . esc_html($item[$column_name]);
 
 				if ( $item['table_lost'] > 0 && in_array( $prefix_and_name, $this->aDBc_tables_name_to_optimize ) ) {
 
@@ -308,9 +302,11 @@ class ADBC_Tables_List extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb( $item ) {
-
-		return sprintf( '<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', $item['table_prefix'] . "|" . $item['table_name'] );
-
+		$value = $item['table_prefix'] . "|" . $item['table_name'];
+		return sprintf( 
+			'<input type="checkbox" name="aDBc_elements_to_process[]" value="%s" />', 
+			esc_attr($value)
+		);
 	}
 
 	/** WP: Get bulk actions */
@@ -359,21 +355,29 @@ class ADBC_Tables_List extends WP_List_Table {
 		if ( ! current_user_can( 'administrator' ) )
 			wp_die( 'Security check failed!' );
 
-		// Prepare an array containing names of tables deleted
-		$names_deleted = array();
+		// Get the list of all tables names to validate selected tables
+		global $wpdb;
+		$sql_rows = "SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = '" . DB_NAME . "';";
+		$valid_tables_names = $wpdb->get_col( $sql_rows );
 
         if ( $action == 'delete' ) {
+
+			// Prepare an array containing names of tables deleted
+			$names_deleted = array();
+
 			// If the user wants to clean the tables he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
-				global $wpdb;
 				foreach($_POST['aDBc_elements_to_process'] as $table){
-					$table_info 	= explode("|", $table);
-					$table_prefix 	= sanitize_html_class($table_info[0]);
-					$table_name 	= sanitize_text_field($table_info[1]);
-					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
-					if($wpdb->query("DROP TABLE " . $table_prefix . $table_name)){
-						array_push($names_deleted, $table_name);
+					$table_info 	= explode("|", $table, 2);
+					$table_prefix 	= $table_info[0];
+					$table_name 	= wp_unslash($table_info[1]); // Because WP adds slashes to the name in the POST request
+					$full_table_name = $table_prefix . $table_name;
+
+					// Validate table name before deleting
+					if ( in_array( $full_table_name, $valid_tables_names ) ) {
+						if($wpdb->query("DROP TABLE `" . $full_table_name . "`")){
+							array_push($names_deleted, $table_name);
+						}
 					}
 				}
 
@@ -388,17 +392,23 @@ class ADBC_Tables_List extends WP_List_Table {
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected tables cleaned successfully!', 'advanced-database-cleaner');
 			}
+
         }else if($action == 'optimize'){
 			// If the user wants to optimize the tables he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
-				global $wpdb;
 				foreach($_POST['aDBc_elements_to_process'] as $table) {
-					$table_info 	= explode("|", $table);
-					$table_prefix 	= sanitize_html_class($table_info[0]);
-					$table_name 	= sanitize_text_field($table_info[1]);
-					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
-					$wpdb->query("OPTIMIZE TABLE " . $table_prefix . $table_name);
+					$table_info 	= explode("|", $table, 2);
+					$table_prefix 	= $table_info[0];
+					$table_name 	= wp_unslash($table_info[1]); // Because WP adds slashes to the name in the POST request
+					$full_table_name = $table_prefix . $table_name;
+
+					// Validate table name before optimizing
+					if ( in_array( $full_table_name, $valid_tables_names ) ) {
+						$wpdb->query("OPTIMIZE TABLE `" . $full_table_name . "`");
+						// run analyze sql query to force updating the table statistics
+						$wpdb->query("ANALYZE TABLE `" . $full_table_name . "`");
+					}
+
 				}
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected tables optimized successfully!', 'advanced-database-cleaner');
@@ -406,14 +416,18 @@ class ADBC_Tables_List extends WP_List_Table {
         }else if($action == 'empty'){
 			// If the user wants to empty the tables he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
-				global $wpdb;
 				foreach($_POST['aDBc_elements_to_process'] as $table) {
-					$table_info 	= explode("|", $table);
-					$table_prefix 	= sanitize_html_class($table_info[0]);
-					$table_name 	= sanitize_text_field($table_info[1]);
-					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
-					$wpdb->query("TRUNCATE TABLE " . $table_prefix . $table_name);
+					$table_info 	= explode("|", $table, 2);
+					$table_prefix 	= $table_info[0];
+					$table_name 	= wp_unslash($table_info[1]); // Because WP adds slashes to the name in the POST request
+					$full_table_name = $table_prefix . $table_name;
+
+					// Validate table name before emptying
+					if ( in_array( $full_table_name, $valid_tables_names ) ) {
+						$wpdb->query("TRUNCATE TABLE `" . $full_table_name . "`");
+						// run analyze sql query to force updating the table statistics
+						$wpdb->query("ANALYZE TABLE `" . $full_table_name . "`");
+					}
 				}
 				// Update the message to show to the user
 				$this->aDBc_message = __('Selected tables emptied successfully!', 'advanced-database-cleaner');
@@ -421,23 +435,29 @@ class ADBC_Tables_List extends WP_List_Table {
         }else if($action == 'repair'){
 			// If the user wants to repair the tables he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
-				global $wpdb;
 				$cannot_repair = 0;
 				foreach($_POST['aDBc_elements_to_process'] as $table) {
-					$table_info 	= explode("|", $table);
-					$table_prefix 	= sanitize_html_class($table_info[0]);
-					$table_name 	= sanitize_text_field($table_info[1]);
-					// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-					$table_name 	= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
-					$query_result 	= $wpdb->get_results("REPAIR TABLE " . $table_prefix . $table_name);
-					foreach($query_result as $row){
-						if($row->Msg_type == 'error'){
-							if(preg_match('/corrupt/i', $row->Msg_text)){
-								$cannot_repair++;
+					$table_info 	= explode("|", $table, 2);
+					$table_prefix 	= $table_info[0];
+					$table_name 	= wp_unslash($table_info[1]); // Because WP adds slashes to the name in the POST request
+					$full_table_name = $table_prefix . $table_name;
+
+					// Validate table name before repairing
+					if ( in_array( $full_table_name, $valid_tables_names ) ) {
+						$query_result = $wpdb->get_results("REPAIR TABLE `" . $full_table_name . "`");
+						foreach($query_result as $row){
+							if($row->Msg_type == 'error'){
+								if(preg_match('/corrupt/i', $row->Msg_text)){
+									$cannot_repair++;
+								}
+							} else {
+								// run analyze sql query to force updating the table statistics
+								$wpdb->query("ANALYZE TABLE `" . $full_table_name . "`");
 							}
 						}
 					}
 				}
+
 				// Update the message to show to the user
 				if($cannot_repair == 0){
 					$this->aDBc_message = __('Selected tables repaired successfully!', 'advanced-database-cleaner');
@@ -453,11 +473,15 @@ class ADBC_Tables_List extends WP_List_Table {
 				$aDBc_path_items = @fopen(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/tables_manually_correction_temp.txt", "w");
 				if($aDBc_path_items){
 					foreach($_POST['aDBc_elements_to_process'] as $table) {
-						$table_info = explode("|", $table);
-						$table_name = sanitize_text_field($table_info[1]);
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$table_name = preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $table_name);
-						fwrite($aDBc_path_items, $table_name . "\n");
+						$table_info = explode("|", $table, 2);
+						$table_prefix 	= $table_info[0];
+						$table_name 	= wp_unslash($table_info[1]); // Because WP adds slashes to the name in the POST request
+						$full_table_name = $table_prefix . $table_name;
+
+						// Validate table name before adding it to the file
+						if ( in_array( $full_table_name, $valid_tables_names ) ) {
+							fwrite($aDBc_path_items, $table_name . "\n");
+						}
 					}
 					fclose($aDBc_path_items);
 				}
@@ -471,9 +495,6 @@ class ADBC_Tables_List extends WP_List_Table {
 		if($this->aDBc_message != ""){
 			echo '<div id="aDBc_message" class="' . $this->aDBc_class_message . ' notice is-dismissible"><p>' . $this->aDBc_message . '</p></div>';
 		}
-
-		// If the search has finished, show a msg success to users + button to double check results against our server database
-		echo $this->aDBc_search_has_finished_msg;
 
 		// If the folder adbc_uploads cannot be created, show a msg to users
 		if(!empty($this->aDBc_permission_adbc_folder_msg)){
@@ -500,9 +521,18 @@ class ADBC_Tables_List extends WP_List_Table {
 				if($_GET['aDBc_cat'] == 'o' && $this->aDBc_tables_categories_info['o']['count'] > 0){
 					echo '<div class="aDBc-box-warning-orphan">' . __('Tables below seem to be orphan! However, please delete only those you are sure to be orphan!','advanced-database-cleaner') . '</div>';
 				}else if(($_GET['aDBc_cat'] == 'all' || $_GET['aDBc_cat'] == 'u') && $this->aDBc_tables_categories_info['u']['count'] > 0){
-					echo '<div class="aDBc-box-info">' . __('Some of your tables are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') . '</div>';
-				}
 
+					$aDBc_settings = get_option('aDBc_settings');
+					$hide_not_categorized_msg = empty($aDBc_settings['hide_not_categorized_yet_msg']) ? "" : $aDBc_settings['hide_not_categorized_yet_msg'];
+					if ( $hide_not_categorized_msg != "yes" ) {
+						echo '<div id="aDBc-box-info" class="aDBc-box-info">' 
+							. '<div style="width:100%">' 
+							. __('Some of your tables are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') 
+							. '</div>'
+							. '<div><a href="#" id="aDBc-dismiss-not-categorized-yet-msg" title="' . __('Dismiss similar messages', 'advanced-database-cleaner') . '"><span class="dashicons dashicons-dismiss" style="text-decoration:none;font-size:16px;margin-top:4px"></span></a></div>'
+						. '</div>';
+					}
+				}
 			}
 
 		?>
@@ -516,7 +546,7 @@ class ADBC_Tables_List extends WP_List_Table {
 				if ( $this->aDBc_which_button_to_show == "new_search" ) {
 					$aDBc_search_text  	= __( 'Scan tables', 'advanced-database-cleaner' );
 				} else {
-					$aDBc_search_text  	= __( 'Continue scannig ...', 'advanced-database-cleaner' );
+					$aDBc_search_text  	= __( 'Continue scanning ...', 'advanced-database-cleaner' );
 				}
 				?>
 
@@ -526,7 +556,9 @@ class ADBC_Tables_List extends WP_List_Table {
 				<?php
 				// These hidden inputs are used by ajax to see if we should execute scanning automatically after reloading a page
 				$iteration = get_option("aDBc_temp_last_iteration_tables");
+				$currently_scanning = get_option("aDBc_temp_currently_scanning_tables");
 				?>
+				<input type="hidden" id="aDBc_currently_scanning" value="<?php echo $currently_scanning; ?>"/>
 				<input type="hidden" id="aDBc_iteration" value="<?php echo $iteration; ?>"/>
 				<input type="hidden" id="aDBc_count_uncategorized" value="<?php echo $this->aDBc_tables_categories_info['u']['count']; ?>"/>
 				<input type="hidden" id="aDBc_count_all_items" value="<?php echo $this->aDBc_tables_categories_info['all']['count']; ?>"/>
@@ -610,9 +642,9 @@ class ADBC_Tables_List extends WP_List_Table {
 							?>
 
 								<span style="width:150px" class="aDBc-premium-tooltiptext">
-
-									<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
-
+									<a href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner/" target="_blank">
+										<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
+									</a>
 								</span>
 
 							<?php
@@ -632,6 +664,9 @@ class ADBC_Tables_List extends WP_List_Table {
 			<div class="aDBc-clear-both"></div>
 
 			<div id="aDBc-progress-container">
+
+				<span id="aDBc_collected_files" href="#" style="color:gray">
+				</span>
 
 				<div class="aDBc-progress-background">
 					<div id="aDBc-progress-bar" class="aDBc-progress-bar"></div>

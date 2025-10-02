@@ -82,19 +82,19 @@ class ADBC_Clean_Transient extends WP_List_Table {
 		// Get all dashboard transients
 		$this->aDBc_sql_get_transients = "SELECT a.option_id, a.option_name, a.option_value as option_content, a.autoload, b.option_value as option_timeout FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name =
 		CONCAT(
-			CASE WHEN a.option_name LIKE '_site_transient_%'
+			CASE WHEN a.option_name LIKE '\_site\_transient\_%'
 				THEN '_site_transient_timeout_'
 				ELSE '_transient_timeout_'
 			END
 			,
 			SUBSTRING(a.option_name, CHAR_LENGTH(
-				CASE WHEN a.option_name LIKE '_site_transient_%'
+				CASE WHEN a.option_name LIKE '\_site\_transient\_%'
 				   THEN '_site_transient_'
 				   ELSE '_transient_'
 				END
 			) + 1)
 		)
-		WHERE (a.option_name LIKE '_transient_%' OR a.option_name LIKE '_site_transient_%') AND a.option_name NOT LIKE '%_transient_timeout_%'"
+		WHERE (a.option_name LIKE '\_transient\_%' OR a.option_name LIKE '\_site\_transient\_%') AND a.option_name NOT LIKE '%\_transient\_timeout\_%'"
 		. $this->aDBc_custom_sql_args
 		. $this->aDBc_search_sql_arg
 		. $this->aDBc_order_by_sql_arg
@@ -272,17 +272,18 @@ class ADBC_Clean_Transient extends WP_List_Table {
 					foreach($feeds_to_delete as $site_id => $feed_ids){
 						switch_to_blog($site_id);
 						global $wpdb;
-						$names_to_delete = $wpdb->get_col("select option_name from $wpdb->options WHERE option_id IN (" . implode(',',$feed_ids) . ")");
-						foreach($names_to_delete as $transient_name){
-							$site_wide = (strpos($transient_name, '_site_transient') !== false);
-							$name = str_replace($site_wide ? '_site_transient_' : '_transient_', '', $transient_name);
+						$transients_to_delete = $wpdb->get_results("select option_name, option_id from $wpdb->options WHERE option_id IN (" . implode(',',$feed_ids) . ")");
+						foreach($transients_to_delete as $transient){
+							$site_wide = (strpos($transient->option_name, '_site_transient') !== false);
+							$name = str_replace($site_wide ? '_site_transient_' : '_transient_', '', $transient->option_name);
 							if(false !== $site_wide){
-								delete_site_transient($name);
+								// We used a query directly here instead of delete_site_transient() because in MU, WP tries to delete the transient from sitemeta table, however, in our case, all results above are from options table. So, we need to delete them from options table
+								$name_timeout = '_site_transient_timeout_' . $name;
+								$wpdb->query("DELETE FROM $wpdb->options WHERE option_id = {$transient->option_id} OR option_name = '{$name_timeout}'");
 							}else{
 								delete_transient($name);
 							}
 						}
-
 						restore_current_blog();
 					}
 				}else{
@@ -301,6 +302,7 @@ class ADBC_Clean_Transient extends WP_List_Table {
 						$site_wide = (strpos($transient_name, '_site_transient') !== false);
 						$name = str_replace($site_wide ? '_site_transient_' : '_transient_', '', $transient_name);
 						if(false !== $site_wide){
+							// Here, we used delete_site_transient() instead of a query because on a single site, this function will delete the transient from options table
 							delete_site_transient($name);
 						}else{
 							delete_transient($name);

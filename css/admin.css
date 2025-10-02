@@ -472,11 +472,14 @@ input:disabled {
 }
 
 .aDBc-box-info {
+	display: flex;
     background: #f0f5fa url("../images/info.svg") no-repeat scroll 8px 50%;
     color: #404040;
     padding: 10px 10px 10px 40px;
 	margin-top: 10px;
 	margin-bottom: 25px;
+	border: 1px solid #dbe9ff;
+	border-radius: 4px;
 }
 
 /*---------------------------------------------------------------------------------------------
@@ -693,11 +696,11 @@ input:disabled {
 
 .column-option_name {width: 31%}
 
-.column-option_value {width: 22%}
+.column-option_value {width: 21%}
 
 .column-option_size {width: 10%}
 
-.column-option_autoload {width: 12%}
+.column-option_autoload {width: 13%}
 
 .column-option_belongs_to {width: 25%}
 
@@ -799,6 +802,27 @@ input:disabled {
 	}
 }
 
+.aDBc-filter-elements {
+	float: left;
+	margin-right: 4px;
+	display: flex;
+	gap: 5px;	
+}
+
+@media screen and (max-width: 820px) {
+	.aDBc-filter-elements {
+		flex-direction: column;
+	}
+}
+
+.aDBc-filter-label {
+	display: block;
+	margin-bottom: 5px;
+	font-size: 11px;
+	font-weight: 500;
+	color: #555;
+}
+
 .aDBc-filter-search-input {
 	float: left;
 	line-height: 2 !important;
@@ -815,9 +839,9 @@ input:disabled {
 	box-shadow: none !important;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 820px) {
 	.aDBc-filter-search-input {
-		width: 100% !important;
+		min-width: 200px !important;
 		margin-right: 0px;
 	}
 }
@@ -836,9 +860,9 @@ input:disabled {
 	box-shadow: none !important;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 820px) {
 	.aDBc-filter-dropdown-menu {
-		width: 100% !important;
+		min-width: 200px !important;
 		margin-top: 5px !important;
 		margin-left: 0px;
 	}
@@ -847,11 +871,11 @@ input:disabled {
 .aDBc-filter-botton {
 	float: left;
 	height: 30px !important;
-	width: 50px !important;
+	/* width: 50px !important; */
 	margin-top: 0px !important;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 820px) {
 	.aDBc-filter-botton {
 		clear: both;
 		margin-top: 5px !important;
@@ -1462,18 +1486,22 @@ span.aDBc-tooltips {
 
 span.aDBc-tooltips span {
 	position: absolute;
-	color: #666666;
+	color: #444;
 	background: #FFFFE0;
 	font-size: 13px;
 	font-weight: normal;
 	padding: 10px;
 	visibility: hidden;
 	width: 300px;
+	max-height: 200px;     /* Set maximum height */
+	overflow-y: auto;      /* Add vertical scrollbar when needed */
+	overflow-x: hidden;    /* Hide horizontal scrollbar */
 	border: 1px solid #006799;
 	border-radius: 4px;
+	z-index: 999;
 }
 
-span.aDBc-tooltips span:after {
+/* span.aDBc-tooltips span:after {
 	content: '';
 	position: absolute;
 	top: 18px;
@@ -1484,15 +1512,54 @@ span.aDBc-tooltips span:after {
 	border-right: 8px solid #006799;
 	border-top: 8px solid transparent;
 	border-bottom: 8px solid transparent;
-}
+} */
 
-span:hover.aDBc-tooltips span {
+/* span:hover.aDBc-tooltips span {
 	visibility: visible;
 	left: 100%;
 	top: 50%;
 	margin-top: -15.5px;
 	margin-left: 5px;
 	z-index: 999;
+} */
+
+span.aDBc-tooltips:hover span,
+span.aDBc-tooltips span:hover {
+	visibility: visible;
+	left: 100%;
+	top: 50%;
+	margin-top: -15.5px;
+	margin-left: 5px;
+}
+
+/* Add a transparent bridge to allow smooth movement to the tooltip */
+span.aDBc-tooltips:after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 100%;
+	width: 5px; /* Width of the bridge */
+	height: 20px;
+	transform: translateY(-50%);
+}
+
+/* Custom scrollbar styling for better appearance */
+span.aDBc-tooltips span::-webkit-scrollbar {
+	width: 8px;
+}
+
+span.aDBc-tooltips span::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 4px;
+}
+
+span.aDBc-tooltips span::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 4px;
+}
+
+span.aDBc-tooltips span::-webkit-scrollbar-thumb:hover {
+	background: #555;
 }
 
 /*---------------------------------------------------------------------------------------------
@@ -1536,7 +1603,7 @@ span.aDBc-tooltips-headers span:after {
 	margin-top: -8px;
 	width: 0;
 	height: 0;
-	border-right: 8px solid #222;
+	border-right: 8px solid #222222;
 	border-top: 8px solid transparent;
 	border-bottom: 8px solid transparent;
 }

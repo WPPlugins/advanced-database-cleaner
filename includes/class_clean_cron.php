@@ -20,9 +20,6 @@ class ADBC_Tasks_List extends WP_List_Table {
 	// This array contains belongs_to info about plugins and themes
 	private $array_belongs_to_counts = array();
 
-	// Holds msg that will be shown if the scan has finished with success
-	private $aDBc_search_has_finished_msg = "";
-
 	// Holds msg that will be shown if folder adbc_uploads cannot be created by the plugin (This is verified after clicking on scan button)
 	private $aDBc_permission_adbc_folder_msg = "";
 
@@ -42,9 +39,6 @@ class ADBC_Tasks_List extends WP_List_Table {
 	function aDBc_prepare_and_count_tasks() {
 
 		if ( ADBC_PLUGIN_PLAN == "pro" ) {
-
-			// If the search has finished, show a msg success to users + button to double check results against our server database
-			$this->aDBc_search_has_finished_msg = aDBc_get_msg_double_check( "tasks" );
 
 			// Verify if the adbc_uploads cannot be created
 			$adbc_folder_permission = get_option( "aDBc_permission_adbc_folder_needed" );
@@ -190,6 +184,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 				}
 				break;
 			case 'hook_name':
+				return esc_html($item[$column_name]);
 			case 'next_run':
 			case 'site_id':
 			case 'hook_belongs_to':
@@ -201,7 +196,20 @@ class ADBC_Tasks_List extends WP_List_Table {
 
 	/** WP: Column cb for check box */
 	function column_cb($item) {
-		return sprintf("<input type='checkbox' name='aDBc_elements_to_process[]' value='%s' />", $item['site_id']."|".$item['hook_name']."|".$item['timestamp']."|".$item['arguments']);
+
+		$data = array(
+			'site_id'   => $item['site_id'],
+			'hook_name' => $item['hook_name'],
+			'timestamp' => $item['timestamp'],
+			'arguments' => $item['arguments']
+		);
+
+		$value = json_encode($data);
+
+		return sprintf(
+			"<input type='checkbox' name='aDBc_elements_to_process[]' value='%s' />", 
+			esc_attr($value)
+		);
 	}
 
 	/** WP: Get bulk actions */
@@ -248,15 +256,17 @@ class ADBC_Tasks_List extends WP_List_Table {
 
         if ( $action == 'delete' ) {
 
-			// xxx Have a look at the remark with the code 16230-code in Trello
 			// If the user wants to clean the tasks he/she selected
 			if(isset($_POST['aDBc_elements_to_process'])){
 				if(function_exists('is_multisite') && is_multisite()){
 					// Prepare tasks to delete in organized array to minimize switching from blogs
 					$tasks_to_delete = array();
 					foreach($_POST['aDBc_elements_to_process'] as $task){
-						$task_info 	= explode("|", $task, 2);
-						$site_id 	= sanitize_html_class($task_info[0]);
+
+						$json 		= wp_unslash( $task ); // Unslash because WP adds slashes to the POST data
+						$data 		= json_decode( $json, true );
+						$site_id 	= sanitize_html_class($data['site_id']);
+
 						if(is_numeric($site_id)){
 							if(empty($tasks_to_delete[$site_id])){
 								$tasks_to_delete[$site_id] = array();
@@ -268,13 +278,14 @@ class ADBC_Tasks_List extends WP_List_Table {
 					foreach($tasks_to_delete as $site_id => $tasks_info){
 						switch_to_blog($site_id);
 						foreach($tasks_info as $task) {
-							$aDBc_cron_info = explode("|", $task, 4);
 
-							$hook 			= sanitize_text_field($aDBc_cron_info[1]);
-							// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-							$hook 			= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $hook);
-							$timestamp 		= sanitize_html_class($aDBc_cron_info[2]);
-							$args 			= sanitize_text_field($aDBc_cron_info[3]);
+							$json 		= wp_unslash( $task ); // Unslash because WP adds slashes to the POST data
+							$data 		= json_decode( $json, true );
+	
+							$hook 		= $data['hook_name'];
+							$timestamp 	= $data['timestamp'];
+							$args 		= $data['arguments'];
+
 							if(is_numeric($timestamp)){
 								if($args == "none"){
 									wp_unschedule_event($timestamp, $hook);
@@ -284,9 +295,9 @@ class ADBC_Tasks_List extends WP_List_Table {
 									// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
 									// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
 									if($hook == "aDBc_clean_scheduler"){
-										aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_clean_schedule");
+										aDBc_update_task_in_db_after_delete($args[0], "aDBc_clean_schedule");
 									}else if($hook == "aDBc_optimize_scheduler"){
-										aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_optimize_schedule");
+										aDBc_update_task_in_db_after_delete($args[0], "aDBc_optimize_schedule");
 									}
 								}
 							}
@@ -295,12 +306,14 @@ class ADBC_Tasks_List extends WP_List_Table {
 					}
 				}else{
 					foreach($_POST['aDBc_elements_to_process'] as $task) {
-						$aDBc_cron_info = explode("|", $task, 4);
-						$hook 			= sanitize_text_field($aDBc_cron_info[1]);
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$hook 			= preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $hook);
-						$timestamp 		= sanitize_html_class($aDBc_cron_info[2]);
-						$args 			= sanitize_text_field($aDBc_cron_info[3]);
+
+						$json 		= wp_unslash( $task ); // Unslash because WP adds slashes to the POST data
+						$data 		= json_decode( $json, true );
+
+						$hook 		= $data['hook_name'];
+						$timestamp 	= $data['timestamp'];
+						$args 		= $data['arguments'];
+
 						if(is_numeric($timestamp)){
 							if($args == "none"){
 								wp_unschedule_event($timestamp, $hook);
@@ -310,9 +323,9 @@ class ADBC_Tasks_List extends WP_List_Table {
 								// Check if the user has deleted a task beloging to this plugin. If so, update his data in DB to inactive
 								// A task of ADBC cannot be without an arg, not necessary to add this check to "none" args
 								if($hook == "aDBc_clean_scheduler"){
-									aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_clean_schedule");
+									aDBc_update_task_in_db_after_delete($args[0], "aDBc_clean_schedule");
 								}else if($hook == "aDBc_optimize_scheduler"){
-									aDBc_update_task_in_db_after_delete(sanitize_html_class($args[0]), "aDBc_optimize_schedule");
+									aDBc_update_task_in_db_after_delete($args[0], "aDBc_optimize_schedule");
 								}
 							}
 						}
@@ -328,10 +341,11 @@ class ADBC_Tasks_List extends WP_List_Table {
 				$aDBc_path_items = @fopen(ADBC_UPLOAD_DIR_PATH_TO_ADBC . "/tasks_manually_correction_temp.txt", "w");
 				if($aDBc_path_items){
 					foreach($_POST['aDBc_elements_to_process'] as $task) {
-						$task_info = explode("|", $task);
-						$hook = sanitize_text_field($task_info[1]);
-						// We delete some characters we believe they should not appear in the name: & < > = # ( ) [ ] { } ? " '
-						$hook = preg_replace("/[&<>=#\(\)\[\]\{\}\?\"\' ]/", '', $hook);
+
+						$json = wp_unslash( $task ); // Unslash because WP adds slashes to the POST data
+						$data = json_decode( $json, true );
+						$hook = $data['hook_name'];
+
 						fwrite($aDBc_path_items, $hook . "\n");
 					}
 					fclose($aDBc_path_items);
@@ -346,9 +360,6 @@ class ADBC_Tasks_List extends WP_List_Table {
 		if($this->aDBc_message != ""){
 			echo '<div id="aDBc_message" class="' . $this->aDBc_class_message . ' notice is-dismissible"><p>' . $this->aDBc_message . '</p></div>';
 		}
-
-		// If the search has finished, show a msg success to users + button to double check results against our server database
-		echo $this->aDBc_search_has_finished_msg;
 
 		// If the folder adbc_uploads cannot be created, show a msg to users
 		if(!empty($this->aDBc_permission_adbc_folder_msg)){
@@ -375,7 +386,17 @@ class ADBC_Tasks_List extends WP_List_Table {
 				if($_GET['aDBc_cat'] == 'o' && $this->aDBc_tasks_categories_info['o']['count'] > 0){
 					echo '<div class="aDBc-box-warning-orphan">' . __('Tasks below seem to be orphan! However, please delete only those you are sure to be orphan!','advanced-database-cleaner') . '</div>';
 				}else if(($_GET['aDBc_cat'] == 'all' || $_GET['aDBc_cat'] == 'u') && $this->aDBc_tasks_categories_info['u']['count'] > 0){
-					echo '<div class="aDBc-box-info">' . __('Some of your tasks are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') . '</div>';
+
+					$aDBc_settings = get_option('aDBc_settings');
+					$hide_not_categorized_msg = empty($aDBc_settings['hide_not_categorized_yet_msg']) ? "" : $aDBc_settings['hide_not_categorized_yet_msg'];
+					if ( $hide_not_categorized_msg != "yes" ) {
+						echo '<div id="aDBc-box-info" class="aDBc-box-info">' 
+							. '<div style="width:100%">' 
+							. __('Some of your tasks are not categorized yet! Please click on the button below to categorize them!','advanced-database-cleaner') 
+							. '</div>'
+							. '<div><a href="#" id="aDBc-dismiss-not-categorized-yet-msg" title="' . __('Dismiss similar messages', 'advanced-database-cleaner') . '"><span class="dashicons dashicons-dismiss" style="text-decoration:none;font-size:16px;margin-top:4px"></span></a></div>'
+						. '</div>';
+					}
 				}
 
 			}
@@ -391,7 +412,7 @@ class ADBC_Tasks_List extends WP_List_Table {
 				if ( $this->aDBc_which_button_to_show == "new_search" ) {
 					$aDBc_search_text  	= __( 'Scan tasks', 'advanced-database-cleaner' );
 				} else {
-					$aDBc_search_text  	= __( 'Continue scannig ...', 'advanced-database-cleaner' );
+					$aDBc_search_text  	= __( 'Continue scanning ...', 'advanced-database-cleaner' );
 				}
 				?>
 
@@ -401,7 +422,9 @@ class ADBC_Tasks_List extends WP_List_Table {
 				<?php
 				// These hidden inputs are used by ajax to see if we should execute the scan automatically after reloading a page
 				$iteration = get_option("aDBc_temp_last_iteration_tasks");
+				$currently_scanning = get_option("aDBc_temp_currently_scanning_tasks");
 				?>
+				<input type="hidden" id="aDBc_currently_scanning" value="<?php echo $currently_scanning; ?>"/>
 				<input type="hidden" id="aDBc_iteration" value="<?php echo $iteration; ?>"/>
 				<input type="hidden" id="aDBc_count_uncategorized" value="<?php echo $this->aDBc_tasks_categories_info['u']['count']; ?>"/>
 				<input type="hidden" id="aDBc_count_all_items" value="<?php echo $this->aDBc_tasks_categories_info['all']['count']; ?>"/>
@@ -486,9 +509,9 @@ class ADBC_Tasks_List extends WP_List_Table {
 							?>
 
 								<span style="width:150px" class="aDBc-premium-tooltiptext">
-
-									<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
-
+									<a href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner/" target="_blank">
+										<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
+									</a>
 								</span>
 
 							<?php
@@ -507,6 +530,9 @@ class ADBC_Tasks_List extends WP_List_Table {
 			<div class="aDBc-clear-both"></div>
 
 			<div id="aDBc-progress-container">
+				
+				<span id="aDBc_collected_files" href="#" style="color:gray">
+				</span>
 
 				<div class="aDBc-progress-background">
 					<div id="aDBc-progress-bar" class="aDBc-progress-bar"></div>

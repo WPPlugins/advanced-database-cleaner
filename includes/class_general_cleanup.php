@@ -145,7 +145,7 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 
 					$save_button = __('Save','advanced-database-cleaner');
 
-					$keep_info = "<span id='aDBc_keep_label_$element_type'>" . $keep_number . " " . __('days','advanced-database-cleaner') .  " | </span>" . "<a id='aDBc_edit_keep_$element_type' class='aDBc-keep-link'>Edit</a>";
+					$keep_info = "<span id='aDBc_keep_label_$element_type'>" . $keep_number . " " . __('days','advanced-database-cleaner') .  " | </span>" . "<a id='aDBc_edit_keep_$element_type' class='aDBc-keep-link'>" . __("Edit", "advanced-database-cleaner") . "</a>";
 
 					$keep_info .= "<form action='' method='post'>
 						<input type='hidden' name='aDBc_item_keep_to_edit' value='$element_type'>

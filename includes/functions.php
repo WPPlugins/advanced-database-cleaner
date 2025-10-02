@@ -155,38 +155,39 @@ function aDBc_clean_elements_type($type){
 			$wpdb->query("DELETE FROM $wpdb->termmeta WHERE term_id NOT IN (SELECT term_id FROM $wpdb->terms)");
 			break;
 		case "expired-transients":
-			$type_arg = " AND b.option_value < UNIX_TIMESTAMP()";
-			aDBc_clean_all_transients($type_arg);
+			aDBc_clean_all_transients();
 			break;
 	}
 }
 
 /** Cleans transients based on the type specified in parameter */
-function aDBc_clean_all_transients($type_arg){
+function aDBc_clean_all_transients(){
 
 	global $wpdb;
 
-	$aDBc_transients = $wpdb->get_results("SELECT a.option_name, b.option_value FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name =
+	$aDBc_transients = $wpdb->get_results("SELECT a.option_id, a.option_name, b.option_value FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name =
 	CONCAT(
-		CASE WHEN a.option_name LIKE '_site_transient_%'
+		CASE WHEN a.option_name LIKE '\_site\_transient\_%'
 			THEN '_site_transient_timeout_'
 			ELSE '_transient_timeout_'
 		END
 		,
 		SUBSTRING(a.option_name, CHAR_LENGTH(
-			CASE WHEN a.option_name LIKE '_site_transient_%'
+			CASE WHEN a.option_name LIKE '\_site\_transient\_%'
 			   THEN '_site_transient_'
 			   ELSE '_transient_'
 			END
 		) + 1)
 	)
-	WHERE (a.option_name LIKE '_transient_%' OR a.option_name LIKE '_site_transient_%') AND a.option_name NOT LIKE '%_transient_timeout_%'" . $type_arg);
+	WHERE (a.option_name LIKE '\_transient\_%' OR a.option_name LIKE '\_site\_transient\_%') AND a.option_name NOT LIKE '%\_transient\_timeout\_%' AND b.option_value < UNIX_TIMESTAMP()");
 
 	foreach($aDBc_transients as $transient){
 		$site_wide = (strpos($transient->option_name, '_site_transient') !== false);
 		$name = str_replace($site_wide ? '_site_transient_' : '_transient_', '', $transient->option_name);
 		if(false !== $site_wide){
-			delete_site_transient($name);
+			// We used a query directly here instead of delete_site_transient() because in MU, WP tries to delete the transient from sitemeta table, however, in our case, all results above are from options table. So, we need to delete them from options table
+			$name_timeout = '_site_transient_timeout_' . $name;
+			$wpdb->query("DELETE FROM $wpdb->options WHERE option_id = {$transient->option_id} or option_name = '{$name_timeout}'");
 		}else{
 			delete_transient($name);
 		}
@@ -399,9 +400,21 @@ function aDBc_count_elements_to_clean(&$aDBc_unused){
 
 	$aDBc_unused["orphan-relationships"]['count'] += $wpdb->get_var("SELECT COUNT(object_id) FROM $wpdb->term_relationships WHERE term_taxonomy_id=1 AND object_id NOT IN (SELECT ID FROM $wpdb->posts)");
 
-	$expired_transient_names = $wpdb->get_col("SELECT REPLACE(option_name, '_timeout', '') FROM $wpdb->options where (option_name LIKE '_transient_timeout_%' OR option_name LIKE '_site_transient_timeout_%') AND option_value < UNIX_TIMESTAMP()");
-
-	$aDBc_unused["expired-transients"]['count'] += count($expired_transient_names);
+	$aDBc_unused["expired-transients"]['count'] += $wpdb->get_var("SELECT count(*) FROM $wpdb->options a LEFT JOIN $wpdb->options b ON b.option_name =
+	CONCAT(
+		CASE WHEN a.option_name LIKE '\_site\_transient\_%'
+			THEN '_site_transient_timeout_'
+			ELSE '_transient_timeout_'
+		END
+		,
+		SUBSTRING(a.option_name, CHAR_LENGTH(
+			CASE WHEN a.option_name LIKE '\_site\_transient\_%'
+			   THEN '_site_transient_'
+			   ELSE '_transient_'
+			END
+		) + 1)
+	)
+	WHERE (a.option_name LIKE '\_transient\_%' OR a.option_name LIKE '\_site\_transient\_%') AND a.option_name NOT LIKE '%\_transient\_timeout\_%' AND b.option_value < UNIX_TIMESTAMP()");
 
 }
 
@@ -1158,16 +1171,26 @@ function aDBc_get_core_tasks() {
 	* After each release of WP, this list should be updated to add new tasks if necessary (to minimize searches in files).
 	*/
 	$aDBc_wp_core_tasks = array(
-		'wp_version_check',
-		'wp_update_plugins',
-		'wp_update_themes',
+		'delete_expired_transients',
+		'do_pings',
+		'publish_future_post',
+		'recovery_mode_clean_expired_keys',
+		'update_network_counts',
+		'upgrader_scheduled_cleanup',
+		'wp_auto_updates_maybe_update',
+		'wp_delete_temp_updater_backups',
+		'wp_https_detection',
 		'wp_maybe_auto_update',
+		'wp_privacy_delete_old_export_files',
 		'wp_scheduled_auto_draft_delete',
 		'wp_scheduled_delete',
-		'update_network_counts',
-		'delete_expired_transients',
-		'wp_privacy_delete_old_export_files',
-		'recovery_mode_clean_expired_keys'
+		'wp_site_health_scheduled_check',
+		'wp_split_shared_term_batch',
+		'wp_update_comment_type_batch',
+		'wp_update_plugins',
+		'wp_update_themes',
+		'wp_update_user_counts',
+		'wp_version_check',
 	);
 
 	return $aDBc_wp_core_tasks;
@@ -1295,8 +1318,8 @@ function aDBc_get_core_options() {
 		// 4.9.8
 		'show_comments_cookies_opt_in',
 		// Deleted from new versions
-		'blodotgsping_url', 'bodyterminator', 'emailtestonly', 'phoneemail_separator', 'smilies_directory',
-		'subjectprefix', 'use_bbcode', 'use_blodotgsping', 'use_phoneemail', 'use_quicktags', 'use_weblogsping',
+		'blodotgsping_url', 'bodyterminator', 'emailtestonly', 'phoneemail_separator',
+		'subjectprefix', 'use_bbcode', 'use_blodotgsping', 'use_quicktags', 'use_weblogsping',
 		'weblogs_cache_file', 'use_preview', 'use_htmltrans', 'smilies_directory', 'fileupload_allowedusers',
 		'use_phoneemail', 'default_post_status', 'default_post_category', 'archive_mode', 'time_difference',
 		'links_minadminlevel', 'links_use_adminlevels', 'links_rating_type', 'links_rating_char',
@@ -1338,19 +1361,124 @@ function aDBc_get_core_options() {
 		'current_theme',
 		// Found in wp-includes/cron.php
 		'cron',
-		// Unknown : To verify
-		'user_roles',
 		'widget_nav_menu',
+		'_split_terms',
+		// Added in the new adbc 3.2.7
+		'_wp_suggested_policy_text_has_changed',
+		'active_sitewide_plugins',
+		'admin_email_lifespan',
+		'adminhash',
+		'allowed_themes',
+		'allowedthemes',
+		'auto_core_update_checked',
+		'auto_core_update_failed',
+		'auto_core_update_last_checked',
+		'auto_core_update_notified',
+		'auto_plugin_theme_update_emails',
+		'auto_update_core_dev',
+		'auto_update_core_major',
+		'auto_update_core_minor',
+		'auto_update_plugins',
+		'auto_update_themes',
+		'blocklist_keys',
+		'blog_count',
+		'blog_upload_space',
+		'category_children',
+		'comment_previously_approved',
+		'core_updater.lock',
+		'customize_stashed_theme_mods',
+		'dashboard_widget_options',
+		'db_upgraded',
+		'deactivated_sitewide_plugins',
+		'delete_blog_hash',
+		'disallowed_keys',
+		'dismissed_update_core',
+		'dismissed_update_plugins',
+		'dismissed_update_themes',
+		'embed_size_h',
+		'embed_size_w',
+		'fileupload_maxk',
+		'fileupload_url',
+		'finished_updating_comment_type',
+		'fresh_site',
+		'ftp_credentials',
+		'global_terms_enabled',
+		'https_detection_errors',
+		'https_migration_required',
+		'illegal_names',
+		'large_image_threshold',
+		'layout_columns',
+		'links_per_page',
+		'ms_files_rewriting',
+		'my_array',
+		'my_option_name',
+		'nav_menu_options',
+		'network_admin_hash',
+		'new_admin_email',
+		'post_count',
+		'product_cat_children',
+		'recovery_keys',
+		'recovery_mode_auth_key',
+		'recovery_mode_auth_salt',
+		'recovery_mode_email_last_sent',
+		'registration',
+		'registrationnotification',
+		'secret_key',
+		'site_admins',
+		'site_logo',
+		'stylesheet_root',
+		'template_root',
+		'theme_mods_twentytwentythree',
+		'theme_switch_menu_locations',
+		'theme_switched_via_customizer',
+		'update_core_major',
+		'update_services',
+		'update_translations',
+		'upgrade_500_was_gutenberg_active',
+		'use_fileupload',
+		'user_count',
+		'welcome_user_email',
+		'widget_block',
+		'widget_calendar',
+		'widget_custom_html',
+		'widget_media_audio',
+		'widget_media_gallery',
+		'widget_media_image',
+		'widget_media_video',
+		'widget_pages',
+		'widget_recent_comments',
+		'widget_recent_entries',
+		'widget_tag_cloud',
+		'wp_calendar_block_has_published_posts',
+		'wp_force_deactivated_plugins',
+		'wpmu_sitewide_plugins',
+		'wpmu_upgrade_site',
+		'wp_attachment_pages_enabled'
 	);
 
 	// Before doing anything, we add some special options to the WP core options array
-	// The 'user_roles' option is added in Multi-site as $prefix.'user_roles'. So for each site we should add this options in that format
-	if(function_exists('is_multisite') && is_multisite()){
-		global $wpdb;
+	// The 'user_roles' option is added as $prefix.'user_roles'
+	global $wpdb;
+	if( function_exists('is_multisite') && is_multisite() ){
+
 		$blogs_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+
 		foreach($blogs_ids as $blog_id){
 			array_push($aDBc_wp_core_options, $wpdb->get_blog_prefix($blog_id).'user_roles');
 		}
+
+	} else {
+
+		array_push($aDBc_wp_core_options, $wpdb->prefix.'user_roles');
+
+	}
+
+	// Add also theme_mods option
+	$child_theme_slug = get_stylesheet();
+	$parent_theme_slug = get_template();
+	array_push($aDBc_wp_core_options, 'theme_mods_' . $child_theme_slug);
+	if ( $child_theme_slug != $parent_theme_slug ) {
+		array_push($aDBc_wp_core_options, 'theme_mods_' . $parent_theme_slug);
 	}
 
 	return $aDBc_wp_core_options;
@@ -1390,28 +1518,30 @@ function aDBc_save_settings_callback() {
 	check_ajax_referer( 'aDBc_nonce', 'security' );
 
 	if ( ! current_user_can( 'administrator' ) )
-
 		wp_send_json_error( __( 'Not sufficient permissions!', 'advanced-database-cleaner' ) );
 
 	$aDBc_settings = get_option( 'aDBc_settings' );
 
-	// Data validation
+	// Data sanitization and validation
+	$left_menu 			= sanitize_key($_REQUEST['left_menu']);
+	$menu_under_tools 	= sanitize_key($_REQUEST['menu_under_tools']);
+	$network_menu 		= sanitize_key($_REQUEST['network_menu']);
+	$hide_premium_tab 	= sanitize_key($_REQUEST['hide_premium_tab']);
+	$is_multisite 		= is_multisite() ? "1" : "0";
 
-	$left_menu 			= intval( $_REQUEST['left_menu'] );
-	$menu_under_tools 	= intval( $_REQUEST['menu_under_tools'] );
-	$hide_premium_tab 	= intval( $_REQUEST['hide_premium_tab'] );
-
-	$allowed_values = array(0, 1);
+	$allowed_values = array("0", "1");
 
 	if ( ! in_array( $left_menu, $allowed_values, true ) ||
 		 ! in_array( $menu_under_tools, $allowed_values, true ) ||
+		 ! in_array( $network_menu, $allowed_values, true ) ||
 		 ! in_array( $hide_premium_tab, $allowed_values, true ) ) {
 
 		wp_send_json_error( __( 'An error has occurred. Please try again!', 'advanced-database-cleaner' ) );
 
 	}
 
-	if ( $left_menu == 0 && $menu_under_tools == 0 )
+	if ( ($is_multisite == "0" && $left_menu == "0" && $menu_under_tools == "0") || 
+		 ($is_multisite == "1" && $network_menu == "0" && $left_menu == "0" && $menu_under_tools == "0") )
 
 		wp_send_json_error( __( 'Please select at least one menu to show the plugin', 'advanced-database-cleaner' ) );
 
@@ -1419,9 +1549,10 @@ function aDBc_save_settings_callback() {
 
 	$aDBc_settings['left_menu'] 		= $left_menu;
 	$aDBc_settings['menu_under_tools'] 	= $menu_under_tools;
+	if ( $is_multisite == "1" )
+		$aDBc_settings['network_menu'] 	= $network_menu;
 
 	if ( ADBC_PLUGIN_PLAN == "free" )
-
 		$aDBc_settings['hide_premium_tab'] = $hide_premium_tab;
 
 	update_option( 'aDBc_settings', $aDBc_settings, "no" );
@@ -1429,6 +1560,63 @@ function aDBc_save_settings_callback() {
 	// If no error reported before, success and die
 	wp_send_json_success();
 
+}
+
+/**
+ * Get the total size of all autoloaded options efficiently.
+ * Compatible with WordPress 6.6.0+ autoload handling changes.
+ *
+ * @return array Total size of autoloaded options in bytes and 'bad' or 'good' status of the size.
+ */
+function adbc_get_total_autoload_size($size_unit = 'KB') {
+
+	$alloptions = wp_load_alloptions();
+	$total_length = 0;
+
+	foreach ( $alloptions as $option_value ) {
+		if ( is_array( $option_value ) || is_object( $option_value ) ) {
+			$option_value = maybe_serialize( $option_value );
+		}
+		$total_length += strlen( (string) $option_value );
+	}
+
+	$size_status = $total_length > 800000 ? 'bad' : 'good'; // 800KB is the threshold for 'good' status in WP
+	
+    switch ( $size_unit ) {
+		case 'B':
+			break;
+		case 'KB':
+			$total_length = round( $total_length / 1024, 2 );
+			break;
+		case 'MB':
+			$total_length = round( $total_length / 1024 / 1024, 2 );
+			break;
+	}
+
+	return [$total_length, $size_status];
+	
+}
+
+/**
+ * Format bytes.
+ *
+ * @return string Formatted bytes.
+ */
+function aDBc_format_bytes( $bytes, $precision = 2 ) {
+
+	$units = [ 'B', 'KB', 'MB', 'GB' ];
+
+	if ( $bytes <= 0 ) {
+		return '0 B';
+	}
+
+	$base = log( $bytes, 1024 );
+	$pow = (int) $base; // Equivalent to floor for our purpose
+	$pow = min( $pow, count( $units ) - 1 );
+
+	$adjustedSize = $bytes / pow( 1024, $pow );
+
+	return round( $adjustedSize, $precision ) . ' ' . $units[ $pow ];
 }
 
 ?>

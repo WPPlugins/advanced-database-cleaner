@@ -157,27 +157,37 @@ if(function_exists('is_multisite') && is_multisite()){
 		<div class="aDBc-overview-box-head"><?php _e('Settings', 'advanced-database-cleaner') ?></div>
 
 		<form action="" method="post">
-
 			<ul>
 
-				<li style="padding-top:10px;padding-bottom:20px">
-
-					<?php
-
+				<?php
 					$aDBc_settings = get_option('aDBc_settings');
+					$in_main_site_msg = "";
+					if(is_multisite()){
+						$in_main_site_msg = __('(In main site only)', 'advanced-database-cleaner');
+					?>
+						<li style="padding-top:10px;padding-bottom:10px">
+							<input type="checkbox" name="aDBc_network_menu" <?php echo (!empty($aDBc_settings['network_menu']) && $aDBc_settings['network_menu'] != "0") ? "checked='checked'" : "" ?>/>
+							<?php _e('Show network plugin menu', 'advanced-database-cleaner'); ?>
+							<div class="aDBc-overview-setting-desc">
+								<?php _e('Displays a menu at the left side of your network admin panel', 'advanced-database-cleaner'); ?>
+							</div>
+						</li>		
 
+					<?php 
+					}
 					?>
 
-					<input type="checkbox" name="aDBc_left_menu" <?php echo (!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] == '1') ? "checked='checked'" : "" ?>/>
-					<?php _e('Show plugin left menu', 'advanced-database-cleaner'); ?>
+				<li style="padding-top:10px;padding-bottom:10px">
+					<input type="checkbox" name="aDBc_left_menu" <?php echo (!empty($aDBc_settings['left_menu']) && $aDBc_settings['left_menu'] != "0") ? "checked='checked'" : "" ?>/>
+					<?php echo __('Show plugin left menu', 'advanced-database-cleaner') . ' ' . $in_main_site_msg; ?>
 					<div class="aDBc-overview-setting-desc">
 						<?php _e('Displays a menu at the left side of your WP admin', 'advanced-database-cleaner'); ?>
 					</div>
 				</li>
 
-				<li style="padding-bottom:10px">
-					<input type="checkbox" name="aDBc_menu_under_tools" <?php echo (!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] == '1') ? "checked='checked'" : "" ?>/>
-					<?php _e('Show plugin menu under tools', 'advanced-database-cleaner'); ?>
+				<li style="padding-top:10px;padding-bottom:10px">
+					<input type="checkbox" name="aDBc_menu_under_tools" <?php echo (!empty($aDBc_settings['menu_under_tools']) && $aDBc_settings['menu_under_tools'] != "0") ? "checked='checked'" : "" ?>/>
+					<?php echo __('Show plugin menu under tools', 'advanced-database-cleaner') . ' ' . $in_main_site_msg;; ?>
 					<div class="aDBc-overview-setting-desc">
 						<?php _e('Displays a menu under "tools" menu', 'advanced-database-cleaner'); ?>
 					</div>

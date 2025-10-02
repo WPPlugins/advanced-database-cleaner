@@ -309,20 +309,20 @@ function aDBc_license_actions_callback() {
 	} else if ( $edd_action == "deactivate_license" ) {
 
 		// $license_data->license will be either "deactivated" or "failed"
-		if ( 'deactivated' === $license_data->license ) {
+		// if ( 'deactivated' === $license_data->license ) {
 
 			delete_option( 'aDBc_edd_license_key' );
 			delete_option( 'aDBc_edd_license_status' );
 			wp_send_json_success( __( 'Deactivated!', 'advanced-database-cleaner' ) );
 
-		} else {
+		// } else {
 
-			wp_send_json_error( __( 'License cannot be deactivated, please try again.', 'advanced-database-cleaner' ) );
+		// 	wp_send_json_error( __( 'License cannot be deactivated, please try again.', 'advanced-database-cleaner' ) );
 
-		}
+		// }
 	}
 
-	// If we are here, maybe un anknonw error occured
+	// If we are here, maybe un unknown error occurred
 	wp_send_json_error( __( 'Unknown error occurred, please try again.', 'advanced-database-cleaner' ) );
 
 }

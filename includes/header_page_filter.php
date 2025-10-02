@@ -1,5 +1,5 @@
 <!-- style et code ok -->
-<div class="aDBc-filter-container">
+<div class="aDBc-filter-container" style="border-radius:4px">
 
 	<div class="aDBc-filter-section">
 
@@ -37,9 +37,14 @@
 				echo "<input type='hidden' name='aDBc_cat' value='all'/>";
 				?>
 
-				<div style="float:left;margin-right:4px">
+				<div class="aDBc-filter-elements">
 
-					<input class="aDBc-filter-search-input" type="search" placeholder="<?php _e( 'Search for', 'advanced-database-cleaner' ); ?>" name="s" value="<?php echo empty( $_GET['s'] ) ? '' : esc_attr( $_GET['s'] ); ?>"/>
+					<div>
+						<label class="aDBc-filter-label">
+							<?php _e('Search for', 'advanced-database-cleaner' ); ?>
+						</label>
+						<input class="aDBc-filter-search-input" type="search" placeholder="<?php _e( 'Search for', 'advanced-database-cleaner' ); ?>" name="s" value="<?php echo empty( $_GET['s'] ) ? '' : esc_attr( $_GET['s'] ); ?>"/>
+					</div>
 
 					<?php
 
@@ -52,31 +57,37 @@
 
 					?>
 
-						<select name="t_type" class="aDBc-filter-dropdown-menu" style="width:100px">
+						<div>
+							<label class="aDBc-filter-label">
+								<?php _e('Table status', 'advanced-database-cleaner' ); ?>
+							</label>
 
-							<option value="all" <?php echo $all_selected; ?>>
+							<select name="t_type" class="aDBc-filter-dropdown-menu" style="width:100px">
 
-								<?php _e( 'All tables', 'advanced-database-cleaner' ) ?>
+								<option value="all" <?php echo $all_selected; ?>>
 
-							</option>
+									<?php _e( 'All', 'advanced-database-cleaner' ) ?>
 
-							<option value="optimize" <?php echo $optimize_selected; ?>>
+								</option>
 
-								<?php
-								echo __( 'To optimize', 'advanced-database-cleaner' ) . " (" . count( $this->aDBc_tables_name_to_optimize ) . ")"
-								?>
+								<option value="optimize" <?php echo $optimize_selected; ?>>
 
-							</option>
+									<?php
+									echo __( 'To optimize', 'advanced-database-cleaner' ) . " (" . count( $this->aDBc_tables_name_to_optimize ) . ")"
+									?>
 
-							<option value="repair" <?php echo $repair_selected; ?>>
+								</option>
 
-								<?php
-								echo __( 'To repair', 'advanced-database-cleaner' ) . " (" . count( $this->aDBc_tables_name_to_repair ) . ")"
-								?>
+								<option value="repair" <?php echo $repair_selected; ?>>
 
-							</option>
+									<?php
+									echo __( 'To repair', 'advanced-database-cleaner' ) . " (" . count( $this->aDBc_tables_name_to_repair ) . ")"
+									?>
 
-						</select>
+								</option>
+
+							</select>
+						</div>
 
 					<?php
 
@@ -91,127 +102,159 @@
 
 					?>
 
-						<select name="autoload" class="aDBc-filter-dropdown-menu" style="width:100px">
+						<div>
+							<label class="aDBc-filter-label">
+								<?php _e('Autoload', 'advanced-database-cleaner' ); ?>
+							</label>
 
-							<option value="all" <?php echo $all_autoload; ?>>
+							<select name="autoload" class="aDBc-filter-dropdown-menu" style="width:100px">
 
-								<?php _e( 'Autoload', 'advanced-database-cleaner' ); ?>
+								<option value="all" <?php echo $all_autoload; ?>>
 
-							</option>
+									<?php _e( 'All', 'advanced-database-cleaner' ); ?>
 
-							<option value="yes" <?php echo $autoload_yes; ?>>
+								</option>
 
-								<?php echo __( 'Yes', 'advanced-database-cleaner' ); ?>
+								<option value="yes" <?php echo $autoload_yes; ?>>
 
-							</option>
+									<?php 
+									echo __( 'Yes', 'advanced-database-cleaner' );
+									if(function_exists('wp_autoload_values_to_autoload')){
+										echo " [on, auto, auto-on]";
+									}
+									?>&nbsp;
 
-							<option value="no" <?php echo $autoload_no; ?>>
+								</option>
 
-								<?php echo __( 'No', 'advanced-database-cleaner' ); ?>
+								<option value="no" <?php echo $autoload_no; ?>>
 
-							</option>
+									<?php 
+										echo __( 'No', 'advanced-database-cleaner' );								
+										if(function_exists('wp_autoload_values_to_autoload')){
+											echo " [off, auto-off]";
+										}
+									?>
 
-						</select>
+								</option>
+
+							</select>
+						</div>
 
 					<?php
 					}
 					?>
 
-					<select name="belongs_to" class="aDBc-filter-dropdown-menu" style="width:135px">
+					<div>
+						<label class="aDBc-filter-label">
+							<?php _e( 'Belongs to', 'advanced-database-cleaner' ); ?>
+						</label>
+						<select name="belongs_to" class="aDBc-filter-dropdown-menu" style="width:135px">
 
-						<option value="all">
-							<?php _e( 'All "belongs to"', 'advanced-database-cleaner' ); ?>
-						</option>
-
-						<?php
-
-						$total_plugins 	= 0;
-						$total_themes 	= 0;
-
-						foreach ( $this->array_belongs_to_counts as $name => $info ) {
-
-							if ( $info['type'] == "p" ) {
-
-								$total_plugins++;
-
-							} elseif ( $info['type'] == "t" ) {
-
-								$total_themes++;
-
-							}
-
-						}
-						?>
-
-						<optgroup label="<?php echo __( 'Plugins', 'advanced-database-cleaner' ) . " (" . $total_plugins . ")"  ?>">
+							<option value="all">
+								<?php _e( 'All', 'advanced-database-cleaner' ); ?>
+							</option>
 
 							<?php
+
+							$total_plugins 	= 0;
+							$total_themes 	= 0;
+
 							foreach ( $this->array_belongs_to_counts as $name => $info ) {
 
 								if ( $info['type'] == "p" ) {
 
-									$selected = isset( $_GET['belongs_to'] ) && $_GET['belongs_to'] == $name ? "selected='selected'" : "";
+									$total_plugins++;
 
-									echo "<option value='$name'" . $selected . ">" . $name . " (" . $info['count'] .")" . "</option>";
+								} elseif ( $info['type'] == "t" ) {
 
-								}
-							}
-							?>
-
-						</optgroup>
-
-						<optgroup label="<?php echo __( 'Themes', 'advanced-database-cleaner' ) . " (" . $total_themes . ")" ?>">
-
-							<?php
-							foreach ( $this->array_belongs_to_counts as $name => $info ) {
-
-								if ( $info['type'] == "t" ) {
-
-									$selected = isset( $_GET['belongs_to'] ) && $_GET['belongs_to'] == $name ? "selected='selected'" : "";
-
-									echo "<option value='$name'" . $selected . ">" . $name . " (" . $info['count'] .")" . "</option>";
+									$total_themes++;
 
 								}
 
 							}
 							?>
 
-						</optgroup>
+							<optgroup label="<?php echo __( 'Plugins', 'advanced-database-cleaner' ) . " (" . $total_plugins . ")"  ?>">
 
-					</select>
+								<?php
+								foreach ( $this->array_belongs_to_counts as $name => $info ) {
+
+									if ( $info['type'] == "p" ) {
+
+										$selected = isset( $_GET['belongs_to'] ) && $_GET['belongs_to'] == $name ? "selected='selected'" : "";
+
+										echo "<option value='$name'" . $selected . ">" . $name . " (" . $info['count'] .")" . "</option>";
+
+									}
+								}
+								?>
+
+							</optgroup>
+
+							<optgroup label="<?php echo __( 'Themes', 'advanced-database-cleaner' ) . " (" . $total_themes . ")" ?>">
+
+								<?php
+								foreach ( $this->array_belongs_to_counts as $name => $info ) {
+
+									if ( $info['type'] == "t" ) {
+
+										$selected = isset( $_GET['belongs_to'] ) && $_GET['belongs_to'] == $name ? "selected='selected'" : "";
+
+										echo "<option value='$name'" . $selected . ">" . $name . " (" . $info['count'] .")" . "</option>";
+
+									}
+
+								}
+								?>
+
+							</optgroup>
+
+						</select>
+					</div>
 
 					<?php
 					if ( function_exists( 'is_multisite' ) && is_multisite() ){
 					?>
-						<select name="site" class="aDBc-filter-dropdown-menu" style="width:85px">
 
-							<option value=""> <?php _e( 'All sites', 'advanced-database-cleaner' ); ?> </option>
+						<div>
+							<label class="aDBc-filter-label">
+								<?php _e( 'In site', 'advanced-database-cleaner' ); ?>
+							</label>
 
-							<?php
-							global $wpdb;
-							$blogs_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
+							<select name="site" class="aDBc-filter-dropdown-menu" style="width:85px">
 
-							foreach ( $blogs_ids as $blog_id ) {
+								<option value=""> <?php _e( 'All', 'advanced-database-cleaner' ); ?> </option>
 
-								$blog_details = get_blog_details( $blog_id );
+								<?php
+								global $wpdb;
+								$blogs_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
 
-								$selected = ( isset( $_GET['site'] ) && $_GET['site'] == $blog_id ) ? "selected='selected'" : "";
+								foreach ( $blogs_ids as $blog_id ) {
 
-								echo "<option value='$blog_id'". $selected .">" . __( 'Site', 'advanced-database-cleaner' ) . " ". $blog_id . " | " . $blog_details->blogname . "</option>";
+									$blog_details = get_blog_details( $blog_id );
 
-							}
-							?>
+									$selected = ( isset( $_GET['site'] ) && $_GET['site'] == $blog_id ) ? "selected='selected'" : "";
 
-						</select>
+									echo "<option value='$blog_id'". $selected .">" . __( 'Site', 'advanced-database-cleaner' ) . " ". $blog_id . " | " . $blog_details->blogname . "</option>";
+
+								}
+								?>
+
+							</select>
+						</div>
 
 					<?php
 					}
 					?>
 
+					<div>
+						<label class="aDBc-filter-label" style="visibility:hidden">
+							Submit
+						</label>
+						<input class="button-secondary aDBc-filter-botton" type="submit" value="<?php _e( 'Filter', 'advanced-database-cleaner' ); ?>"/>
+					</div>
+
 				</div>
-
-				<input class="button-secondary aDBc-filter-botton" type="submit" value="<?php _e( 'Filter', 'advanced-database-cleaner' ); ?>"/>
-
 			</form>
 
 			<?php
@@ -219,9 +262,9 @@
 			?>
 
 				<span style="width:150px" class="aDBc-premium-tooltiptext">
-
-					<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
-
+					<a href="https://sigmaplugin.com/downloads/wordpress-advanced-database-cleaner/" target="_blank">
+						<?php _e( 'Available in Pro version!', 'advanced-database-cleaner' ); ?>
+					</a>
 				</span>
 
 			<?php
@@ -253,13 +296,15 @@
 			echo "<input type='hidden' name='paged' value='1'/>";
 			?>
 
-			<span class="aDBc-items-per-page-label">
-				<?php _e( 'Items per page', 'advanced-database-cleaner' ); ?>
-			</span>
+			<div>
+				<label class="aDBc-filter-label" style="font-weight:normal">
+					<?php _e( 'Items per page', 'advanced-database-cleaner' ); ?>
+				</label>
+				
+				<input name="per_page" class="aDBc-items-per-page-input" type="number" value="<?php echo empty( $_GET['per_page'] ) ? '50' : esc_attr( $_GET['per_page'] ); ?>"/>
 
-			<input name="per_page" class="aDBc-items-per-page-input" type="number" value="<?php echo empty( $_GET['per_page'] ) ? '50' : esc_attr( $_GET['per_page'] ); ?>"/>
-
-			<input type="submit" class="button-secondary aDBc-show-botton" value="<?php _e( 'Show', 'advanced-database-cleaner' ); ?>"/>
+				<input type="submit" class="button-secondary aDBc-show-botton" value="<?php _e( 'Show', 'advanced-database-cleaner' ); ?>"/>
+			</div>
 
 		</form>
 
