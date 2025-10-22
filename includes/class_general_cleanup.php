@@ -49,6 +49,10 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 		// Test if user wants to edit keep_last column for an item
 		if(isset($_POST['aDBc_keep_input'])){
 
+			// Security check - verify nonce
+			if(!check_admin_referer('aDBc_keep_last_nonce', 'aDBc_keep_last_nonce'))
+				return; //get out if nonce verification fails
+
 			$sanitized_keep_input 			= sanitize_html_class($_POST['aDBc_keep_input']);
 			$sanitized_item_keep_to_edit 	= sanitize_html_class($_POST['aDBc_item_keep_to_edit']);
 			$settings 						= get_option('aDBc_settings');
@@ -151,7 +155,9 @@ class ADBC_Clean_DB_List extends WP_List_Table {
 						<input type='hidden' name='aDBc_item_keep_to_edit' value='$element_type'>
 						<input id='aDBc_keep_input_$element_type' class='aDBc-keep-input' name='aDBc_keep_input' value='$keep_number'/>
 						<input id='aDBc_keep_button_$element_type' class='aDBc-keep-button button-primary' type='submit'  value='$save_button' style='display:none'/>
-						<a id='aDBc_keep_cancel_$element_type' class='aDBc-keep-cancel-link'> " . __('Cancel','advanced-database-cleaner')  . "</a></form>";
+						<a id='aDBc_keep_cancel_$element_type' class='aDBc-keep-cancel-link'> " . __('Cancel','advanced-database-cleaner')  . "</a>";
+					$keep_info .= wp_nonce_field('aDBc_keep_last_nonce', 'aDBc_keep_last_nonce', true, false);
+					$keep_info .= "</form>";
 			}else{
 				$keep_info = __('N/A','advanced-database-cleaner') ;
 			}
