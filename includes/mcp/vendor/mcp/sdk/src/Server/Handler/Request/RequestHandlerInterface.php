@@ -1,0 +1,33 @@
+<?php
+
+/*
+ * This file is part of the official PHP MCP SDK.
+ *
+ * A collaboration between Symfony and the PHP Foundation.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace ADBC\Vendor\Mcp\Server\Handler\Request;
+
+use ADBC\Vendor\Mcp\Schema\JsonRpc\Error;
+use ADBC\Vendor\Mcp\Schema\JsonRpc\Request;
+use ADBC\Vendor\Mcp\Schema\JsonRpc\Response;
+use ADBC\Vendor\Mcp\Server\Session\SessionInterface;
+/**
+ * Covariant in TResult: a handler only ever produces its result, so one
+ * declaring a concrete result type satisfies a collection of handlers typed by
+ * the interface every result implements.
+ *
+ * @template-covariant TResult
+ *
+ * @author Kyrian Obikwelu <koshnawaza@gmail.com>
+ */
+interface RequestHandlerInterface
+{
+    public function supports(Request $request): bool;
+    /**
+     * @return Response<TResult>|Error
+     */
+    public function handle(Request $request, SessionInterface $session): Response|Error;
+}

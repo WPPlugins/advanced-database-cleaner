@@ -1,0 +1,8 @@
+# Fallback for PHP hosts without a usable system openssl.cnf.
+# Only used for generating and exporting MCP RSA keys in memory.
+[ req ]
+default_bits = 2048
+default_md = sha256
+distinguished_name = adbc_distinguished_name
+
+[ adbc_distinguished_name ]

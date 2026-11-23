@@ -1,0 +1,631 @@
+.adbc-plan-picker {
+  box-sizing: border-box;
+  width: min(940px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100dvh - 80px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: #172238;
+  box-shadow: 0 24px 90px #0f172a55;
+  font:
+    14px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+.adbc-plan-picker::backdrop {
+  background: #0f172ab8;
+}
+.adbc-plan-picker * {
+  box-sizing: border-box;
+}
+.adbc-plan-picker h2,
+.adbc-plan-picker p {
+  margin: 0;
+}
+.adbc-plan-picker button,
+.adbc-plan-picker a {
+  font: inherit;
+  cursor: pointer;
+}
+.adbc-plan-picker button:focus-visible,
+.adbc-plan-picker a:focus-visible {
+  outline: 2px solid #2271b1;
+  outline-offset: 3px;
+}
+.adbc-plans-header {
+  position: relative;
+  padding: 26px 30px;
+  background: #f4f7fb;
+  border-bottom: 1px solid #e4e9f1;
+}
+.adbc-plans-eyebrow {
+  color: #52627a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.adbc-plans-header h2 {
+  padding-right: 28px;
+  margin: 5px 0 6px;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #172238;
+}
+.adbc-plans-header p {
+  color: #52627a;
+  font-size: 13px;
+}
+.adbc-plan-picker .adbc-plans-close {
+  position: absolute;
+  top: 17px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #e8edf4;
+  color: #52627a;
+  line-height: 1;
+}
+.adbc-plans-body {
+  padding: 24px 30px;
+}
+.adbc-plan-picker.adbc-plan-picker-manual {
+  --adbc-guide-padding: clamp(18px, 4vw, 28px);
+  max-width: 540px;
+}
+.adbc-plan-picker-manual[open] {
+  display: flex;
+  flex-direction: column;
+}
+.adbc-plan-picker-manual .adbc-plans-header {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 14px;
+  padding: 22px var(--adbc-guide-padding);
+  padding-inline-end: 58px;
+  border: 0;
+  background: linear-gradient(110deg, #152b43, #244965);
+}
+.adbc-plan-picker-manual .adbc-plans-header::before {
+  grid-row: span 2;
+  height: 46px;
+  background: url("../images/logo.png") center / contain no-repeat;
+  content: "";
+}
+.adbc-plan-picker-manual .adbc-plans-eyebrow {
+  align-self: end;
+  color: #c0d9ea;
+  line-height: 1.3;
+}
+.adbc-plan-picker-manual .adbc-plans-header h2 {
+  align-self: start;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font-size: clamp(20px, 3vw, 24px);
+  line-height: 1.2;
+}
+.adbc-plan-picker-manual .adbc-plans-header h2[tabindex="-1"]:focus {
+  outline: 0;
+}
+.adbc-plan-picker-manual .adbc-plans-close {
+  inset-inline: auto 14px;
+  top: 14px;
+  background: #ffffff1a;
+  color: #fff;
+}
+.adbc-plan-picker-manual .adbc-plans-close:hover {
+  background: #ffffff30;
+}
+.adbc-plan-picker-manual .adbc-plans-close:focus-visible {
+  outline-color: #bce3ff;
+}
+.adbc-plan-picker-manual .adbc-plans-body {
+  min-height: 0;
+  padding: 24px var(--adbc-guide-padding);
+  overflow-y: auto;
+}
+.adbc-plans-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: adbc-upgrade-step;
+}
+.adbc-plans-steps > li {
+  position: relative;
+  margin: 0;
+  padding-inline-start: 42px;
+  counter-increment: adbc-upgrade-step;
+}
+.adbc-plans-steps > li:not(:last-child) {
+  padding-bottom: 20px;
+}
+.adbc-plans-steps > li::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  box-sizing: border-box;
+  border: 1px solid #c5d8e7;
+  border-radius: 50%;
+  background: #edf4f9;
+  color: #285a7b;
+  font-size: 13px;
+  font-weight: 700;
+  content: counter(adbc-upgrade-step);
+  content: counter(adbc-upgrade-step) / "";
+}
+.adbc-plans-steps > li:not(:last-child)::after {
+  position: absolute;
+  inset-block: 31px 4px;
+  inset-inline-start: 13px;
+  border-inline-start: 1px solid #d7e2ea;
+  content: "";
+}
+.adbc-plans-steps strong,
+.adbc-plans-steps .adbc-plans-login {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 27px;
+}
+.adbc-plans-steps a {
+  color: #175b89;
+}
+.adbc-plans-steps .adbc-plans-login {
+  text-decoration: none;
+}
+.adbc-plans-login > span:first-child,
+.adbc-plans-steps p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.adbc-plans-login .dashicons {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+  vertical-align: -2px;
+}
+.adbc-plans-steps p {
+  margin: 3px 0 0;
+  color: #4d5d70;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.adbc-plans-coupon {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 8px;
+  padding-inline-start: 12px;
+  border: 1px solid #a9d5c5;
+  border-radius: 8px;
+  background: #edf8f3;
+  color: #125d47;
+}
+.adbc-plans-coupon .dashicons {
+  flex: none;
+}
+.adbc-plans-coupon code {
+  margin: 0;
+  padding-block: 7px;
+  padding-inline: 8px 13px;
+  background: transparent;
+  color: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  user-select: all;
+}
+.adbc-plans-signoff {
+  display: grid;
+  align-self: stretch;
+  align-items: center;
+  padding: 5px 11px;
+  border-inline-start: 1px dashed #8ab5a6;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.adbc-plans-terms {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 auto 24px;
+  padding: 4px;
+  background: #edf1f7;
+  border-radius: 9px;
+}
+.adbc-plans-terms button {
+  min-width: 108px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #52627a;
+  font-weight: 600;
+}
+.adbc-plans-terms button.is-active {
+  background: #fff;
+  color: #1d5f96;
+  box-shadow: 0 1px 5px #182c4b1a;
+}
+.adbc-plan-card .adbc-tier-choice::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+.adbc-plan-saving {
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: #e4f4e9;
+  color: #22633b;
+  font-size: 11px;
+  font-weight: 650;
+}
+.adbc-plan-picker[open]:has(.adbc-plans-comparison) {
+  display: flex;
+  flex-direction: column;
+}
+.adbc-plan-picker:has(.adbc-plans-comparison) .adbc-plans-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+.adbc-plans-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 194px), 1fr));
+  gap: 14px;
+}
+.adbc-plan-tier {
+  min-width: 0;
+  padding: 20px 17px;
+  border: 1px solid #d1d9e2;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 9px #162a3e0a;
+}
+.adbc-plan-tier.is-current {
+  border-color: #8caecb;
+}
+.adbc-plan-card {
+  position: relative;
+}
+.adbc-plan-tier:has(input:checked) {
+  border-color: #08765b;
+  box-shadow: 0 0 0 1px #08765b;
+}
+.adbc-plan-tier h3 {
+  margin: 0;
+  color: #46586d;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.adbc-tier-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 6px;
+  margin: 10px 0 18px;
+  min-height: 40px;
+  color: #52627a;
+  font-size: 12px;
+}
+.adbc-tier-price strong {
+  color: #172238;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+}
+.adbc-tier-choice,
+.adbc-tier-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.adbc-tier-choice {
+  border-color: #208069;
+  background: #fff;
+  color: #06624a;
+  cursor: pointer;
+}
+.adbc-tier-choice:hover {
+  background: #eff9f5;
+}
+.adbc-plan-picker .adbc-tier-renewal {
+  margin-top: 6px;
+  color: #52627a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.adbc-tier-choice:has(input:checked) {
+  background: #08765b;
+  color: #fff;
+}
+.adbc-tier-choice:has(input:focus-visible) {
+  outline: 2px solid #1d5f96;
+  outline-offset: 3px;
+}
+.adbc-plan-tier input[type="radio"] {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+.adbc-tier-choice input[type="radio"] {
+  color: inherit;
+}
+.adbc-plan-tier input[type="radio"]:checked {
+  background: radial-gradient(circle, currentColor 0 3px, transparent 3.5px);
+}
+.adbc-plan-tier input[type="radio"]::before {
+  content: none;
+}
+.adbc-tier-status {
+  background: #f0f2f5;
+  color: #536172;
+}
+.adbc-plan-tier.is-current .adbc-tier-status {
+  background: #e9f2fa;
+  color: #245984;
+}
+.adbc-tier-status .dashicons,
+.adbc-tier-benefits .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  flex: none;
+}
+.adbc-tier-benefits {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid #e1e7e9;
+  list-style: none;
+}
+.adbc-tier-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.adbc-tier-benefits .dashicons {
+  margin-top: 2px;
+  color: #087c5e;
+}
+.adbc-tier-benefits .is-excluded,
+.adbc-tier-benefits .is-excluded .dashicons {
+  color: #677485;
+}
+.adbc-plans-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+.adbc-plans-total del,
+.adbc-tier-price del {
+  color: #b32d2e;
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: line-through 2px;
+}
+@media (forced-colors: active) {
+  .adbc-plan-tier input[type="radio"] {
+    appearance: auto;
+  }
+}
+.adbc-plan-picker .adbc-plans-note {
+  margin-top: 20px;
+  color: #65758b;
+  font-size: 12px;
+}
+.adbc-plans-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 30px;
+  border-top: 1px solid #e4e9f1;
+}
+.adbc-plans-footer:empty {
+  display: none;
+}
+.adbc-plans-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #52627a;
+  font-size: 12px;
+}
+.adbc-plans-selection strong {
+  color: #172238;
+  font-size: 18px;
+}
+.adbc-plan-picker:has(.adbc-plans-comparison) .adbc-plans-total strong {
+  font-size: 28px;
+  line-height: 1.2;
+}
+.adbc-plan-picker .adbc-plans-primary,
+.adbc-plan-picker .adbc-plans-checkout,
+.adbc-plan-picker .adbc-plans-secondary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.adbc-plan-picker .adbc-plans-checkout {
+  gap: 10px;
+  min-height: 44px;
+  max-width: 100%;
+  padding-block: 9px;
+  padding-inline: 14px 20px;
+  border: 1px solid #07654f;
+  border-radius: 9px;
+  background: #08765b;
+  box-shadow: 0 2px 4px #064c3d26;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 650;
+  text-align: center;
+}
+.adbc-plans-checkout .dashicons {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 5px;
+  background: #ffffff24;
+  font-size: 16px;
+}
+.adbc-plan-picker .adbc-plans-checkout:hover,
+.adbc-plan-picker .adbc-plans-checkout:focus-visible {
+  background: #06624b;
+  color: #fff;
+}
+.adbc-plan-picker .adbc-plans-checkout:active {
+  background: #054f3d;
+  box-shadow: none;
+}
+.adbc-plan-picker .adbc-plans-primary {
+  border: 1px solid #2271b1;
+  background: #2271b1;
+  color: #fff;
+}
+.adbc-plan-picker .adbc-plans-primary:hover {
+  background: #195a8e;
+  border-color: #195a8e;
+  color: #fff;
+}
+.adbc-plan-picker .adbc-plans-secondary {
+  background: #fff;
+  color: #2271b1;
+  border: 1px solid #c5d2e3;
+}
+.adbc-plans-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 210px;
+  text-align: center;
+  color: #52627a;
+}
+.adbc-plans-state p {
+  max-width: 510px;
+}
+.adbc-plans-loading {
+  flex-direction: row;
+  gap: 8px;
+}
+.adbc-plans-loading .dashicons {
+  flex: none;
+  color: #2271b1;
+}
+@keyframes adbc-plans-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .adbc-plans-loading .dashicons {
+    animation: adbc-plans-spin 1s linear infinite;
+  }
+}
+.adbc-plans-state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #edf4fb;
+  color: #2271b1;
+  font-size: 24px;
+}
+.adbc-plans-state[role="alert"] .adbc-plans-state-icon {
+  background: #fff1dd;
+  color: #b66c0c;
+}
+@media (max-width: 600px) {
+  .adbc-plan-picker {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 32px);
+  }
+  .adbc-plans-header,
+  .adbc-plans-body,
+  .adbc-plans-footer {
+    padding: 20px;
+  }
+  .adbc-plans-header h2 {
+    font-size: 21px;
+  }
+  .adbc-plans-comparison {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .adbc-plans-checkout {
+    width: 100%;
+  }
+  .adbc-plan-picker-manual .adbc-plans-header {
+    grid-template-columns: 21px minmax(0, 1fr);
+    gap: 7px 8px;
+    padding: 16px var(--adbc-guide-padding);
+  }
+  .adbc-plan-picker-manual .adbc-plans-header::before {
+    grid-row: 1;
+    height: 26px;
+  }
+  .adbc-plan-picker-manual .adbc-plans-eyebrow {
+    align-self: center;
+    padding-inline-end: 36px;
+    font-size: 10px;
+  }
+  .adbc-plan-picker-manual .adbc-plans-header h2 {
+    grid-column: 1 / -1;
+    text-wrap: balance;
+  }
+}
